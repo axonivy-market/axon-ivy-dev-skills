@@ -3,6 +3,12 @@ name: axon-ivy-java-data
 description: Rules and patterns for Java model classes, enums, DTOs, and persistence (Ivy.repo() or JPA/SQL) in Axon Ivy projects.
 ---
 
+## When to Use
+
+- Creating Java model/entity classes, enums, or DTOs in `src/`
+- Defining the domain model for a workflow (e.g., `Employee`, `LeaveRequest`)
+- Adding `@Description` annotations for AI/LLM extraction models
+
 ## Use Together With
 
 - `axon-ivy-repository` - For persistence with Ivy.repo()
@@ -14,6 +20,55 @@ description: Rules and patterns for Java model classes, enums, DTOs, and persist
 | Model Class | `src/package/model/` |
 | Enum | `src/package/model/` |
 | DTO | `src/package/dto/` |
+
+## Naming Conventions
+
+- **Classes**: PascalCase (e.g., `Employee`, `LeaveRequest`, `ProjectStatus`)
+- **Fields**: camelCase (e.g., `employeeName`, `startDate`)
+- **Enums**: PascalCase class, UPPER_SNAKE_CASE values (e.g., `EntityStatus.IN_PROGRESS`)
+- **Packages**: all lowercase, dot-separated (e.g., `hr.onboarding.model`)
+
+## Critical Rules
+
+### Serializable
+
+All model classes used in process data (referenced from `.d.json` fields or passed through `SubProcessCall`/`DialogCall`) **must** implement `Serializable`. Without it, the Ivy engine cannot serialize process state.
+
+```java
+import java.io.Serializable;
+
+public class Employee implements Serializable {
+  private static final long serialVersionUID = 1L;
+  // ...
+}
+```
+
+### Imports
+
+- Do **not** import `java.util.List`, `java.util.Map`, `java.util.Set` — they are pre-imported in IvyScript (but you DO need them in regular Java source files under `src/`)
+- Always import `java.util.UUID` when generating IDs
+- Import `java.time.LocalDate` / `java.time.LocalDateTime` for date fields — do **not** use `java.util.Date`
+
+### Default Field Values
+
+- Always initialize `id` in the constructor (typically `UUID.randomUUID().toString()`)
+- Always initialize status enums to a sensible default (e.g., `EntityStatus.NEW`)
+- Initialize `List` fields to `new ArrayList<>()` to avoid null checks downstream
+
+```java
+public class Project implements Serializable {
+  private static final long serialVersionUID = 1L;
+  private String id;
+  private List<String> tags;
+  private ProjectStatus status;
+
+  public Project() {
+    this.id = UUID.randomUUID().toString();
+    this.tags = new ArrayList<>();
+    this.status = ProjectStatus.NEW;
+  }
+}
+```
 
 ## Java Model Pattern
 

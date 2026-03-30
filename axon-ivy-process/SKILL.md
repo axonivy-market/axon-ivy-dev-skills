@@ -101,7 +101,7 @@ Load these only when the process contains the relevant element type:
 
 ### UserTask (Human Task + Dialog)
 
-**CRITICAL RULE**: When a human task is followed directly by an HTML dialog, **ALWAYS** use a single `UserTask` element instead of separate `TaskSwitchEvent` + `DialogCall` elements. `UserTask` combines task assignment and dialog display into one workflow activity.
+**Prefer** using separate `TaskSwitchEvent` + `DialogCall` elements for human tasks with dialogs. Use `UserTask` only when you explicitly need to combine task assignment and dialog display into a single compact element.
 
 ```json
 {
@@ -170,9 +170,9 @@ Load these only when the process contains the relevant element type:
 
 **Note on `dialog`**: Uses `.` (dot) package separators. This is different from `SubProcessCall.processCall` which uses `/` (slash) path separators.
 
-### TaskSwitchEvent (Task Without Dialog)
+### TaskSwitchEvent (Human Task)
 
-Use `TaskSwitchEvent` only when a task does **NOT** have a dialog immediately following it (e.g., task followed by a subprocess, script, or other non-dialog element). If the task is followed by a `DialogCall`, use `UserTask` instead.
+Use `TaskSwitchEvent` to create a human task. This is the **preferred** approach — connect it to a `DialogCall` for the UI, or to other elements as needed.
 
 ```json
 {
@@ -201,9 +201,9 @@ Use `TaskSwitchEvent` only when a task does **NOT** have a dialog immediately fo
 }
 ```
 
-### DialogCall (Standalone Dialog Without Task)
+### DialogCall (Dialog Display)
 
-Use `DialogCall` only when displaying a dialog that is **NOT** associated with a task assignment (e.g., an inline dialog in the same task context). If the dialog is preceded by a `TaskSwitchEvent`, use `UserTask` instead.
+Use `DialogCall` to display an HTML dialog. Typically connected after a `TaskSwitchEvent` for human task workflows, or used standalone for dialogs without task assignment.
 
 ```json
 {

@@ -33,7 +33,7 @@ It requires: `databases.yaml`, `persistence.xml`, JPA entities, DAOs, and servic
 Location: `<project>/config/databases.yaml`
 
 ```yaml
-# yaml-language-server: $schema=https://json-schema.axonivy.com/app/12.0.0/databases.json
+# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0-dev/config/databases.json
 Databases:
   MyDatabase:
     Url: jdbc:sqlserver://localhost;databaseName=MY_DB

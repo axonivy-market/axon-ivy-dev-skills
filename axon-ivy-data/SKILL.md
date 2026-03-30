@@ -3,6 +3,12 @@ name: axon-ivy-data
 description: Rules and patterns for Axon Ivy data classes (.d.json files).
 ---
 
+## When to Use
+
+- Creating or editing `.d.json` data class files (master data for processes or dialogs)
+- Adding fields to an existing data class
+- Setting up the data layer for a new workflow process
+
 ## Use Together With
 
 - `axon-ivy-workflow-guide` - Step-by-step workflow creation
@@ -41,7 +47,7 @@ See `schema.json` in this skill folder for full JSON schema reference.
 
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/data-class/13.2.0/data-class.json",
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
   "simpleName" : "OnboardingData",
   "namespace" : "hr.onboarding",
   "fields" : [ {
@@ -59,7 +65,7 @@ See `schema.json` in this skill folder for full JSON schema reference.
 
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/data-class/13.2.0/data-class.json",
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
   "simpleName" : "HiringData",
   "namespace" : "hr.hiring",
   "fields" : [ {
@@ -79,7 +85,7 @@ See `schema.json` in this skill folder for full JSON schema reference.
 
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/data-class/13.2.0/data-class.json",
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
   "simpleName" : "ProjectData",
   "namespace" : "project.management",
   "fields" : [ {

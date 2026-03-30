@@ -21,7 +21,7 @@ Generate a random 16-character hex string for `__PROCESS_ID__`.
 
 ## Step 2 — Read the bundled template
 
-Read every file under `.claude/skills/axon-ivy-init/template/` — these are the exact files to create.
+Read every file under `.claude/skill/axon-ivy-init/template/` — these are the exact files to create.
 Skip `src_generated/` and `target/` — they are build outputs, not source files.
 
 ## Step 3 — Scaffold the new project

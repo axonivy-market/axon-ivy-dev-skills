@@ -38,7 +38,7 @@ Prefer PrimeFaces components (`p:*`) over raw HTML inputs when possible. Use:
 ### ID and naming rules
 
 - All components must have explicit id attributes.
-- Use snake-case for IDs.
+- Use kebab-case (hyphen-case) for IDs.
 - Do not use spaces or special characters in IDs.
 - Use camelCase for `widgetVar` and `name` attributes.
 

@@ -15,7 +15,7 @@ These references are needed for every HTML dialog:
 - Building input forms → Load `form-design.md`
 - Using date picker or calendar components (`p:datePicker`) → Load `date-picker.md`
 - Using file upload components (`p:fileUpload`) → Load `file-upload.md`
-- Working with dialog logic, events, or methods (`#{logic.*}`, `#{data.*}`) → Load `logic-process.md` and `code.md`
+- Working with dialog logic, events, or methods (`#{logic.*}`, `#{data.*}`) → Load `logic-process.md` and `../axon-ivy-process/code.md`
 - Creating or updating managed beans for dialogs → Load `managed-bean.md`
 - Using Ivy HTML components (`<ic:*>`) → Load `ivy.md`
 - Looking up icon names → Refer to `icons.txt`

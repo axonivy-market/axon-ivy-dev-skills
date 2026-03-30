@@ -66,7 +66,8 @@ If no CSS file is referenced:
 
 - Do NOT use inline JavaScript (no `<script>` blocks inside HTML).
 - All JavaScript must be placed in an external .js file.
-- Use vanilla JavaScript only (no jQuery, React, Vue, Angular).
+- Prefer jQuery (available via PrimeFaces) for DOM manipulation, then vanilla JavaScript as fallback.
+- Do NOT use other JS libraries (React, Vue, Angular, etc.).
 - Code must be modular and reusable.
 - Avoid global variables; use a namespace object if needed.
 

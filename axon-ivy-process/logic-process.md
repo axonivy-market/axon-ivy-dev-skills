@@ -174,7 +174,7 @@ A dialog process file lives in `src_hd/` and typically contains multiple flows:
 
 ```json
 {
-  "$schema": "https://json-schema.axonivy.com/process/13.2.0/process.json",
+  "$schema": "https://json-schema.axonivy.com/14.0-dev/project/process.json",
   "id": "UNIQUE_HEX_ID",
   "kind": "HTML_DIALOG",
   "config": {
@@ -211,7 +211,7 @@ A working example of a dialog process that handles file upload, removal, submit,
 
 ```json
 {
-  "$schema": "https://json-schema.axonivy.com/process/13.2.0/process.json",
+  "$schema": "https://json-schema.axonivy.com/14.0-dev/project/process.json",
   "id": "1A4E9F78C2BDC1A1",
   "kind": "HTML_DIALOG",
   "config": {

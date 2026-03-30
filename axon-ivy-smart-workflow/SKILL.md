@@ -170,7 +170,7 @@ public class EmployeeInfo {
 
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/data-class/13.2.0/data-class.json",
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
   "simpleName" : "ExtractEmployeeData",
   "namespace" : "hr.onboarding.agent",
   "fields" : [ {
@@ -195,7 +195,7 @@ public class EmployeeInfo {
 
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/process/13.2.0/process.json",
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process.json",
   "id" : "19CF01A0E1B2C3D4",
   "kind" : "CALLABLE_SUB",
   "config" : {

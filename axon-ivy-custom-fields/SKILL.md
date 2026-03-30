@@ -29,7 +29,7 @@ description: Define custom fields in custom-fields.yaml for tasks, cases, and pr
 ## YAML Structure
 
 ```yaml
-# yaml-language-server: $schema=https://json-schema.axonivy.com/app/14.0.0/custom-fields.json
+# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0-dev/config/custom-fields.json
 
 CustomFields:
   Tasks:

@@ -47,7 +47,7 @@ Create process in `processes/package/`:
 
 ### Step 4: Create Managed Beans (if needed)
 
-**Skill:** `axon-ivy-bean`
+**Skill:** `axon-ivy-html` (see `managed-bean.md`)
 
 Create beans in `src/package/managedbean/` when dialog needs Java logic beyond `#{data.xxx}`:
 
@@ -57,7 +57,7 @@ Create beans in `src/package/managedbean/` when dialog needs Java logic beyond `
 
 ### Step 5: Create Dialog UIs
 
-**Skills:** `axon-ivy-html`, `axon-ivy-bean`
+**Skills:** `axon-ivy-html` (see `managed-bean.md` for bean patterns)
 
 Create dialogs in `src_hd/package/`:
 
@@ -68,7 +68,7 @@ Create dialogs in `src_hd/package/`:
 
 ### Step 6: Configure Roles & Users
 
-**Skill:** `axon-ivy-config`
+**Skills:** `axon-ivy-variable-config`, `axon-ivy-user-role-config`
 
 Update config files:
 

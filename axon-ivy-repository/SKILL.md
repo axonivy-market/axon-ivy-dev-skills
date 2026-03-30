@@ -1,4 +1,3 @@
-````skill
 ---
 name: axon-ivy-repository
 description: Create repository classes for persisting entities. Dispatches between Ivy.repo() (default) and JPA/SQL (advanced) approaches.
@@ -32,4 +31,3 @@ Does the user explicitly request SQL/JPA/database/persistence-utils?
 ## Entity/Model Definition
 
 Both approaches use `axon-ivy-java-data` skill for creating model classes and enums.
-````

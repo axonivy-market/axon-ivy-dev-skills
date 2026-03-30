@@ -40,7 +40,7 @@ Note: `DialogCall.dialog` uses `.` (dot) package separators — do NOT confuse t
 
 ## CallSubStart (Callable Subprocess Entry)
 
-Used in processes with `"kind": "SUB"`. Defines the entry point that other processes call.
+Used in processes with `"kind": "CALLABLE_SUB"`. Defines the entry point that other processes call.
 
 ```json
 {
@@ -165,13 +165,13 @@ RIGHT: "processCall": "hr/workflow/BusinessProcess:createLeaveRequest(String,jav
 
 ## SUB Process Structure
 
-A callable subprocess uses `"kind": "SUB"`:
+A callable subprocess uses `"kind": "CALLABLE_SUB"`:
 
 ```json
 {
-  "$schema": "https://json-schema.axonivy.com/process/13.2.0/process.json",
+  "$schema": "https://json-schema.axonivy.com/14.0-dev/project/process.json",
   "id": "UNIQUE_HEX_ID",
-  "kind": "SUB",
+  "kind": "CALLABLE_SUB",
   "config": {
     "data": "package.name.DataClass"
   },

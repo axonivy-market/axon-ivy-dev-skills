@@ -71,7 +71,6 @@ cms/
 ## Use Together With
 
 - `axon-ivy-html` — XHTML files reference CMS via `#{ivy.cms.co('...')}`
-- `axon-ivy-email` — Email templates use CMS for subject/body content
 - `axon-ivy-cms-verify` — **MUST** run after creating/modifying CMS files to catch common errors
 
 ## Proactive CMS Creation

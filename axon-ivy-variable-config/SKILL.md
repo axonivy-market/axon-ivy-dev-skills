@@ -1,11 +1,30 @@
 ---
 name: axon-ivy-variable-config
-description: Provide information and rules for Axon Ivy variables configurations. Use when wokring with Axon Ivy variable.
+description: Provide information and rules for Axon Ivy variables configurations. Use when working with Axon Ivy variable.
 ---
+
+## When to Use
+
+- Adding or editing entries in `config/variables.yaml`
+- Configuring application settings (API URLs, feature flags, credentials)
+- Setting up JSON-type variables with external `.json` files
 
 ## Configuration Files
 
 `config/variables.yaml` : Environment variables
+
+## Type Annotations
+
+Variables default to `String`. To use a different type, add a YAML comment annotation:
+
+| Annotation | Type | Example Value |
+|------------|------|---------------|
+| *(none)* | String (default) | `"My Application"` |
+| `# [type: Integer]` | Integer | `3` |
+| `# [type: Password]` | Password (encrypted, hidden in UI) | `"secret-value"` |
+| `# [file: json]` | JSON file reference | `""` (value in separate `.json` file) |
+
+The annotation comment **must** appear on the line directly above the `value:` entry.
 
 ## variables.yaml
 
@@ -34,13 +53,6 @@ Variables:
     Processes:
       # [file: json]
       ExternalLinks: ""
-
-  # Environment-specific (use [default] for fallback)
-  Database:
-    Host:
-      [default]: "localhost"
-      [production]: "db.example.com"
-    Port: 5432
 ```
 
 ## JSON Variable Folder Structure
