@@ -9,6 +9,26 @@ Use this skill as the **single entry point** whenever the user wants to do anyth
 
 ---
 
+## Step 0: Check for Existing Ivy Project
+
+**Before doing anything else**, search for `.ivyproject` files to locate existing Axon Ivy projects **within this codebase only**:
+
+1. Use Glob with pattern `**/.ivyproject` scoped to the current working directory, skipping `.claude/`, `.github/`, and `.vscode/` folders
+2. For each `.ivyproject` found, read it to extract the `name` field, then locate and read the sibling `pom.xml` for `groupId` and `artifactId`
+3. Present findings to the user in a short summary, e.g.:
+   ```
+   Found project: invoice-parser
+   Group ID:      com.example
+   Artifact ID:   invoice-parser
+   Location:      invoice-parser/
+   ```
+
+**If NO `.ivyproject` is found:** automatically run **Path A — Project Bootstrap** first (no prompt needed), then — once Path A is fully complete — continue to the path that matches the user's original intent (Step 1 below). Do NOT skip ahead to requirements or stories before the project is scaffolded.
+
+**If one or more projects ARE found:** present the summary, then proceed to Step 1.
+
+---
+
 ## Step 1: Detect Intent
 
 Read the user's request and match it to one of the 4 paths:
@@ -38,7 +58,7 @@ If intent is **ambiguous**, use your best judgment — freely decide which path 
 3. Wait for both subagents to finish
 4. Run skill `axon-ivy-custom-fields` if the project needs task/case metadata fields
 
-**Done when:** project builds cleanly and base config files exist.
+**Done when:** project builds cleanly and base config files exist. If Path A was triggered as a prerequisite (i.e., no `.ivyproject` existed when the user asked for a feature or story), immediately continue to the originally intended path — do not stop here.
 
 ---
 

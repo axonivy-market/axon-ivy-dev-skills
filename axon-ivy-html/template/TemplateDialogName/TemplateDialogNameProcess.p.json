@@ -1,0 +1,36 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process.json",
+  "id" : "UNIQUE_HEX_ID_16CHARS",
+  "kind" : "HTML_DIALOG",
+  "config" : {
+    "data" : "your.package.path.TemplateDialogName.TemplateDialogNameData"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "HtmlDialogStart",
+      "name" : "start()",
+      "config" : {
+        "signature" : "start",
+        "guid" : "UNIQUE_GUID_16CHARS"
+      },
+      "visual" : { "at" : { "x" : 96, "y" : 64 } },
+      "connect" : [ { "id" : "f2", "to" : "f1" } ]
+    }, {
+      "id" : "f1",
+      "type" : "HtmlDialogEnd",
+      "visual" : { "at" : { "x" : 224, "y" : 64 } }
+    }, {
+      "id" : "f3",
+      "type" : "HtmlDialogEventStart",
+      "name" : "submit",
+      "config" : {
+        "guid" : "UNIQUE_GUID_16CHARS_2"
+      },
+      "visual" : { "at" : { "x" : 96, "y" : 160 } },
+      "connect" : [ { "id" : "f5", "to" : "f4" } ]
+    }, {
+      "id" : "f4",
+      "type" : "HtmlDialogExit",
+      "visual" : { "at" : { "x" : 224, "y" : 160 } }
+    } ]
+}

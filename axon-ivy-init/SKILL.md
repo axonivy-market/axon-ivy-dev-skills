@@ -7,17 +7,33 @@ description: Scaffold a new Axon Ivy project. Asks for project name, group ID, a
 
 ## Step 1 — Collect inputs
 
-Ask the user for the following. Validate that each value contains no spaces:
+Infer reasonable default values from the user's request context (e.g. feature description, conversation history). Validate that each value contains no spaces. Project name and Artifact ID must use hyphens (e.g. `invoice-parser`), never PascalCase or underscores.
 
-- **Project name** — root folder name (e.g. `my-new-app`)
-- **Group ID** — Maven groupId (e.g. `com.example`)
-- **Artifact ID** — Maven artifactId (e.g. `my-new-app`)
+Present the proposed values in this exact format and wait for the user to confirm or override:
 
-Derive from the project name:
-- `namespace` = hyphens → dots (e.g. `my-new-app` → `my.new.app`)
-- `namespacePath` = hyphens → slashes (e.g. `my-new-app` → `my/new/app`)
+```
+Here are the proposed project settings:
 
-Generate a random 16-character hex string for `__PROCESS_ID__`.
+┌─────────────────┬──────────────────────────────┐
+│ Field           │ Value                        │
+├─────────────────┼──────────────────────────────┤
+│ Project name    │ <proposed-project-name>      │
+│ Group ID        │ <proposed-group-id>          │
+│ Artifact ID     │ <proposed-artifact-id>       │
+│ Namespace       │ <derived-namespace>          │
+│ Namespace path  │ <derived-namespace-path>     │
+└─────────────────┴──────────────────────────────┘
+
+Let me know if you'd like to change anything, or confirm to continue.
+```
+
+- Derive `namespace` from the project name: hyphens → dots (e.g. `my-new-app` → `my.new.app`)
+- Derive `namespacePath` from the project name: hyphens → slashes (e.g. `my-new-app` → `my/new/app`)
+- Accept any natural confirmation from the user (e.g. "ok", "looks good", "continue", "yes") to proceed
+- If the user requests changes, update the table and re-display it, then wait again
+- Generate a random 16-character hex string for `__PROCESS_ID__`
+
+Do not write any files until the user confirms.
 
 ## Step 2 — Read the bundled template
 

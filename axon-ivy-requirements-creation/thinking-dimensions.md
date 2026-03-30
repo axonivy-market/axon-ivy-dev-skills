@@ -162,6 +162,36 @@ Express as measurable outcomes, not vague goals.
 
 ---
 
+## Define File Upload Handling
+
+Only relevant if the process involves users uploading documents, images, or other files.
+
+Ask yourself:
+
+- What file types are accepted? Define a whitelist (e.g., PDF, PNG, JPEG — not "any file").
+- What is the maximum file size?
+- Single file or multiple files per upload?
+- Where are files stored after upload? (temp path during process, or persisted permanently?)
+- Can the user download or preview the uploaded file later?
+- What happens if the upload fails mid-process?
+
+---
+
+## Define AI / Data Extraction
+
+Only relevant if the process uses AI (Smart Workflow) to extract structured data from documents, text, or images.
+
+Ask yourself:
+
+- What is the input format? (uploaded PDF, image, free text, email body?)
+- What fields must be extracted? Define each with name and type (String, Double, Date, List).
+- Which fields are required vs. optional in the extracted output?
+- What happens if confidence is low or a field cannot be found? (return null, flag for manual review, reject?)
+- What happens if extraction fails completely? (notify user, allow manual entry, retry?)
+- How is the extracted data validated after extraction? (format checks, business rules?)
+
+---
+
 ## Expansion Heuristics
 
 Use these patterns to expand vague user language into concrete detail:
@@ -169,7 +199,8 @@ Use these patterns to expand vague user language into concrete detail:
 | User Says | You Should Think About |
 | --------- | ---------------------- |
 | "some info" / "the details" / "the data" | What SPECIFIC fields? List every one. Each needs a name, type, and validation rule. |
-| "extract" / "parse" / "read from" | From what format? What fields come out? What if it fails or data is missing? |
+| "extract" / "parse" / "AI" / "read from file" | Input format? Full extraction schema (all fields + types)? What if extraction fails or confidence is low? |
+| "upload" / "attach" / "submit a file" | File types (whitelist)? Size limit? Single or multi? Storage location? Preview/download needed? |
 | "save it" / "store it" | To what storage? What's the entity structure? What about auto-generated fields (id, timestamps, status)? |
 | "fill in a form" / "enter details" | What sections? Which fields required vs optional? Conditional fields? Save draft? |
 | "approve" / "review" | Who approves? What do they see? What actions can they take? Deadline? What about reject/return? |

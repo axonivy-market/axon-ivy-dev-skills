@@ -92,6 +92,29 @@ Go through each category below. For every question, check if it has been answere
 - [ ] Automated step failure handling (retry, fallback)
 - [ ] Timeout/escalation at each human step
 
+## File Handling
+
+> Skip if the process does not involve file uploads.
+
+- [ ] Accepted file types defined (whitelist: e.g., PDF, PNG, JPEG)
+- [ ] Maximum file size defined
+- [ ] Single vs. multiple file upload defined
+- [ ] File storage location defined (temp during process vs. persistent)
+- [ ] File cleanup policy defined (when are temp files deleted?)
+- [ ] Download/preview of uploaded file needed?
+- [ ] Upload failure handling defined (retry, notify user?)
+
+## Data Extraction / AI
+
+> Skip if the process does not use AI or Smart Workflow extraction.
+
+- [ ] Input document format defined (PDF, image, text, email?)
+- [ ] Full extraction schema defined: every field with name, type, required/optional
+- [ ] Low-confidence or missing field handling defined (null, manual review, reject?)
+- [ ] Extraction failure handling defined (retry, fallback to manual entry, notify?)
+- [ ] Post-extraction validation rules defined (format, range, business rules)
+- [ ] Notifications for extraction events defined ("complete", "failed", "needs review")
+
 ## Security & Compliance
 
 - [ ] Sensitive/PII data fields identified

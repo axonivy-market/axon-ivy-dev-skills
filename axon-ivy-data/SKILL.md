@@ -41,6 +41,28 @@ See `schema.json` in this skill folder for full JSON schema reference.
 
 **Modifiers:** `PERSISTENT`, `ID`, `GENERATED`, `NOT_NULLABLE`, `UNIQUE`, `NOT_UPDATEABLE`, `NOT_INSERTABLE`, `VERSION`
 
+## Field Type Reference
+
+| Type | JSON value | Notes |
+|------|-----------|-------|
+| String | omit `"type"` (default) | Text, IDs, dates returned by AI |
+| Boolean | `"Boolean"` | true/false flags |
+| Integer | `"java.lang.Integer"` | Whole numbers, quantities |
+| Double | `"java.lang.Double"` | Prices, amounts, rates |
+| BigDecimal | `"java.math.BigDecimal"` | High-precision financial calculations |
+| LocalDate | `"java.time.LocalDate"` | Date only (yyyy-MM-dd) |
+| LocalDateTime | `"java.time.LocalDateTime"` | Full timestamp |
+| File | `"java.io.File"` | Uploaded file handle |
+| InputStream | `"java.io.InputStream"` | File content stream (for AI extraction) |
+| List of objects | `"List<com.example.Item>"` | Use fully-qualified type name |
+| List of strings | `"List<String>"` | Simple string lists |
+| Nested object | `"com.example.Address"` | Use fully-qualified class name |
+| Enum | `"com.example.Status"` | Use fully-qualified enum name |
+
+**Double vs BigDecimal:** Use `Double` for display and simple calculations. Use `BigDecimal` only for strict financial rounding requirements.
+
+**Dates from AI extraction:** Prefer `String` (AI returns ISO format strings). Parse to `LocalDate` in a Script element only when needed for business logic comparisons.
+
 ## .d.json Examples
 
 ### Basic Master Data

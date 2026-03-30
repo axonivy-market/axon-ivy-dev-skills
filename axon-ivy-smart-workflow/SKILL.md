@@ -38,9 +38,9 @@ Before creating Smart Workflow elements, verify the project's `pom.xml` contains
    - Add the dependencies to the target project's `pom.xml`
    - Use the version from the smart-workflow project's pom.xml
 
-3. **If smart-workflow project DOES NOT EXIST in workspace:**
-   - **STOP and inform the user:**
-   > "The smart-workflow project is not found in the workspace. Please add the smart-workflow and smart-workflow-openai projects to your workspace before continuing with Smart Workflow implementation."
+3. **If smart-workflow project DOES NOT EXIST in workspace** (no `pom.xml` found AND no `smart-workflow-*.iar` file found):
+   - **Use the `ivy-market-import` skill** to import the smart-workflow library into the codebase before doing anything else.
+   - After import completes, continue with the rest of this skill.
 
 ## Creating Smart Workflow Elements
 
@@ -317,4 +317,65 @@ Each tool name must correspond to a callable sub-process signature in the projec
 ### Multiple Inputs
 ```json
 "query" : "Context: <%= in.context %>\n\nData to process:\n<%= in.inputData %>\n\nInstructions: <%= in.instructions %>"
+```
+
+### Binary File Input (Image or PDF)
+Pass binary files directly in the query — AgenticProcessCall understands `InputStream` and `Binary` objects natively. No base64 encoding needed.
+
+```json
+"query" : "Extract all data from this invoice:\n<%= in.uploadedFile %>"
+```
+
+Supported data types for file variables:
+
+| Type | How to obtain | Notes |
+|------|--------------|-------|
+| `java.io.InputStream` | From uploaded file or CMS | Preferred for images |
+| `ch.ivyteam.ivy.scripting.objects.Binary` | From CMS binary resource | Preferred for PDFs |
+| `java.io.File` | From file system path | Works for both |
+| CMS binary directly | `ivy.cms.co("/path/to/resource")` | Embedded in template |
+
+**Example: Extract invoice from user-uploaded file**
+
+Data class:
+```json
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "ExtractInvoiceData",
+  "namespace" : "invoice.extraction",
+  "fields" : [ {
+    "name" : "uploadedFile",
+    "type" : "java.io.InputStream",
+    "comment" : "Uploaded invoice file (PDF or image)"
+  }, {
+    "name" : "invoice",
+    "type" : "invoice.model.Invoice",
+    "comment" : "Extracted invoice data"
+  }, {
+    "name" : "error",
+    "type" : "ch.ivyteam.ivy.bpm.error.BpmError"
+  }, {
+    "name" : "errorStr",
+    "type" : "String"
+  } ]
+}
+```
+
+AgenticProcessCall query:
+```json
+"query" : "Extract all invoice data from this document:\n<%= in.uploadedFile %>"
+```
+
+**Type guidance for financial/document extraction:**
+
+| Field type | Use | Reason |
+|-----------|-----|--------|
+| `java.lang.Double` | Prices, amounts, totals | Sufficient for display and calculation |
+| `java.lang.Integer` | Quantities | Whole numbers only |
+| `String` | Dates, invoice number, IBAN | Return as string, parse in Script if needed |
+| `List<T>` (via wrapper) | Line items | Must be wrapped — see Note 2 above |
+
+**System prompt example for invoice extraction:**
+```json
+"system" : "You are an invoice data extraction assistant.\n\nEXTRACT THE FOLLOWING:\n1. invoiceNumber: The invoice identifier\n2. invoiceDate: Issue date (format: yyyy-MM-dd)\n3. dueDate: Payment due date (format: yyyy-MM-dd)\n4. vendorName: Name of the issuing company\n5. customerName: Name of the billed customer\n6. items: List of line items (description, quantity, unitPrice, total)\n7. subtotal: Amount before tax\n8. vatRate: VAT percentage (e.g. 8.1)\n9. vatAmount: Tax amount\n10. totalDue: Final amount due\n\nRULES:\n- All amounts are numbers (no currency symbols)\n- Return null for fields not found in the document"
 ```

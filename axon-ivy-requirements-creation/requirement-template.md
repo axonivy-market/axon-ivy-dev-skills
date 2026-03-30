@@ -92,6 +92,19 @@ STATUS_A → STATUS_B → STATUS_C → STATUS_D (end)
 
 ---
 
+## 4A. File Upload Specification
+
+> Remove this section if the process does not involve file uploads.
+
+- **Accepted file types:** (e.g., PDF, PNG, JPEG — define whitelist explicitly)
+- **Maximum file size:** (e.g., 10 MB)
+- **Single or multiple files:**
+- **Storage location:** (temp during process / persisted to path / stored in CMS)
+- **Download / preview after upload:** Yes / No
+- **Upload failure handling:** (retry prompt / notify user / cancel process?)
+
+---
+
 ## 5. Detailed Task Definition
 
 > Repeat this section for each task in the process.
@@ -120,6 +133,26 @@ Yes / No
 - Approve
 - Reject
 - Request rework
+
+---
+
+## 5A. Data Extraction / AI Specification
+
+> Remove this section if the process does not use AI or Smart Workflow extraction.
+
+- **Input format:** (uploaded PDF / image / free text / email body)
+- **Extraction schema:**
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| invoiceNumber | String | Yes | Unique invoice identifier |
+| invoiceDate | String | Yes | ISO format yyyy-MM-dd |
+| totalDue | Double | Yes | Final amount due |
+| items | List\<InvoiceItem\> | Yes | Line items (wrapped list) |
+
+- **Low-confidence / missing field handling:** (return null / flag for manual review / reject submission)
+- **Extraction failure handling:** (retry once / fallback to manual entry / notify user)
+- **Post-extraction validation rules:** (e.g., totalDue > 0, invoiceDate is valid date)
 
 ---
 

@@ -5,6 +5,15 @@ description: Import an Axon Ivy Marketplace item into the codebase. Optionally a
 
 # Import Axon Ivy Marketplace Item
 
+## Item-specific instructions
+
+Some marketplace items have additional setup requirements. Before proceeding with Step 1, check if a `<item-name>.md` file exists in this skill's folder and follow its instructions first.
+
+**Known items with extra steps:**
+- `smart-workflow` → see [smart-workflow.md](smart-workflow.md)
+
+---
+
 ## Step 1 — Collect inputs
 
 ### Item name

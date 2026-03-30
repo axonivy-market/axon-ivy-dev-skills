@@ -39,16 +39,51 @@ One story for the persistence layer:
 
 **Source:** Each "Extract Data using Smart Workflow" step in the requirements.
 
-One story per extraction type:
+One story per extraction type. Each story must include:
 
-- JSON schema definition for the extraction target
-- Subprocess definition (Start -> Script -> Smart Workflow Call -> Script -> End)
-- Input type (typically String) and output type (the target data class)
-- Any format conversion rules (e.g., date parsing)
+#### Part A — Data class for the subprocess
+
+- `simpleName`, `namespace`
+- Input field: file variable (`java.io.InputStream` for images, `ch.ivyteam.ivy.scripting.objects.Binary` for PDFs) or `String` for text
+- Output field: the target model class (e.g., `invoice.model.Invoice`)
+- Error fields: `ch.ivyteam.ivy.bpm.error.BpmError error` and `String errorStr`
+
+#### Part B — Extraction schema table
+
+List every field the AI must extract:
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| invoiceNumber | String | Yes | e.g. INV-0001-0001 |
+| invoiceDate | String | Yes | ISO format yyyy-MM-dd |
+| totalDue | Double | Yes | Final amount, no currency symbol |
+| items | List (wrapped) | Yes | Use wrapper class — AI cannot return List directly |
+
+#### Part C — Subprocess process file
+
+- Kind: `CALLABLE_SUB`
+- Elements: `CallSubStart` → `Script (init)` → `ProgramInterface (AgenticProcessCall)` → `CallSubEnd`, with `ErrorBoundaryEvent` → `Script (parse error)` → `CallSubEnd`
+- `resultType`: fully-qualified model class ending in `.class`
+- `resultMapping`: maps to output field
+- System prompt: list every field to extract with format rules
+- Query template: pass file or text variable directly — e.g., `"query": "Extract invoice data:\n<%= in.uploadedFile %>"`
+
+#### Part D — Failure handling
+
+- State what happens when extraction fails: return null, set `errorStr`, caller decides
+- State what happens for missing optional fields: AI returns null, caller validates
 
 **Why separate:** Each extraction has its own schema and output type, can be developed independently.
 
 **Count:** Number of stories = number of distinct data classes needing AI extraction.
+
+Acceptance criteria template:
+
+- [ ] Subprocess is callable with correct signature
+- [ ] Input/output types match the data class definition
+- [ ] Returns populated object when given a valid test document
+- [ ] Returns null/errorStr (not an exception) when extraction fails
+- [ ] All required fields extracted correctly from a sample invoice
 
 ### Reusable UI Component Stories
 
