@@ -71,8 +71,8 @@ LOG.warning(() -> "msg " + value);
 ---
 
 **M5a. No Magic Values**
-*Scan for:* unnamed numeric/string literals in logic; constants named so vaguely they require a comment; the same sentinel defined independently in multiple classes; **JSON field name strings** used in `node.get("fieldName")` or `map.get("key")` calls; **return value sentinels** (`"unknown"`, `"N/A"`, `""`) repeated across multiple methods of the same class.
-*Why:* Magic values force readers to reverse-engineer intent. JSON field name strings are especially dangerous — if the serialization schema changes, silent `null`/`0` returns with no compile-time or runtime error. Return value sentinels repeated 4+ times will drift.
+*Scan for:* unnamed numeric/string literals in logic; constants named so vaguely they require a comment; the same sentinel defined independently in multiple classes; **JSON field name strings** used in `node.get("fieldName")` or `map.get("key")` calls; **return value sentinels** (`"unknown"`, `"N/A"`, `""`) repeated across multiple methods of the same class; **inline string concatenation** for multi-part output strings where the shape of the string is fixed but the values vary.
+*Why:* Magic values force readers to reverse-engineer intent. JSON field name strings are especially dangerous — if the serialization schema changes, silent `null`/`0` returns with no compile-time or runtime error. Return value sentinels repeated 4+ times will drift. Inline concatenation buries the output shape inside the logic; a named format constant makes the shape explicit and reusable.
 ```java
 // Before: inline literals everywhere
 node.get("totalTokens")      // ✗ silent null if schema renames field
@@ -97,4 +97,15 @@ private static final String NO_TASK_UUID = "-1"; // AgentHistoryTreeBuilder — 
 String NO_TASK_UUID = "-1";  // HistoryRecorder interface
 ...orElse(HistoryRecorder.NO_TASK_UUID);
 StringUtils.defaultIfBlank(taskUuid, HistoryRecorder.NO_TASK_UUID);
+
+// Inline string concatenation vs. named format constants
+// Before: output shape is buried inside the logic
+return hours + " hour" + (hours > 1 ? "s" : "") + (remainingMinutes > 0 ? " " + remainingMinutes + " min" : "");
+
+// After: named format constants + String.format — shape is visible at a glance
+private static final String MINUTES_FORMAT       = "%d min";
+private static final String HOURS_FORMAT         = "%d hour%s";
+private static final String HOURS_MINUTES_FORMAT = "%d hour%s %d min";
+
+return String.format(HOURS_MINUTES_FORMAT, hours, plural, remainingMinutes);
 ```

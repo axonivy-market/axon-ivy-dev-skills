@@ -7,14 +7,20 @@
 *Why:* Core logic that imports infrastructure types cannot be tested or reused without that infrastructure. The entire inner layer is contaminated. In Axon Ivy projects, `Ivy.log()` and other `ch.ivyteam.*` calls must not appear in entity or domain classes — they belong only in adapter/service/listener classes.
 
 **C2. No Direct Instantiation — Inject Interfaces**
-*Scan for:* `new ConcreteClass(runtimeArg)` in business logic; multiple overloaded constructors that differ only in which concrete class they instantiate; `Function<X, ConcreteClass>` fields instead of `Function<X, Interface>`; static infrastructure fields initialized with `new ConcreteImpl()` when a shared factory (e.g. `JsonUtils.getObjectMapper()`) already exists.
-*Why:* Calling `new` in a high-level class couples it to the concrete implementation and blocks substitution. The caller must own the wiring, passing a `Function<RuntimeData, Interface>` factory.
+*Scan for:* `new ConcreteClass(runtimeArg)` in business logic; `private [final] Interface field = new ConcreteImpl()` at field declaration level; multiple overloaded constructors that differ only in which concrete class they instantiate; `Function<X, ConcreteClass>` fields instead of `Function<X, Interface>`; static infrastructure fields initialized with `new ConcreteImpl()` when a shared factory (e.g. `JsonUtils.getObjectMapper()`) already exists.
+*Why:* Calling `new` in a high-level class couples it to the concrete implementation and blocks substitution. Field-level instantiation is equally harmful — it is invisible to triage rules that only scan method bodies, and in JSF/CDI beans it also bypasses the container lifecycle. The caller (or `@PostConstruct`) must own the wiring.
 ```java
-// Before: listener owns the wiring, concrete type leaks
-public ToolExecutionHistoryListener(Function<String, ToolExecutionRepository> f) { ... }
+// ✗ — field-level: hard-couples concrete type, bypasses JSF lifecycle
+private final HistoryStorage storage = new IvyRepoHistoryStorage();
 
-// After: caller owns the wiring, depends on interface
-public ToolExecutionHistoryListener(Function<String, ToolExecutionRecorder> f) { ... }
+// ✓ — declared separately, wired in @PostConstruct
+private HistoryStorage storage;
+
+@PostConstruct
+public void init() {
+  storage = new IvyRepoHistoryStorage();
+  loadData();
+}
 ```
 
 **C3. Ports, Adapters, and Package Contracts**

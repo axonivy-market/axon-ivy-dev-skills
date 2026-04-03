@@ -22,6 +22,30 @@ class CaseHistoryGroup implements HistoryGroupView {
 
 ---
 
+**M6a. Extract Large Inner Classes to Their Own File**
+*Scan for:* inner static classes with more than ~20 lines of body (fields + constructor + factory method + getters combined) living inside a host class.
+*Why:* Large inner classes make the host class harder to navigate, are invisible to IDEs when searching by class name, and cannot be imported alone. Once a class grows beyond a simple value holder it deserves its own file. Place it in the most semantically appropriate sub-package (e.g. `ui.entity` for view models, `utils` for parsers).
+
+Decision guide:
+- Tiny value holder (2–4 fields, no logic, used only by owner) → keep as nested class or record (see M6)
+- Substantial class (factory method, constants, multi-field immutable object, 20+ lines) → extract to own file in matching package
+
+```
+// ✗ — 80-line CaseDetails inner class inside ConversationsBean
+public class ConversationsBean {
+  public static class CaseDetails { /* 80 lines */ }
+}
+
+// ✓ — extracted to ui.entity package, renamed to match domain vocabulary
+// com.example.governance.ui.entity.CaseInformation
+public class CaseInformation { /* own file */ }
+
+// ConversationsBean imports and uses it
+import com.example.governance.ui.entity.CaseInformation;
+```
+
+---
+
 **M6. Nested Record for Owned Value Objects**
 *Scan for:* simple value-holder classes (no business logic, no setters called outside their owner) that are used exclusively by one parent class and live in the same package as that parent.
 *Why:* A class used only by one owner adds a file with no benefit. A nested `public record` eliminates the file, enforces immutability, and provides correct `equals()`/`hashCode()` for free — which fixes silent test failures when comparing objects after JSON round-trip (`containsExactly` falls back to reference equality without `equals()`).
