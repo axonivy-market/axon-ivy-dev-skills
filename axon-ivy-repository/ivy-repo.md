@@ -59,8 +59,7 @@ public class EntityRepository {
       throw new IllegalArgumentException("Entity cannot be null");
     }
 
-    Ivy.repo().save(entity);
-    return entity;
+    return Ivy.repo().save(entity).getContext();
   }
 
   /**
@@ -120,8 +119,7 @@ public class EntityRepository {
       return null;
     }
 
-    Ivy.repo().save(entity);
-    return entity;
+    return Ivy.repo().save(entity).getContext();
   }
 
   /**

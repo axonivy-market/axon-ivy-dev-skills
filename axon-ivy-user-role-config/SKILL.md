@@ -24,42 +24,64 @@ description: Provide format for Axon Ivy users/roles configurations. Use when wo
 ## Naming Conventions
 
 - **Role names**: PascalCase, no spaces (e.g., `ProjectManager`, `HRAdmin`, `Recruiter`)
-- **User names**: snake_case (e.g., `pm_user`, `hr_admin`)
-- Role names in `roles.yaml` must match **exactly** with:
+- **User names**: camelCase or snake_case (e.g., `pmUser`, `hr_admin`)
+- Role `Id` values in `roles.yaml` must match **exactly** with:
   - `responsible.roles` in process elements (`TaskSwitchEvent`, `UserTask`)
   - `ROLE_FROM_ATTRIBUTE` script expressions
-  - User `roles:` assignments in `users.yaml`
+  - User `Roles:` assignments in `users.yaml`
+
+## Schema
+
+- `roles.yaml` schema: `https://json-schema.axonivy.com/14.0-dev/config/roles.json`
+- `users.yaml` schema: `https://json-schema.axonivy.com/14.0-dev/config/users.json`
+
+Both `Roles` and `Users` are **arrays** (not maps). All field names are **PascalCase**.
 
 ## roles.yaml
 
 ```yaml
+# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0-dev/config/roles.json
 Roles:
-  # Parent roles
-  Everybody:
-  HR:
-    parent: Everybody
-  Manager:
-    parent: Everybody
-
-  # Child roles
-  Recruiter:
-    parent: HR
-  ProjectManager:
-    parent: Manager
+  - Id: HR
+    Name: HR Department
+    Parent: Everybody
+  - Id: Manager
+    Name: Manager
+    Parent: Everybody
+  - Id: Recruiter
+    Name: Recruiter
+    Parent: HR
+  - Id: ProjectManager
+    Name: Project Manager
+    Parent: Manager
 ```
+
+Fields:
+- `Id` (**required**) — unique role identifier, used in process `responsible.roles` and user `Roles`
+- `Name` — display name shown in the portal
+- `Parent` — parent role id (defaults to `Everybody` if omitted)
+- `Members` — array of child role ids (alternative to setting `Parent` on children)
 
 ## users.yaml
 
 ```yaml
+# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0-dev/config/users.json
 Users:
-  pm_user:
-    fullName: Project Manager
-    password: pm_user
-    email: pm@example.com
-    roles:
+  - Name: pmUser
+    FullName: Project Manager
+    Password: pmUser
+    Mail: pm@example.com
+    Roles:
       - HR
       - ProjectManager
 ```
+
+Fields:
+- `Name` (**required**) — unique username for login
+- `FullName` — display name
+- `Password` — plain text test password
+- `Mail` — email address
+- `Roles` — array of role `Id` values from `roles.yaml`
 
 ## Mapping Roles to Process Tasks
 

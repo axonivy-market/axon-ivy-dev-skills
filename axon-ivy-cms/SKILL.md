@@ -222,6 +222,22 @@ String greeting = Ivy.cms().co("/Email/greeting", Arrays.asList(userName));
 - **Text content** → use `ivy.cms.co()` (returns String)
 - **File/binary content** → use `ivy.cm.ref()` (returns URL link)
 
+### YAML Boolean Key Trap — Quote `Yes`/`No`/`True`/`False`/`On`/`Off` keys
+
+Axon Ivy uses SnakeYAML (YAML 1.1), which treats these words as booleans. Any such word used as a **key** must be single-quoted.
+
+```yaml
+# WRONG
+Labels:
+  Yes: 'Yes'
+  No: 'No'
+
+# RIGHT
+Labels:
+  'Yes': 'Yes'
+  'No': 'No'
+```
+
 ## Portal CMS Overrides
 
 To override Axon Ivy Portal default labels, use the `ch.ivy.addon.portalkit.ui.jsf:` namespace:

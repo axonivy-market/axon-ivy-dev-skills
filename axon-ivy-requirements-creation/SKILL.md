@@ -70,9 +70,10 @@ Use the verified requirements from Steps 1-2 to fill in the template:
 
 Decompose the requirements document from Step 3 into implementation stories:
 
-- Follow the dependency order: Data → Entity → Extractions → UI Components → Tag Library → Forms → Process → Config
-- Each story is a separate file: `story_1.md`, `story_2.md`, ... `story_N.md`
-- Each story includes: description, dependencies, implementation details, acceptance criteria
+- Follow the dependency order in `create-stories.md`
+- For each story type you are about to generate, **read the corresponding file in `story-types/`** before writing the story (e.g., read `story-types/form-composition.md` before writing any form story)
+- Each story is a separate file: `story_NN_type-name.md` (see filename convention in `create-stories.md`)
+- Each story includes: user framing, description, dependencies, implementation details, acceptance criteria
 
 **Output location:** `[project]/documents/stories/` — create folder if it doesn't exist.
 

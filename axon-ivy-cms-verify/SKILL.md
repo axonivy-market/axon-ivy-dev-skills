@@ -7,25 +7,21 @@ description: Verification checklist for Axon Ivy CMS files (cms_*.yaml). MUST be
 
 ## Checklist
 
-### 1. YAML Boolean Keys — `Yes`, `No`, `On`, `Off`, `True`, `False` must be quoted
+### 1. YAML Boolean Keys must be quoted
 
-YAML 1.1 (used by SnakeYAML / Axon Ivy Java runtime) treats these words as **booleans**, not strings. Unquoted, `Yes` becomes `true` and `No` becomes `false`, silently breaking CMS lookups.
-
-Affected words (case-insensitive): `yes`, `no`, `on`, `off`, `true`, `false`, `y`, `n`
+Axon Ivy uses SnakeYAML (YAML 1.1), which treats `yes`, `no`, `on`, `off`, `true`, `false` (case-insensitive) as booleans. Quote any such **key** with single quotes.
 
 ```yaml
-# WRONG — parsed as {true: "Yes", false: "No"}
+# WRONG
 Labels:
   Yes: 'Yes'
   No: 'No'
 
-# RIGHT — keys stay as strings "Yes" and "No"
+# RIGHT
 Labels:
   'Yes': 'Yes'
   'No': 'No'
 ```
-
-Scan for: Any **key** (left side of `:`) that is one of these reserved words without quotes. Values (right side) already quoted are fine.
 
 ### 2. Key Hierarchy Mismatch Between Language Files
 
