@@ -39,8 +39,7 @@ Create master data in `dataclasses/package/`:
 Create process in `processes/package/`:
 
 - [ ] RequestStart with signature
-- [ ] TaskSwitchEvent for each human task
-- [ ] DialogCall for each UI screen
+- [ ] UserTask for each human task with UI screen
 - [ ] Script nodes for business logic
 - [ ] Alternative nodes for conditions
 - [ ] TaskEnd for completion

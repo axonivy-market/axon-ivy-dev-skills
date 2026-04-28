@@ -52,31 +52,24 @@ Common JDBC drivers:
 | PostgreSQL | `org.postgresql.Driver` | `jdbc:postgresql://host:5432/DB` |
 | MySQL | `com.mysql.cj.jdbc.Driver` | `jdbc:mysql://host:3306/DB` |
 
-### persistence.xml
+### persistence.yaml
 
-Location: `<project>/config/persistence.xml`
+Location: `<project>/config/persistence.yaml`
 
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             version="2.2"
-             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
-                                 http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+```yaml
+# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0-dev/config/persistence-2.json
+Persistence:
+  InvoiceDb:
+    DataSource: InvoiceDb
+    Properties:
+      hibernate.show_sql: 'true'
+      hibernate.format_sql: 'false'
+      hibernate.enable_lazy_load_no_trans: 'true'
+      hibernate.id.new_generator_mappings: 'false'
 
-    <persistence-unit name="MyDatabase">
-        <non-jta-data-source>MyDatabase</non-jta-data-source>
-        <class>com.example.entity.Customer</class>
-        <class>com.example.entity.Order</class>
-        <exclude-unlisted-classes>true</exclude-unlisted-classes>
-        <properties>
-            <property name="hibernate.id.new_generator_mappings" value="false"/>
-        </properties>
-    </persistence-unit>
-</persistence>
 ```
 
-**Critical**: `<non-jta-data-source>` value MUST match the database name in `databases.yaml`. Every entity class MUST be listed.
+**Critical**: `DataSource` value MUST match the database name in `databases.yaml`. Every entity class MUST be listed.
 
 ---
 
@@ -93,20 +86,20 @@ package com.example.project.sql.entity;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 import com.axonivy.utils.persistence.beans.AuditableIdEntity;
 
@@ -154,6 +147,22 @@ public class MyEntity extends AuditableIdEntity {
     // ... remaining getters/setters
 }
 ```
+
+### Persistence namespace — `jakarta.*` vs `javax.*`
+
+Axon Ivy 14+ ships with the `jakarta.persistence.*` / `jakarta.validation.*` API (Jakarta EE 9+). Always use `jakarta.*` imports in entities, DAOs, and services. The older `javax.persistence.*` namespace is only correct for Ivy 9–13 codebases — using it in Ivy 14 produces compile errors against the runtime libraries.
+
+```java
+// Ivy 14+
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotNull;
+
+// Ivy 9–13 (legacy)
+import javax.persistence.Entity;
+import javax.validation.constraints.NotNull;
+```
+
+---
 
 ### TableAndColumnDictionary
 
@@ -244,7 +253,7 @@ Static wrapper classes over DAO instances.
 package com.example.project.sql.service;
 
 import java.util.List;
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 
 import com.example.project.sql.dao.MyEntityDAO;
 import com.example.project.sql.entity.MyEntity;
@@ -281,6 +290,63 @@ public class MyEntityService {
     }
 }
 ```
+
+---
+
+## 5. Soft-Delete & Unique Constraints
+
+`AuditableIdEntity` provides soft-delete via `flaggedDeletedDate`. The default DAO query filter excludes soft-deleted rows, so application code never sees them. Database-level **unique constraints, however, still cover deleted rows**. Re-inserting a record with the same unique key as a soft-deleted one throws `ConstraintViolationException`.
+
+### Wrong — naive INSERT after soft-delete
+
+```java
+// User deletes Allocation(week=42, project=X). Row is soft-deleted.
+// Later, user re-creates Allocation(week=42, project=X).
+allocationDAO.save(new Allocation(42, projectX));
+// → ConstraintViolationException: unique constraint UK_ALLOC_WEEK_PROJECT
+```
+
+### Right — undelete the soft-deleted row
+
+Before INSERT, look for an existing soft-deleted row using the unique key. If found, `undelete()` it and update fields instead of creating a new entity.
+
+```java
+// In the service layer
+public Allocation saveCell(int week, Project project, double value) {
+    Allocation existing = allocationDAO.findExactIncludingDeleted(week, project);
+    if (existing != null && existing.getFlaggedDeletedDate() != null) {
+        allocationDAO.undelete(existing);   // clears flaggedDeletedDate, merges
+        existing.setValue(value);
+        return allocationDAO.save(existing);
+    }
+    if (existing != null) {
+        existing.setValue(value);
+        return allocationDAO.save(existing);
+    }
+    return allocationDAO.save(new Allocation(week, project, value));
+}
+```
+
+### DAO — bypass the soft-delete filter
+
+`AuditableMarker.ALL.execute(...)` runs a JPA query without the soft-delete filter, so soft-deleted rows become visible:
+
+```java
+import com.axonivy.utils.persistence.dao.markers.AuditableMarker;
+
+public Allocation findExactIncludingDeleted(int week, Project project) {
+    return AuditableMarker.ALL.execute(() -> {
+        try (CriteriaQueryContext<Allocation> query = initializeQuery()) {
+            query.whereEq(Allocation_.week, week);
+            query.whereEq(Allocation_.project, project);
+            List<Allocation> results = findByCriteria(query);
+            return results.isEmpty() ? null : results.get(0);
+        }
+    });
+}
+```
+
+**When this matters**: any service method that performs INSERT-or-UPDATE-by-business-key on an `AuditableIdEntity` with database-level unique constraints — typically `save…()`, `add…()`, or transfer/move operations.
 
 ---
 

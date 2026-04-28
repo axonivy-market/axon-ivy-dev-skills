@@ -144,3 +144,79 @@ Scan for `style="..."` on components and `<script>` blocks in the XHTML. Both ar
 
 - Styles must go in an external CSS file (see `axon-ivy-html` skill, `css-js.md`)
 - JavaScript must go in an external JS file
+
+---
+
+### 10. DataTable sorting — `sortBy`, NOT `sortField`
+
+PrimeFaces 14 uses `sortBy` with an EL expression on the row variable. The legacy `sortField` attribute is silently ignored.
+
+```xhtml
+<!-- WRONG -->
+<p:dataTable value="#{bean.projects}" var="proj" sortField="sortOrder">
+
+<!-- RIGHT -->
+<p:dataTable value="#{bean.projects}" var="proj" sortBy="#{proj.sortOrder}">
+```
+
+---
+
+### 11. `<p:tooltip for="...">` — target must be a JSF component
+
+`<p:tooltip>` resolves the target via the JSF component tree. Plain HTML elements (`<span>`, `<div>`, `<i>`) have no client ID in that tree, so the tooltip silently fails to attach. Wrap the icon/anchor in a JSF component (typically `<h:panelGroup>`).
+
+```xhtml
+<!-- WRONG -->
+<span id="info-icon" class="pi pi-info-circle" />
+<p:tooltip for="info-icon" value="..." />
+
+<!-- RIGHT -->
+<h:panelGroup id="info-icon" styleClass="pi pi-info-circle" />
+<p:tooltip for="info-icon" value="..." />
+```
+
+---
+
+### 12. `update` paths — no `<p:dialog>` ID prefix
+
+`<p:dialog>` is **not** a NamingContainer (unlike `<p:tabView>` / `<p:tab>`). Components inside a dialog do **not** carry the dialog ID in their client ID. Prefixing them in `update` makes the path unresolvable.
+
+```xhtml
+<p:dialog id="quick-alloc-dialog">
+  <h:panelGroup id="quick-pt" layout="block">...</h:panelGroup>
+</p:dialog>
+
+<!-- WRONG -->
+<p:commandButton update="quick-alloc-dialog:quick-pt" />
+
+<!-- RIGHT -->
+<p:commandButton update="quick-pt" />
+<!-- or absolute from the form: -->
+<p:commandButton update=":main-form:quick-pt" />
+```
+
+---
+
+### 13. `<p:panelGrid columns="N">` — direct children must be JSF components
+
+`<p:panelGrid columns="N">` distributes its **direct children** across N columns. A plain HTML `<div>` is rendered but is not a JSF component, breaking the column count and shifting all subsequent cells. Wrap layout containers in `<h:panelGroup layout="block">`.
+
+```xhtml
+<!-- WRONG — <div> shifts subsequent cells -->
+<p:panelGrid columns="2">
+  <p:outputLabel value="Name" />
+  <div class="flex">
+    <p:inputText value="#{bean.name}" />
+    <p:commandButton icon="pi pi-search" />
+  </div>
+</p:panelGrid>
+
+<!-- RIGHT -->
+<p:panelGrid columns="2">
+  <p:outputLabel value="Name" />
+  <h:panelGroup layout="block" styleClass="flex">
+    <p:inputText value="#{bean.name}" />
+    <p:commandButton icon="pi pi-search" />
+  </h:panelGroup>
+</p:panelGrid>
+```

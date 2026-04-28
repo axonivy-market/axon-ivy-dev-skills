@@ -89,6 +89,39 @@ String caseUuid = ivy.case.uuid();
 String taskUuid = ivy.task.uuid();
 ```
 
+### Session, User, and Roles
+
+Use `Ivy.session()` for the current session and role checks. The `IUser` interface does **not** expose `isMemberOf(IRole)` — calling it produces a compile error. Use `ivy.session.hasRole(...)` instead.
+
+```java
+import ch.ivyteam.ivy.security.IRole;
+import ch.ivyteam.ivy.security.IUser;
+
+// CORRECT — role check via the session
+boolean isManager = ivy.session.hasRole("Manager");
+IRole role = ivy.wf.getApplication().getSecurityContext().findRole("TeamLead");
+boolean isLead = ivy.session.hasRole(role);
+
+// WRONG — IUser has no isMemberOf(IRole) overload
+IUser user = ivy.session.getSessionUser();
+boolean isMember = user.isMemberOf(role);  // does not compile
+```
+
+### Application reference — `IApplication.current()`
+
+`Ivy.wf().getApplication()` is **deprecated** since 9.4 and marked for removal. Use the static factory `IApplication.current()` instead — available since 9.1.
+
+```java
+import ch.ivyteam.ivy.application.IApplication;
+
+// WRONG — deprecated
+IApplication app = ivy.wf.getApplication();
+
+// CORRECT
+IApplication app = IApplication.current();
+app.getBusinessCalendarSettings();
+```
+
 ### Logging
 
 ```java

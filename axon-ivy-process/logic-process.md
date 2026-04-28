@@ -20,7 +20,7 @@ start()        → Script → HtmlDialogEnd      (dialog opens and stays open)
 upload()       → Script → HtmlDialogEnd      (file uploaded, dialog stays open)
 removeFile()   → Script → HtmlDialogEnd      (file removed, dialog stays open)
 submit         → Script → HtmlDialogExit     (dialog closes, result returned)
-close          →          HtmlDialogEnd       (dialog closes without result)
+close          →          HtmlDialogExit     (dialog closes without result)
 ```
 
 ### Common Mistake
@@ -191,7 +191,7 @@ A dialog process file lives in `src_hd/` and typically contains multiple flows:
 
     // Cancel/close (dialog closes without result)
     { "type": "HtmlDialogEventStart", "name": "close", ... },
-    { "type": "HtmlDialogEnd", ... },
+    { "type": "HtmlDialogExit", ... },
 
     // UI methods (dialog stays open)
     { "type": "HtmlDialogMethodStart", "name": "upload(FileUploadEvent)", ... },
@@ -263,7 +263,7 @@ A working example of a dialog process that handles file upload, removal, submit,
     },
     {
       "id": "f5",
-      "type": "HtmlDialogEnd",
+      "type": "HtmlDialogExit",
       "visual": { "at": { "x": 224, "y": 256 } }
     },
     {
