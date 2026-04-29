@@ -18,7 +18,6 @@ description: Rules and patterns for the `com.axonivy.utils.persistence` library 
 
 - For `Ivy.repo()` (Ivy's built-in repository) → use `axon-ivy-repository`.
 - For raw `EntityManager`/`@PersistenceContext` JPA without the helper → use `axon-ivy-jpa`.
-- For SQL via Ivy's DB connector activity → use `axon-ivy-sql`.
 
 ## File Locations
 

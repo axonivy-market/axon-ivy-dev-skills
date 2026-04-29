@@ -265,5 +265,3 @@ If your code needs to react in Java to a send failure, listen for the `ivy:error
 
 - `axon-ivy-error-handling` — for the `mail:sendFailed` BpmError path
 - `axon-ivy-cms` — when subject / body templates live in CMS
-- `axon-ivy-document-generation` — when the attachment is a generated PDF / Excel
-- `axon-ivy-scheduled-jobs` — when mail is sent from a cron-triggered process
