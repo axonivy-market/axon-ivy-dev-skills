@@ -104,11 +104,39 @@ A common pattern is a `DaoServices` aggregator that holds one instance of every 
 
 ### 6. Persistence unit name must match `persistence.xml`
 
-`persistence-utils` resolves the unit by name. The Axon Ivy convention is one production unit per project (e.g. `KFWG`) plus an optional `_TESTING` unit pointing at a separate datasource for integration tests. Both units share the same set of `@Entity` classes via classpath auto-scan.
+Each DAO declares its persistence unit by overriding `getPersistenceUnitName()` (returns the `<persistence-unit name="…">` value). The Axon Ivy convention is one production unit per project (e.g. `KFWG`) plus an optional `_TESTING` unit pointing at a separate datasource for integration tests. Both units share the same set of `@Entity` classes via classpath auto-scan.
+
+```java
+public class StationDAO extends AuditableIdDAO<Station_, Station> {
+  @Override public String getPersistenceUnitName() { return "KFWG"; }
+  @Override protected Class<Station> getType() { return Station.class; }
+}
+```
 
 ### 7. Soft delete via `flaggedDeleted*` — do not `DELETE`
 
-`AuditableIdDAO.delete(...)` flags the row by setting `flaggedDeletedByUsername` and `flaggedDeletedDate`, then `findAll()` filters them out. Bypassing this with raw `EntityManager.remove(...)` defeats audit. Only use a hard delete when you have a documented reason (e.g. GDPR right-to-erasure).
+`AuditableIdDAO.delete(...)` flags the row by setting `flaggedDeletedByUserName` and `flaggedDeletedDate`, then `findAll()` and `findByCriteria()` filter them out via a Criteria predicate added in `AuditableDAO.manipulateCriteriaFactory()`. Bypassing this with raw `EntityManager.remove(...)` defeats audit.
+
+Two sanctioned escape hatches:
+
+- **Hard-delete a single entity** — set the transient `auditingDisabled` flag before `delete()`:
+
+  ```java
+  station.setAuditingDisabled(true);
+  stationDAO.delete(station);   // physical DELETE, no audit row
+  ```
+
+  Use only with a documented reason (e.g. GDPR right-to-erasure).
+
+- **Read soft-deleted rows** — pass a `QuerySettings` with `AuditableMarker.DELETED` (just deleted) or `AuditableMarker.ALL` (active + deleted):
+
+  ```java
+  QuerySettings<Station> settings = new QuerySettings<>();
+  settings.setAuditableMarker(AuditableMarker.DELETED);
+  return findAll(settings);
+  ```
+
+  Default is `AuditableMarker.ACTIVE`.
 
 ## Common Patterns
 
