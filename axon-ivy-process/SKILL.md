@@ -174,6 +174,8 @@ Load these only when the process contains the relevant element type:
 
 Use `TaskSwitchEvent` to create a human task. This is the **preferred** approach — connect it to a `DialogCall` for the UI, or to other elements as needed.
 
+**CRITICAL — Variable is `in1`, NOT `in`**: Inside a `TaskSwitchEvent`, all expressions that reference process data (`task.name`, `task.description`, `responsible.script`, `output.code`, `case.name`, etc.) MUST use `in1` — it is the first output branch of the event. Using `in` here produces `Variable 'in' cannot be resolved`. This is the exact opposite of `UserTask`, which uses `in`.
+
 ```json
 {
   "id": "f1",
@@ -185,7 +187,7 @@ Use `TaskSwitchEvent` to create a human task. This is the **preferred** approach
       "description": "Task description",
       "responsible": {
         "type": "ROLE_FROM_ATTRIBUTE",
-        "script": "in.roleName"
+        "script": "in1.roleName"
       }
     },
     "case": {
@@ -193,7 +195,7 @@ Use `TaskSwitchEvent` to create a human task. This is the **preferred** approach
       "description": "Case description"
     },
     "output": {
-      "code": "ivy.case.attachToBusinessCase(in.parentCaseId);"
+      "code": "ivy.case.attachToBusinessCase(in1.parentCaseId);"
     }
   },
   "visual": { "at": { "x": 128, "y": 64 } },
@@ -225,6 +227,22 @@ Use `DialogCall` to display an HTML dialog. Typically connected after a `TaskSwi
 ```
 
 **Note**: `dialog` uses `.` (dot) package separators. This is different from `SubProcessCall.processCall` which uses `/` (slash) path separators.
+
+**CRITICAL — Dialog ID is the folder path, NOT folder + class name.** The dialog ID is composed of the package (parent folders under `src_hd/`) plus the dialog folder name. The dialog folder name appears **once** at the end — do NOT append it again. Same rule applies to `UserTask.dialog`.
+
+```
+Folder layout:        src_hd/com/example/orders/OrderForm/
+                                                ├── OrderForm.xhtml
+                                                ├── OrderFormData.d.json
+                                                └── OrderFormProcess.p.json
+
+Dialog ID:            com.example.orders.OrderForm        ← folder path, OrderForm appears ONCE
+Data class FQN:       com.example.orders.OrderForm.OrderFormData
+DialogCall.dialog:    "com.example.orders.OrderForm:start()"
+
+WRONG:                "com.example.orders.OrderForm.OrderForm:start()"     ← duplicated name
+                      → runtime error: "User Dialog '...OrderForm.OrderForm' not found"
+```
 
 ### Script (Code Execution)
 

@@ -107,6 +107,17 @@ IUser user = ivy.session.getSessionUser();
 boolean isMember = user.isMemberOf(role);  // does not compile
 ```
 
+**CRITICAL — `IWorkflowSession` requires method-call syntax for the user name.** IvyScript's property shortcut (`x.foo` → `x.getFoo()`) does NOT apply to `getSessionUserName()`. Calling `ivy.session.sessionUserName` produces `Field sessionUserName not found for class IWorkflowSession`. Always use the explicit `()` form.
+
+```java
+// WRONG — property syntax not supported here
+String user = ivy.session.sessionUserName;
+
+// CORRECT — explicit method call
+String user = ivy.session.getSessionUserName();
+IUser sessionUser = ivy.session.getSessionUser();
+```
+
 ### Application reference — `IApplication.current()`
 
 `Ivy.wf().getApplication()` is **deprecated** since 9.4 and marked for removal. Use the static factory `IApplication.current()` instead — available since 9.1.
@@ -147,6 +158,20 @@ in.isComplete = in.employee.getStatus().equals("COMPLETED");
 in.requiresReview = in.employee.getScore() < 50;
 ```
 
+**CRITICAL — Use `true`/`false` literals, NOT `Boolean.TRUE`/`Boolean.FALSE`.** IvyScript does not support static field access on `java.lang.Boolean`. Writing `Boolean.TRUE` produces `Field TRUE not found for class Boolean`. Auto-boxing converts the primitive `true`/`false` to a `Boolean` field automatically.
+
+```java
+// WRONG — static field access not supported
+in.approved = Boolean.TRUE;
+in.rejected = Boolean.FALSE;
+
+// CORRECT — primitive literals, auto-boxed
+in.approved = true;
+in.rejected = false;
+```
+
+Note: `Boolean.TRUE.equals(...)` is fine in *Java* code (e.g., managed beans), but NOT inside `.p.json` script blocks.
+
 ## RequestStart Input Mapping
 
 In RequestStart elements, map `param` to `in` fields:
@@ -165,7 +190,9 @@ After mapping, use `in.*` in subsequent Script elements.
 ## Key Reminders
 
 1. **Never use `param` in Script elements** — it's only for RequestStart signatures
-2. **Always use `in.*`** to access process data fields
+2. **Always use `in.*`** to access process data fields (use `in1.*` inside `TaskSwitchEvent` expressions)
 3. **Import classes** at the top of script code
 4. **Save to repository** after creating or updating entities
 5. **Use `as` keyword** for type casting, not Java-style `(Type)` cast
+6. **Use `true`/`false` literals**, not `Boolean.TRUE`/`Boolean.FALSE`
+7. **Use explicit method calls** for `ivy.session.getSessionUserName()` and similar `IWorkflowSession` getters — property syntax does not work there
