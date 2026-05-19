@@ -99,9 +99,9 @@ Load these only when the process contains the relevant element type:
 
 **IMPORTANT**: Before adding `customFields` to RequestStart, use `axon-ivy-custom-fields` skill to define fields in `config/custom-fields.yaml` (load `case.md` for Cases, `start.md` for Starts).
 
-### UserTask (Human Task + Dialog)
+### UserTask (Human Task + Dialog) — DEFAULT for "task + UI" steps
 
-**Prefer** using separate `TaskSwitchEvent` + `DialogCall` elements for human tasks with dialogs. Use `UserTask` only when you explicitly need to combine task assignment and dialog display into a single compact element.
+**ALWAYS prefer `UserTask` when a step combines a human task with an HTML dialog.** It bundles task assignment and dialog display into one element, keeps the process compact, and matches the standard pattern used in `axon-ivy-workflow-guide`. Use the separate `TaskSwitchEvent` + `DialogCall` pair only for advanced cases where the task and the UI must be decoupled (e.g., the same task can be completed by different dialogs, the dialog is launched conditionally after the task starts, or the task has no UI at all).
 
 ```json
 {
@@ -170,9 +170,9 @@ Load these only when the process contains the relevant element type:
 
 **Note on `dialog`**: Uses `.` (dot) package separators. This is different from `SubProcessCall.processCall` which uses `/` (slash) path separators.
 
-### TaskSwitchEvent (Human Task)
+### TaskSwitchEvent (Human Task) — only when `UserTask` does not fit
 
-Use `TaskSwitchEvent` to create a human task. This is the **preferred** approach — connect it to a `DialogCall` for the UI, or to other elements as needed.
+Use `TaskSwitchEvent` only when you cannot use `UserTask` (see the UserTask section above for when that applies — e.g. a task without UI, or a task whose UI is selected dynamically). For the common "human task with a fixed dialog" case, use `UserTask` instead.
 
 **CRITICAL — Variable is `in1`, NOT `in`**: Inside a `TaskSwitchEvent`, all expressions that reference process data (`task.name`, `task.description`, `responsible.script`, `output.code`, `case.name`, etc.) MUST use `in1` — it is the first output branch of the event. Using `in` here produces `Variable 'in' cannot be resolved`. This is the exact opposite of `UserTask`, which uses `in`.
 

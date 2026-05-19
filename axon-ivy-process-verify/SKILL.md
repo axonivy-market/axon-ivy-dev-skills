@@ -126,16 +126,26 @@ WRONG: "UploadedFile uploaded = (UploadedFile) in.uploadedFile;"
 RIGHT: "UploadedFile uploaded = in.uploadedFile as UploadedFile;"
 ```
 
-### 10. UserTask — Use `in` not `in1` in task expressions
+### 10. UserTask vs. TaskSwitchEvent — `in` vs. `in1` in expressions
 
-`UserTask` elements do NOT support `in1`. The variable `in1` is specific to `TaskSwitchEvent` output branches. In `UserTask`, always use `in` to access process data in `task.name`, `task.description`, and other expressions.
+The two human-task element types use **opposite** variable names for process data, and picking the wrong one is a runtime error. Scan every `UserTask` and `TaskSwitchEvent` and verify each embedded expression: `task.name`, `task.description`, `responsible.script`, `output.code`, `case.name`, etc.
+
+| Element type      | Variable | Wrong variable causes                |
+|-------------------|----------|---------------------------------------|
+| `UserTask`        | `in`     | `Variable 'in1' cannot be resolved`   |
+| `TaskSwitchEvent` | `in1`    | `Variable 'in' cannot be resolved`    |
 
 ```
-WRONG: "name": "Review - <%= in1.request.getEmployeeFullName() %>"
-RIGHT: "name": "Review - <%= in.request.getEmployeeFullName() %>"
-```
+UserTask — use `in`:
+  WRONG: "name": "Review - <%= in1.request.getEmployeeFullName() %>"
+  RIGHT: "name": "Review - <%= in.request.getEmployeeFullName() %>"
 
-Error if violated: `Variable 'in1' cannot be resolved`
+TaskSwitchEvent — use `in1` in EVERY embedded expression:
+  WRONG: "name":   "Approve <%= in.project.name %>"
+  WRONG: "script": "in.roleName"
+  RIGHT: "name":   "Approve <%= in1.project.name %>"
+  RIGHT: "script": "in1.roleName"
+```
 
 ### 11. Visual layout — Elements must be well aligned
 
@@ -206,11 +216,56 @@ RIGHT (all connections labeled):
 IvyScript does NOT support the `var` keyword for type inference. Always declare explicit types.
 
 ```
-WRONG: "var caseUuid = ivy.case().uuid().toString();"
-RIGHT: "String caseUuid = ivy.case().uuid().toString();"
+WRONG: "var caseUuid = ivy.case.uuid();"
+RIGHT: "String caseUuid = ivy.case.uuid();"
 
 WRONG: "var results = someService.findAll();"
 RIGHT: "List results = someService.findAll();"
 ```
 
 Error if violated: `Class var not found`
+
+Note: `ivy.case` and `ivy.task` are **properties** — do NOT call them as methods (`ivy.case()` is wrong). `uuid()` already returns `String`, so no `.toString()` needed. See `axon-ivy-process/code.md` → "Access Case/Task UUID".
+
+### 15. DialogCall / UserTask — Dialog name must NOT be duplicated in the path
+
+Scan every `DialogCall.dialog` and `UserTask.dialog` value. The dialog ID is `<package>.<DialogName>` where `<DialogName>` is the **folder name** under `src_hd/`. The folder name appears **once** at the end of the path — do NOT append it again as a "class" segment.
+
+```
+Folder:   src_hd/com/example/orders/OrderForm/OrderForm.xhtml
+
+WRONG: "dialog": "com.example.orders.OrderForm.OrderForm:start()"
+       → runtime error: "User Dialog '...OrderForm.OrderForm' not found"
+
+RIGHT: "dialog": "com.example.orders.OrderForm:start()"
+```
+
+Detection heuristic: if the last two dot-separated segments before `:` are identical, the path is wrong.
+
+### 16. Script code — No `Boolean.TRUE` / `Boolean.FALSE`
+
+Scan every `Script.output.code` (and other inline code blocks like `TaskSwitchEvent.output.code`) for `Boolean.TRUE` or `Boolean.FALSE`. IvyScript does not support static field access on `java.lang.Boolean` — use the primitive literals `true` / `false` (auto-boxing handles the conversion to `Boolean`).
+
+```
+WRONG: "in.approved = Boolean.TRUE;"
+RIGHT: "in.approved = true;"
+
+WRONG: "in.rejected = Boolean.FALSE;"
+RIGHT: "in.rejected = false;"
+```
+
+Error if violated: `Field TRUE not found for class Boolean`
+
+Note: `Boolean.TRUE.equals(...)` IS valid in regular Java code (managed beans, services), only IvyScript blocks inside `.p.json` reject it.
+
+### 17. Script code — `IWorkflowSession` requires method-call syntax
+
+Scan every script for `ivy.session.<name>` accessed as a property where a method exists. IvyScript's getter shortcut (`x.foo` → `x.getFoo()`) does NOT apply to `IWorkflowSession`. Always use the explicit `()` form.
+
+```
+WRONG: "String user = ivy.session.sessionUserName;"
+       → runtime error: "Field sessionUserName not found for class IWorkflowSession"
+
+RIGHT: "String user = ivy.session.getSessionUserName();"
+RIGHT: "IUser u   = ivy.session.getSessionUser();"
+```
