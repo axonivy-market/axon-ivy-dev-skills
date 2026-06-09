@@ -12,7 +12,7 @@ stay consistent.
 | | **A. Controller bean** (Ivy-native) | **B. JSF managed bean** |
 |---|---|---|
 | Wiring | Plain POJO held as a `bean` **field on the dialog data class**; referenced as `#{data.bean.*}` | `@ManagedBean @ViewScoped` class referenced as `#{beanName.*}` |
-| Init | In `HtmlDialogStart` `input.code`: `out.bean = new MyBean(); out.bean.init();` | `@PostConstruct` or a `preRender()` called from `<f:event>` |
+| Init | In `HtmlDialogStart` `input.code`: `out.bean.init();` (Ivy auto-instantiates the `bean` field — do NOT use `new`) | `@PostConstruct` or a `preRender()` called from `<f:event>` |
 | Annotations | **None** (plain `Serializable` POJO) | `@ManagedBean @ViewScoped` (`javax.faces.bean.*`) |
 | Data access | Bean *is* `data.bean`; holds its own state, may call services/DAOs directly | Bean is independent; **XHTML bridges** all `#{data.*}` ↔ bean |
 | Best when | Generated/round-tripped by **Axon Ivy Designer**; bean owns the dialog's whole state | Reusable component logic, autocomplete, behavior shared across dialogs |
@@ -64,7 +64,7 @@ public class MyDialogBean implements Serializable {
   private MyEntity entity;
   private List<Option> options;
 
-  /** Called by the dialog start: out.bean = new MyDialogBean(); out.bean.init(); */
+  /** Called by the dialog start: out.bean.init();  (Ivy auto-instantiates out.bean) */
   public void init() {
     this.entity = new MyEntity();
     this.options = MyService.loadOptions();
@@ -129,7 +129,7 @@ Rules:
     "signature" : "start",
     "input" : {
       "map" : { },
-      "code" : "import package.bean.MyDialogBean;\nout.bean = new MyDialogBean();\nout.bean.init();"
+      "code" : "out.bean.init();"
     },
     "guid" : "UNIQUE_GUID_16CHARS"
   },
@@ -356,7 +356,12 @@ FacesContext.getCurrentInstance().addMessage("form-messages",
 - **Bean in `src_hd/`** — always use `src/package/bean/` or `src/package/managedbean/`.
 - **Mixing the patterns in one dialog** — pick A or B and be consistent.
 - **Constructor with Ivy API** — use `init()` (Pattern A) or `preRender()`/`@PostConstruct` (Pattern B).
-- **(Pattern A) Forgetting `out.bean = new …(); out.bean.init();`** in the `HtmlDialogStart` code — `#{data.bean}` is null.
+- **(Pattern A) Using `out.bean = new MyBean();` in the start code** — INVALID. Ivy auto-instantiates the
+  `bean` data-class field; just call `out.bean.init();`. Writing `new` (or an `import`) there fails the
+  Designer IvyScript compiler with `Variable 'out' cannot be resolved`, which cascades into
+  `Result 'result.x': Field x not found for class Object` on any `result` mapping. (`mvn validateProject`
+  does NOT catch this — only Designer does.)
+- **(Pattern A) Forgetting `out.bean.init();`** in the `HtmlDialogStart` code — the bean is created but not initialized.
 - **(Pattern A) Declaring the `bean` field** missing from the dialog `…Data.d.json` — `#{data.bean}` won't resolve.
 - **(Pattern B) Missing setter** for fields used in `setPropertyActionListener` — silently fails.
 - **No-arg upload method** with `listener` attribute — must accept `FileUploadEvent`.
