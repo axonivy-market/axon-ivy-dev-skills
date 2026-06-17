@@ -258,14 +258,23 @@ Error if violated: `Field TRUE not found for class Boolean`
 
 Note: `Boolean.TRUE.equals(...)` IS valid in regular Java code (managed beans, services), only IvyScript blocks inside `.p.json` reject it.
 
-### 17. Script code — `IWorkflowSession` requires method-call syntax
+### 17. Script / expression — `.property` shortcut needs getter+setter (or a public field)
 
-Scan every script for `ivy.session.<name>` accessed as a property where a method exists. IvyScript's getter shortcut (`x.foo` → `x.getFoo()`) does NOT apply to `IWorkflowSession`. Always use the explicit `()` form.
+Scan every Script `output.code` AND every embedded expression (`UserTask`/`TaskSwitchEvent` `task.name`,
+`case.name`, `responsible.script`, etc.) for the `obj.foo` shortcut. IvyScript resolves `x.foo` to a public
+field or a **full read/write JavaBean property** only. A **getter-only** member (no setter, or a derived
+getter with no backing field) is NOT resolved → `Field foo not found for class …`. Use the explicit `()` form.
 
 ```
-WRONG: "String user = ivy.session.sessionUserName;"
-       → runtime error: "Field sessionUserName not found for class IWorkflowSession"
+WRONG: "ivy.session.sessionUserName"                  → Field sessionUserName not found for class IWorkflowSession
+WRONG: "in.customer.fullName"  (Customer.getFullName(), derived) → Field fullName not found for class Customer
+WRONG: "in.bean.createdApplication"  (getter, no setter)        → Field createdApplication not found for class …Bean
 
-RIGHT: "String user = ivy.session.getSessionUserName();"
-RIGHT: "IUser u   = ivy.session.getSessionUser();"
+RIGHT: "ivy.session.getSessionUserName()"
+RIGHT: "in.customer.getFullName()"
+RIGHT: "in.bean.getCreatedApplication()"
 ```
+
+`in.customer.firstName` works because `firstName` has getter **and** setter. Fix = call the getter
+explicitly with `()`, or add a setter to make it a full property. (JSF EL in XHTML resolves read-only
+getters fine — `#{customer.fullName}` works in a dialog — so this only bites in process/IvyScript.)

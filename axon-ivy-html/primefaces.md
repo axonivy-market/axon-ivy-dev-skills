@@ -4,6 +4,21 @@ Rules and best practices for generating JSF and PrimeFaces elements for Axon Ivy
 
 ## Best Practices
 
+### Component availability — not every PrimeReact/NG component is a PrimeFaces (JSF) tag
+
+The PrimeFaces build bundled with Ivy 14 has **no `<p:inputGroup>` / `<p:inputGroupAddon>` tags** — using
+them fails at render with `TagException: no tag was defined for name: inputGroup`. For a leading-icon
+field, build the group with CSS instead of the component:
+
+```xml
+<span class="my-inputgroup">
+  <span class="my-inputgroup-addon"><i class="pi pi-user"></i></span>
+  <p:inputText id="firstName" value="#{data.bean.customer.firstName}" />
+</span>
+```
+
+…styled in your project CSS (`.my-inputgroup{display:flex} .my-inputgroup-addon{…border-right:0} .my-inputgroup input{flex:1;width:100%;border-top-left-radius:0;border-bottom-left-radius:0}`). When in doubt about a tag, confirm it exists in this PrimeFaces version before using it — `mvn` does not catch a missing tag, only Designer/runtime does.
+
 ### JSF Component Usage
 
 Prefer JSF components (`h:*`) over raw HTML in these cases:

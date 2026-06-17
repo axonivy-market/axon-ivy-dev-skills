@@ -195,4 +195,4 @@ After mapping, use `in.*` in subsequent Script elements.
 4. **Save to repository** after creating or updating entities
 5. **Use `as` keyword** for type casting, not Java-style `(Type)` cast
 6. **Use `true`/`false` literals**, not `Boolean.TRUE`/`Boolean.FALSE`
-7. **Use explicit method calls** for `ivy.session.getSessionUserName()` and similar `IWorkflowSession` getters — property syntax does not work there
+7. **The `obj.property` shortcut needs a full read/write JavaBean property (getter *and* setter) or a public field.** A **getter-only** property is NOT resolved and throws `Field foo not found for class …` — this includes derived getters (`customer.getFullName()` — no backing field) and plain read-only getters (a field with a getter but no setter), as well as `IWorkflowSession` (`ivy.session.getSessionUserName()`). Call the getter explicitly with `()` (e.g. `in.customer.getFullName()`, `in.bean.getCreatedApplication()`), or add a setter to make it a full property. (JSF EL in XHTML *does* resolve read-only getters, so `#{customer.fullName}` works in a dialog — this only bites in process/IvyScript expressions, and only Designer catches it, not `mvn`.)

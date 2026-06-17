@@ -14,6 +14,15 @@ Prefer PrimeFlex utility classes for:
 - Flex utilities (e.g., flex, justify-content-between, align-items-center)
 - Do NOT use inline CSS styles (style="" is forbidden).
 
+### Targeting PrimeFaces components from custom CSS
+
+When you must style a PrimeFaces component from a project stylesheet, target its **`ui-*`** class.
+Components render as `ui-panel`, `ui-button`, `ui-inputtext`, `ui-panel-titlebar`, `ui-slider`,
+`ui-state-error`, … — a selector written against the PrimeReact/NG `p-*` name (e.g. `.p-panel { … }`)
+**silently does nothing**. When unsure, target both prefixes (`.ui-panel, .p-panel`) or inspect the
+rendered DOM. (The Freya theme also honors some `p-button-*` utility classes, but for your own rules
+`ui-*` is the safe bet.) Nothing in the build flags a no-op selector — only the rendered page reveals it.
+
 ### Icons
 
 - You are able to use FontAwesome and Streamlines icons.

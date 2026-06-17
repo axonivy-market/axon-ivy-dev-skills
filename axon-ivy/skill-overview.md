@@ -1,6 +1,6 @@
 # Skill Overview
 
-All available skills and their purpose. Skills folder: `.claude/skill/`
+All available skills and their purpose. Skills folder: `.claude/skills/`
 
 Each skill has a `SKILL.md` file in its folder with full instructions.
 
@@ -14,9 +14,16 @@ Each skill has a `SKILL.md` file in its folder with full instructions.
 | develop | `axon-ivy-data` | Create and manage `.d.json` data class files |
 | develop | `axon-ivy-java-data` | Java model classes, enums, DTOs, and persistence patterns (Ivy.repo() or JPA/SQL) |
 | develop | `axon-ivy-repository` | Create repository classes — dispatches between Ivy.repo() (default) and JPA/SQL |
+| develop | `axon-ivy-jpa` | Plain JPA (`@Entity`, `EntityManager`, `persistence.xml`) with the Hibernate provider |
+| develop | `axon-ivy-persistence-utils` | `com.axonivy.utils.persistence` helpers — `AuditableIdEntity`/`AuditableIdDAO`, query contexts |
+| develop | `axon-ivy-liquibase` | Liquibase changelog conventions and patterns under `<project>/liquibase/` |
 | develop | `axon-ivy-html` | HTML dialog rules: PrimeFaces, PrimeFlex, CSS, JS, and Ivy components |
 | develop | `axon-ivy-cms` | Create and manage CMS multi-language YAML files, binary content, and Portal CMS overrides |
 | develop | `axon-ivy-smart-workflow` | Build AI-powered data extraction using AgenticProcessCall |
+| develop | `axon-ivy-rest` | JAX-RS REST endpoints — `@Path`, param binding, `Response`, `@RolesAllowed` auth |
+| develop | `axon-ivy-mail` | Sending email — sender/recipient resolution, templating, attachments, builder pattern |
+| develop | `axon-ivy-business-calendar` | Read holidays, free days, and working-day info from the Business Calendar |
+| develop | `axon-ivy-error-handling` | `BpmError` construction, error codes, error start events, exception/Ivy-error boundary |
 | develop | `axon-ivy-variable-config` | Manage `variables.yaml` config files |
 | develop | `axon-ivy-user-role-config` | Manage `roles.yaml` and `users.yaml` config files |
 | develop | `axon-ivy-custom-fields` | Define custom fields in `custom-fields.yaml` for tasks, cases, and process starts |
@@ -24,8 +31,10 @@ Each skill has a `SKILL.md` file in its folder with full instructions.
 | review | `axon-ivy-process-verify` | Verify `.p.json` files for structural and IvyScript errors |
 | review | `axon-ivy-cms-verify` | Verify `cms_*.yaml` files for common errors — run after `axon-ivy-cms` |
 | review | `axon-ivy-primefaces-verify` | Verify PrimeFaces column widths, table layout, AJAX updates, and rendering pitfalls |
+| review | `axon-ivy-liquibase-verify` | Verify `.sql`/`.xml` Liquibase changelogs — run after `axon-ivy-liquibase` |
 | review | `axon-ivy-verify-story` | Verify story acceptance criteria and UI behavior (field interactions, validations) |
 | review | `review-java` | Review Java code for Clean Architecture, Ports and Adapters, and SOLID principles |
 | review | `review-javascript` | Review JavaScript code for clean architecture, audit compliance, DRY, and file organization |
 | test | `axon-ivy-test` | Write and update process tests |
+| release | `axon-ivy-release` | Cut a release: branch off `develop`, bump versions, build, generate site report, tag |
 | orchestrate | `axon-ivy` | Master router — detects intent and orchestrates all paths using the skills above |
