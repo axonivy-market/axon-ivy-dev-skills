@@ -1,0 +1,128 @@
+name: Evaluate skill
+
+# Manually-triggered eval of one skill: runs evals/evaluate.py with & without
+# the skill, generates report.html, posts a summary to the run page, and
+# uploads the iteration directory (report + transcripts + gradings) as an
+# artifact.
+#
+# Auth: the Copilot CLI/SDK needs a token whose account has a Copilot license
+# — the default Actions GITHUB_TOKEN does NOT. Create a repo secret
+# COPILOT_GH_TOKEN holding a (fine-grained) PAT of such an account; the CLI
+# picks it up from GH_TOKEN.
+
+on:
+  workflow_dispatch:
+    inputs:
+      skill:
+        description: "Skill directory name (must contain evals/evals.json), e.g. axon-ivy-cms"
+        required: true
+        type: string
+      eval_id:
+        description: "Run only this eval id (leave empty for all cases)"
+        required: false
+        type: string
+      iteration:
+        description: "Iteration number (results go to <skill>-workspace/iteration-N/)"
+        required: false
+        default: "1"
+        type: string
+      model:
+        description: "Model to pin for reproducibility"
+        required: false
+        default: "claude-sonnet-5"
+        type: string
+      skip_baseline:
+        description: "Run only the with-skill config (halves cost; no delta)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ secrets.COPILOT_GH_TOKEN }}
+      SKILL: ${{ inputs.skill }}
+      EVAL_ID: ${{ inputs.eval_id }}
+      ITERATION: ${{ inputs.iteration }}
+      MODEL: ${{ inputs.model }}
+      SKIP_BASELINE: ${{ inputs.skip_baseline }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Copilot CLI + SDK
+        run: |
+          npm install -g @github/copilot
+          python -m pip install github-copilot-sdk
+          copilot --version
+
+      - name: Run evaluation
+        run: |
+          args=(--skill "$SKILL" --iteration "$ITERATION" --model "$MODEL")
+          [ -n "$EVAL_ID" ] && args+=(--eval-id "$EVAL_ID")
+          [ "$SKIP_BASELINE" = "true" ] && args+=(--skip-baseline)
+          python evals/evaluate.py "${args[@]}"
+
+      - name: Generate HTML report
+        run: python evals/report.py --skill "$SKILL" --iteration "$ITERATION"
+
+      - name: Publish run summary
+        run: |
+          python - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          import json, os
+          from pathlib import Path
+
+          skill, it = os.environ["SKILL"], os.environ["ITERATION"]
+          bench = json.loads(Path(f"{skill}-workspace/iteration-{it}/benchmark.json").read_text())
+          rs = bench["run_summary"]
+
+          FMT = {"pass_rate": lambda v: f"{v:.0%}", "tokens": lambda v: f"{v:,.0f}",
+                 "time_seconds": lambda v: f"{v:,.1f}"}
+
+          def mean(cfg, key):
+              v = (rs.get(cfg, {}).get(key) or {}).get("mean")
+              return "—" if v is None else FMT[key](v)
+
+          def delta(key):
+              v = rs.get("delta", {}).get(key)
+              return "—" if v is None else ("+" if v > 0 else "") + FMT[key](v)
+
+          print(f"# Skill eval: `{skill}` — iteration {it}")
+          print(f"\nModel pinned: `{bench.get('model_pinned') or '(unpinned)'}` · "
+                f"observed: `{', '.join(bench.get('models_observed') or []) or '—'}`\n")
+          print("| Metric | With skill | Without | Δ |")
+          print("|---|---:|---:|---:|")
+          for label, key in (("Pass rate", "pass_rate"), ("Tokens / run", "tokens"),
+                             ("Time (s) / run", "time_seconds")):
+              print(f"| {label} | {mean('with_skill', key)} | {mean('without_skill', key)} "
+                    f"| {delta(key)} |")
+          print("\n| Eval | Pass rate (with) | Pass rate (without) | Skill fired |")
+          print("|---|---:|---:|---|")
+          for e in bench.get("evals", []):
+              w, wo = e.get("with_skill") or {}, e.get("without_skill") or {}
+              fired = ", ".join(w.get("invoked_skills") or []) or "—"
+              def pr(c):
+                  v = c.get("pass_rate")
+                  return "—" if v is None else f"{v:.0%}"
+              print(f"| `{e.get('slug')}` | {pr(w)} | {pr(wo)} | {fired} |")
+          print("\nFull results (report.html, transcripts, gradings) are in the run artifact.")
+          EOF
+
+      # Upload whatever exists even when the harness fails fast — the
+      # transcripts and grading_raw.txt are the diagnostics for that failure.
+      - name: Upload results artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-${{ inputs.skill }}-iteration-${{ inputs.iteration }}
+          path: ${{ inputs.skill }}-workspace/iteration-${{ inputs.iteration }}/
+          if-no-files-found: warn
+          retention-days: 30
