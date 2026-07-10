@@ -1,0 +1,20 @@
+{
+  "skill_name": "axon-ivy-cms",
+  "evals": [
+    {
+      "id": 0,
+      "name": "create-yesno-labels",
+      "prompt": "The Axon Ivy project at {PROJECT_DIR} has no CMS text content yet. Add reusable Yes/No confirmation labels (the displayed text should be 'Yes' and 'No') that several dialogs could share, plus a confirmation question label with the text 'Do you agree to the terms and conditions?'. Set things up so these are available via ivy.cms.co(...).",
+      "expected_output": "A cms_en.yaml is created under the project's cms/ folder. Reusable Yes/No labels are added under the Labels: namespace with the option keys single-quoted ('Yes'/'No') so SnakeYAML does not coerce them to booleans. The confirmation question is added as a text entry under a sensible namespace. Keys use colon-separated nesting and the file is valid YAML.",
+      "assertions": [
+        "A cms_en.yaml file is created in the project's cms/ folder",
+        "cms_en.yaml parses as valid YAML",
+        "The Yes and No option keys are written as single-quoted strings ('Yes'/'No'), so SnakeYAML (YAML 1.1) does not coerce them to boolean true/false",
+        "The reusable Yes/No labels are placed under the Labels: namespace (the skill's shared-label convention), not buried under a dialog-specific namespace",
+        "Key hierarchy uses colon-separated nesting (e.g. Labels: then the key), matching the skill's namespace convention",
+        "The confirmation question text 'Do you agree to the terms and conditions?' is present as a CMS text value reachable via an ivy.cms.co path"
+      ],
+      "fixture": "ivy-project"
+    }
+  ]
+}
