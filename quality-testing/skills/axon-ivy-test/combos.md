@@ -8,6 +8,7 @@ Guide for combining test patterns. Each row shows a real combination found in Ax
 | --- | --- | --- | --- | --- | --- | --- |
 | Pure unit | (none) | - | - | - | - | InMemory* |
 | Ivy unit | `@IvyTest` | AppFixture | - | - | - | - |
+| Static singleton | (none) | - | `MockedStatic<Xxx>` (see `singleton-mock.md`) | - | - | `*Fake` factories |
 | Ivy unit + builders | `@IvyTest` | - | - | - | - | helper methods |
 | Process test | `@IvyProcessTest` | - | - | - | - | - |
 | REST full stack | `@RestResourceTest` | AppFixture | MockOpenAI | ResourceResponder | LoggerAccess | - |

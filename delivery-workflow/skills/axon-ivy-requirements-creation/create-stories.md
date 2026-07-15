@@ -1,10 +1,10 @@
 # Create Implementation Stories from Requirements
 
-Decompose the requirements document into implementation stories. Each story is saved as a separate file in `[project]/documents/stories/` — create the folder if it doesn't exist.
+Decompose the requirements document into implementation stories. Stories are grouped by ticket: each story is saved as a separate file under `[project]/documents/stories/<TICKET>/` — create the ticket folder if it doesn't exist. `<TICKET>` is the parent story/epic ID the requirements belong to.
 
-**Filename convention:** `story_NN_type-name.md` — encode the story number and type in the filename so developers can navigate without opening each file.
+**Filename convention:** `story_NN_type-name.md` inside the ticket folder — i.e. `[project]/documents/stories/<TICKET>/story_NN_type-name.md`. Encode the story number and type in the filename so developers can navigate without opening each file.
 
-Examples: `story_01_data-model.md`, `story_02_entity-repository.md`, `story_03_extraction-invoice.md`, `story_04_component-contact-fields.md`, `story_05_taglib.md`, `story_06_form-create-invoice.md`, `story_07_process-main.md`, `story_08_security.md`, `story_09_error-expiry.md`, `story_10_roles-config.md`
+Examples (all under `documents/stories/<TICKET>/`): `story_01_data-model.md`, `story_02_entity-repository.md`, `story_03_extraction-invoice.md`, `story_04_component-contact-fields.md`, `story_05_taglib.md`, `story_06_form-create-invoice.md`, `story_07_process-main.md`, `story_08_security.md`, `story_09_error-expiry.md`, `story_10_roles-config.md`
 
 ---
 

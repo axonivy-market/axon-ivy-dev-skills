@@ -72,10 +72,10 @@ Decompose the requirements document from Step 3 into implementation stories:
 
 - Follow the dependency order in `create-stories.md`
 - For each story type you are about to generate, **read the corresponding file in `story-types/`** before writing the story (e.g., read `story-types/form-composition.md` before writing any form story)
-- Each story is a separate file: `story_NN_type-name.md` (see filename convention in `create-stories.md`)
+- Each story is a separate file grouped by ticket: `<TICKET>/story_NN_type-name.md` (see filename convention in `create-stories.md`)
 - Each story includes: user framing, description, dependencies, implementation details, acceptance criteria
 
-**Output location:** `[project]/documents/stories/` — create folder if it doesn't exist.
+**Output location:** `[project]/documents/stories/<TICKET>/` — create the ticket folder if it doesn't exist.
 
 ---
 
