@@ -1,0 +1,30 @@
+name: Build skill evals sandbox image
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "evals/docker/**"
+      - ".github/workflows/eval-sandbox-image.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}/skill-eval-agent:latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t "$IMAGE" evals/docker
+          docker push "$IMAGE"
