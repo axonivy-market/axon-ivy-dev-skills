@@ -1,44 +1,21 @@
 name: Evaluate skill
 
-# Manually-triggered eval of one skill: runs evals/evaluate.py with & without
-# the skill, generates report.html, posts a summary to the run page, and
-# uploads the iteration directory (report + transcripts + gradings) as an
-# artifact.
-#
-# Auth: the Copilot CLI/SDK needs a token whose account has a Copilot license
-# — the default Actions GITHUB_TOKEN does NOT. Create a repo secret
-# COPILOT_GH_TOKEN holding a (fine-grained) PAT of such an account; the CLI
-# picks it up from GH_TOKEN.
-
 on:
   workflow_dispatch:
     inputs:
       skill:
-        description: "Skill directory name (must contain evals/evals.json), e.g. axon-ivy-cms"
+        description: "Skill path, e.g. configuration/skills/custom-fields-l10n"
         required: true
         type: string
-      eval_id:
-        description: "Run only this eval id (leave empty for all cases)"
-        required: false
-        type: string
-      iteration:
-        description: "Iteration number (results go to <skill>-workspace/iteration-N/)"
-        required: false
-        default: "1"
-        type: string
       model:
-        description: "Model to pin for reproducibility"
+        description: "Model to use for task/judge runs"
         required: false
-        default: "claude-sonnet-5"
+        default: "mai-code-1-flash-picker"
         type: string
-      skip_baseline:
-        description: "Run only the with-skill config (halves cost; no delta)"
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   evaluate:
@@ -47,32 +24,28 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.COPILOT_GH_TOKEN }}
       SKILL: ${{ inputs.skill }}
-      EVAL_ID: ${{ inputs.eval_id }}
-      ITERATION: ${{ inputs.iteration }}
+      ITERATION: "1"
       MODEL: ${{ inputs.model }}
-      SKIP_BASELINE: ${{ inputs.skip_baseline }}
+      SKILL_EVAL_IMAGE: ghcr.io/${{ github.repository }}/skill-eval-agent:latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
-      - name: Install Copilot CLI + SDK
-        run: |
-          npm install -g @github/copilot
-          python -m pip install github-copilot-sdk
-          copilot --version
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pull agent sandbox image
+        run: docker pull "$SKILL_EVAL_IMAGE"
 
       - name: Run evaluation
         run: |
-          args=(--skill "$SKILL" --iteration "$ITERATION" --model "$MODEL")
-          [ -n "$EVAL_ID" ] && args+=(--eval-id "$EVAL_ID")
-          [ "$SKIP_BASELINE" = "true" ] && args+=(--skip-baseline)
-          python evals/evaluate.py "${args[@]}"
+          python evals/evaluate.py --skill "$SKILL" --model "$MODEL"
 
       - name: Generate HTML report
-        run: python evals/report.py --skill "$SKILL" --iteration "$ITERATION"
+        run: python evals/report.py --skill "$SKILL"
 
       - name: Publish run summary
         run: |
@@ -95,7 +68,7 @@ jobs:
               v = rs.get("delta", {}).get(key)
               return "—" if v is None else ("+" if v > 0 else "") + FMT[key](v)
 
-          print(f"# Skill eval: `{skill}` — iteration {it}")
+          print(f"# Skill eval: `{skill}`")
           print(f"\nModel pinned: `{bench.get('model_pinned') or '(unpinned)'}` · "
                 f"observed: `{', '.join(bench.get('models_observed') or []) or '—'}`\n")
           print("| Metric | With skill | Without | Δ |")
@@ -116,13 +89,25 @@ jobs:
           print("\nFull results (report.html, transcripts, gradings) are in the run artifact.")
           EOF
 
-      # Upload whatever exists even when the harness fails fast — the
-      # transcripts and grading_raw.txt are the diagnostics for that failure.
+      - name: Quality gate
+        run: |
+          set +e
+          python evals/gate.py --skill "$SKILL" | tee gate_out.txt
+          GATE_EXIT=${PIPESTATUS[0]}
+          {
+            echo ""; echo "## Quality gate"; echo '```'; cat gate_out.txt; echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$GATE_EXIT"
+
+      - name: Compute artifact name
+        if: always()
+        run: echo "ARTIFACT_NAME=eval-$(echo "$SKILL" | tr '/' '-')" >> "$GITHUB_ENV"
+
       - name: Upload results artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: eval-${{ inputs.skill }}-iteration-${{ inputs.iteration }}
-          path: ${{ inputs.skill }}-workspace/iteration-${{ inputs.iteration }}/
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ inputs.skill }}-workspace/iteration-1/
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 10
