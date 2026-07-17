@@ -1,0 +1,7 @@
+*-workspace
+
+# Python venv for the eval SDK, and caches
+.venv/
+__pycache__/
+/evals/__pycache__/
+/evals/skill_eval/__pycache__/
