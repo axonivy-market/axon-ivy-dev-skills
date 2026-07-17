@@ -16,13 +16,14 @@ on:
 permissions:
   contents: read
   packages: read
+  copilot-requests: write
 
 jobs:
   evaluate:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      GH_TOKEN: ${{ secrets.COPILOT_GH_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SKILL: ${{ inputs.skill }}
       ITERATION: "1"
       MODEL: ${{ inputs.model }}
