@@ -1,6 +1,6 @@
 # Create Implementation Stories from Requirements
 
-Decompose the requirements document into implementation stories. Stories are grouped by ticket: each story is saved as a separate file under `[project]/documents/stories/<TICKET>/` — create the ticket folder if it doesn't exist. `<TICKET>` is the parent story/epic ID the requirements belong to.
+Decompose the requirements document into implementation stories. Stories are grouped by ticket: each story is saved as a separate file under `[project]/documents/stories/<TICKET>/` — create the ticket folder if it doesn't exist. `<TICKET>` is the Jira ticket id of the parent story/epic the requirements belong to; when the requirements don't originate from a Jira ticket, default to `TICKET_0`.
 
 **Filename convention:** `story_NN_type-name.md` inside the ticket folder — i.e. `[project]/documents/stories/<TICKET>/story_NN_type-name.md`. Encode the story number and type in the filename so developers can navigate without opening each file.
 
