@@ -1,0 +1,51 @@
+# =============================================================================
+# REFERENCE: English CMS translations for custom fields.
+# Mirrors the fields defined in config/custom-fields.yaml.
+# Path model: /CustomFields/{kind}/{name}/Label|Description|Values/{value}
+#             /CustomFields/Categories/{category}
+# =============================================================================
+
+CustomFields:
+
+  # --- Task custom fields ---
+  Tasks:
+
+    # STRING field storing a technical branch code — values are localized.
+    branchOffice:
+      Label: Branch Office
+      Description: Office responsible for handling the task
+      Values:
+        Zug: Zug
+        Munich: Munich
+        Vienna: Vienna
+
+    # NUMBER field storing a priority code — quote numeric value keys.
+    priorityLevel:
+      Label: Priority
+      Description: Business priority of the task
+      Values:
+        '1': Low
+        '2': Medium
+        '3': High
+
+    # STRING field whose values are the YAML boolean-trap words — quote the keys.
+    approvalNeeded:
+      Label: Approval Needed
+      Description: Whether the task requires manager approval
+      Values:
+        'Yes': 'Yes'
+        'No': 'No'
+
+  # --- Case custom fields ---
+  Cases:
+
+    # TEXT field: only Label/Description are localizable — no Values block.
+    caseSummary:
+      Label: Case Summary
+      Description: Free-text summary of the case
+
+  # --- Category names (shared across Tasks/Cases/Starts) ---
+  Categories:
+    Organization: Organization
+    Workflow: Workflow
+    Classification: Classification
