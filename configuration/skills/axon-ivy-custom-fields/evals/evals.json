@@ -1,0 +1,65 @@
+{
+  "skill_name": "axon-ivy-custom-fields",
+  "evals": [
+    {
+      "id": 0,
+      "name": "define-order-fulfillment-fields",
+      "fixture": "ivy-project",
+      "prompt": "I need some task custom fields for an order-fulfillment step. Add: orderAmount (the order's total money value), customerTier (Gold / Silver / Bronze), shippedAt (when it shipped), and warehouseRef (an internal warehouse-system id we don't want shown in Portal). Put each in a sensible category.",
+      "expected_output": "All four fields are defined in the single config/custom-fields.yaml at the project root, under the Tasks section, with types matching the data: orderAmount NUMBER (money), customerTier STRING (a small set of labels), shippedAt TIMESTAMP (a point in time), warehouseRef STRING marked Hidden: true (internal id, not shown in Portal). Each field uses a camelCase identifier and has a Label and a Category. No CMS/localization files are involved — this is a plain field-definition task.",
+      "assertions": [
+        "config/custom-fields.yaml (at the project root, not under src/) defines all four fields under the Tasks section and parses as valid YAML",
+        "orderAmount has Type NUMBER and shippedAt has Type TIMESTAMP (types chosen to fit the data: money → NUMBER, a moment in time → TIMESTAMP)",
+        "customerTier has Type STRING",
+        "warehouseRef is marked Hidden: true so it is not surfaced in Portal",
+        "Every field uses a camelCase identifier and has both a Label and a Category, with no tab characters used for indentation",
+        "No cms/cms_*.yaml files are created — no translation was requested"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "define-leave-request-case-and-start-fields",
+      "fixture": "ivy-project",
+      "prompt": "Set up custom fields for a new Leave Request process. At the case level, track leaveType (Annual / Sick / Unpaid) and daysRequested (number of days off). For the process start itself, add allowedRole (which role may start it) and processDescription (a longer descriptive text shown in Portal). Get them ready to use.",
+      "expected_output": "One config/custom-fields.yaml at the project root holds both sections: under Cases, leaveType STRING and daysRequested NUMBER; under Starts, allowedRole STRING and processDescription TEXT (long free text, not STRING). Every field has a camelCase identifier, a Label and a Category. Case-level and start-level fields live in the same shared file under their respective Cases:/Starts: keys — not split into separate files. No CMS/localization files are involved.",
+      "assertions": [
+        "config/custom-fields.yaml (at the project root, not under src/) defines leaveType and daysRequested under the Cases section and allowedRole and processDescription under the Starts section, and parses as valid YAML",
+        "daysRequested has Type NUMBER and leaveType has Type STRING",
+        "processDescription has Type TEXT (long free text), not STRING",
+        "The Cases and Starts fields live in the one shared config/custom-fields.yaml under their respective Cases: and Starts: keys, not in separate files",
+        "Every field uses a camelCase identifier and has both a Label and a Category",
+        "No cms/cms_*.yaml files are created — no translation was requested"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "localize-claim-type-french",
+      "fixture": "ivy-project",
+      "prompt": "Add a case custom field `claimType` — a STRING for the kind of insurance claim, allowed values Auto / Home / Travel, category Insurance. Then localize everything into French (keep English too): label \"Type de sinistre\", the values as Automobile / Habitation / Voyage, and the category as \"Assurance\".",
+      "expected_output": "The field is defined once in config/custom-fields.yaml (Cases > claimType, Type STRING, Category Insurance) with a static single-language fallback — no French text in that file. Translations live in cms/cms_en.yaml and cms/cms_fr.yaml under the /CustomFields/ namespace: the label under CustomFields > Cases > claimType > Label (keyed by the field identifier claimType, not its display label), the value labels under CustomFields > Cases > claimType > Values keyed by the stored values Auto/Home/Travel, and the category under the shared CustomFields > Categories > Insurance (a Categories folder directly under CustomFields, not nested under Cases). Both locale files carry identical key hierarchies; the French file maps Auto→Automobile, Home→Habitation, Travel→Voyage and Insurance→Assurance.",
+      "assertions": [
+        "config/custom-fields.yaml (at the project root, not under src/) defines a Cases field named claimType with Type STRING and category Insurance, and contains no French translations itself",
+        "cms/cms_en.yaml and cms/cms_fr.yaml exist at the project root (not under src/) and both parse as valid YAML",
+        "The field label is localized under CustomFields > Cases > claimType > Label using the field identifier claimType (not its display label), with the French file giving 'Type de sinistre'",
+        "Value labels are localized under CustomFields > Cases > claimType > Values keyed by the stored values Auto/Home/Travel, with the French file mapping Auto → Automobile, Home → Habitation, Travel → Voyage",
+        "The category is localized under the shared CustomFields > Categories > Insurance (a Categories folder directly under CustomFields, not nested under Cases), with French 'Assurance'",
+        "cms_en.yaml and cms_fr.yaml have identical key hierarchies under CustomFields"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "localize-toggle-and-text-german",
+      "fixture": "ivy-project",
+      "prompt": "Add two task custom fields and translate both to German (keep English too). First: `emailAlerts`, a STRING toggle whose values are On and Off (German An / Aus), in category Notifications (German Benachrichtigungen). Second: `handoverNotes`, a free-text field for shift-handover notes, label \"Handover Notes\" (German \"Übergabenotizen\").",
+      "expected_output": "Both fields are defined in config/custom-fields.yaml (Tasks > emailAlerts Type STRING category Notifications; Tasks > handoverNotes Type TEXT) with single-language fallbacks and no German in that file. Translations live in cms/cms_en.yaml and cms/cms_de.yaml. emailAlerts is a STRING so its values are localized under CustomFields > Tasks > emailAlerts > Values keyed by On/Off — and because On/Off are YAML 1.1 boolean words, the keys are single-quoted ('On'/'Off') so SnakeYAML does not coerce them to true/false; the German file maps On→An, Off→Aus. handoverNotes is TEXT, so only its Label (and optionally Description) is localized under CustomFields > Tasks > handoverNotes with NO Values block, since values are localizable only for STRING/NUMBER. The category is localized under the shared CustomFields > Categories > Notifications (German Benachrichtigungen), and both locale files share identical key hierarchies.",
+      "assertions": [
+        "config/custom-fields.yaml (at the project root, not under src/) defines Tasks fields emailAlerts (Type STRING) and handoverNotes (Type TEXT), with no German translations in that file",
+        "cms/cms_en.yaml and cms/cms_de.yaml exist at the project root (not under src/) and both parse as valid YAML",
+        "emailAlerts value labels are localized under CustomFields > Tasks > emailAlerts > Values keyed by On and Off, with the German file mapping On → An and Off → Aus",
+        "The On and Off value keys are written as single-quoted strings ('On'/'Off') so SnakeYAML (YAML 1.1) does not coerce them to boolean true/false",
+        "handoverNotes (a TEXT field) has a localized Label under CustomFields > Tasks > handoverNotes but NO Values block, because values are localized only for STRING/NUMBER fields",
+        "The category is localized under the shared CustomFields > Categories > Notifications (directly under CustomFields, not nested under Tasks) with German 'Benachrichtigungen', and cms_en.yaml and cms_de.yaml have identical key hierarchies under CustomFields"
+      ]
+    }
+  ]
+}
