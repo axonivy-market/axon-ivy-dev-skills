@@ -7,6 +7,14 @@ on:
         description: "Skill path, e.g. configuration/skills/custom-fields-l10n"
         required: true
         type: string
+      baseline:
+        description: "What to compare the skill against"
+        required: false
+        default: "previous-version"
+        type: choice
+        options:
+          - previous-version
+          - without-skill
       model:
         description: "Model to use for task/judge runs"
         required: false
@@ -25,7 +33,7 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SKILL: ${{ inputs.skill }}
-      ITERATION: "1"
+      BASELINE: ${{ inputs.baseline }}
       MODEL: ${{ inputs.model }}
       SKILL_EVAL_IMAGE: ghcr.io/${{ github.repository }}/skill-eval-agent:latest
     steps:
@@ -41,54 +49,19 @@ jobs:
       - name: Pull agent sandbox image
         run: docker pull "$SKILL_EVAL_IMAGE"
 
+      # Git resolution (fetch, worktree materialize + cleanup against
+      # DEFAULT_BRANCH) lives inside the harness now — see skill_eval/baseline.py.
+      # 'previous-version' only degrades to the without-skill baseline for a
+      # brand-new skill (no SKILL.md on the default branch yet); any actual git
+      # failure raises and fails the run.
       - name: Run evaluation
-        run: |
-          python evals/evaluate.py --skill "$SKILL" --model "$MODEL"
+        run: python evals/evaluate.py --skill "$SKILL" --model "$MODEL" --baseline "$BASELINE"
 
       - name: Generate HTML report
         run: python evals/report.py --skill "$SKILL"
 
       - name: Publish run summary
-        run: |
-          python - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
-          import json, os
-          from pathlib import Path
-
-          skill, it = os.environ["SKILL"], os.environ["ITERATION"]
-          bench = json.loads(Path(f"{skill}-workspace/iteration-{it}/benchmark.json").read_text())
-          rs = bench["run_summary"]
-
-          FMT = {"pass_rate": lambda v: f"{v:.0%}", "tokens": lambda v: f"{v:,.0f}",
-                 "time_seconds": lambda v: f"{v:,.1f}"}
-
-          def mean(cfg, key):
-              v = (rs.get(cfg, {}).get(key) or {}).get("mean")
-              return "—" if v is None else FMT[key](v)
-
-          def delta(key):
-              v = rs.get("delta", {}).get(key)
-              return "—" if v is None else ("+" if v > 0 else "") + FMT[key](v)
-
-          print(f"# Skill eval: `{skill}`")
-          print(f"\nModel pinned: `{bench.get('model_pinned') or '(unpinned)'}` · "
-                f"observed: `{', '.join(bench.get('models_observed') or []) or '—'}`\n")
-          print("| Metric | With skill | Without | Δ |")
-          print("|---|---:|---:|---:|")
-          for label, key in (("Pass rate", "pass_rate"), ("Tokens / run", "tokens"),
-                             ("Time (s) / run", "time_seconds")):
-              print(f"| {label} | {mean('with_skill', key)} | {mean('without_skill', key)} "
-                    f"| {delta(key)} |")
-          print("\n| Eval | Pass rate (with) | Pass rate (without) | Skill fired |")
-          print("|---|---:|---:|---|")
-          for e in bench.get("evals", []):
-              w, wo = e.get("with_skill") or {}, e.get("without_skill") or {}
-              fired = ", ".join(w.get("invoked_skills") or []) or "—"
-              def pr(c):
-                  v = c.get("pass_rate")
-                  return "—" if v is None else f"{v:.0%}"
-              print(f"| `{e.get('slug')}` | {pr(w)} | {pr(wo)} | {fired} |")
-          print("\nFull results (report.html, transcripts, gradings) are in the run artifact.")
-          EOF
+        run: python evals/summary.py --skill "$SKILL" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Quality gate
         run: |
