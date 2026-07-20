@@ -158,9 +158,19 @@ def _config_panel(label, rec, passed, total, results, transcript):
         f'{_assert_table(results)}{tx}</div>')
 
 
+def _baseline_labels(bench):
+    baseline_config = bench.get("baseline_config", "without_skill")
+    if baseline_config == "without_skill":
+        return baseline_config, "Without", "Without skill", "without"
+    desc = (bench.get("comparison") or {}).get("baseline_desc")
+    label = f"Old version ({esc(desc)})" if desc else "Old version"
+    return baseline_config, label, label, "old"
+
+
 def render(skill, bench, iteration_dir):
     rs = bench.get("run_summary", {})
-    ws, wo, delta = rs.get("with_skill", {}), rs.get("without_skill", {}), rs.get("delta", {})
+    baseline_config, base_col, base_panel, base_sub = _baseline_labels(bench)
+    ws, wo, delta = rs.get("with_skill", {}), rs.get(baseline_config, {}), rs.get("delta", {})
 
     def mean(cfg, key):
         return (cfg.get(key) or {}).get("mean")
@@ -171,10 +181,10 @@ def render(skill, bench, iteration_dir):
     for e in bench.get("evals", []):
         eid = e.get("id", "?")
         slug = e.get("slug", str(eid))
-        w, o = e.get("with_skill") or {}, e.get("without_skill") or {}
+        w, o = e.get("with_skill") or {}, e.get(baseline_config) or {}
 
         wp, wt, wresults = _grading(iteration_dir, eid, slug, "with_skill")
-        op, ot, oresults = _grading(iteration_dir, eid, slug, "without_skill")
+        op, ot, oresults = _grading(iteration_dir, eid, slug, baseline_config)
         if wp is not None and wt is not None:
             total_pass += wp
             total_all += wt
@@ -192,8 +202,8 @@ def render(skill, bench, iteration_dir):
                                _transcript(iteration_dir, eid, slug, "with_skill"))
         # Only render the baseline panel if it was actually run.
         if o or ot is not None:
-            panels += _config_panel("Without skill", o, op, ot, oresults,
-                                    _transcript(iteration_dir, eid, slug, "without_skill"))
+            panels += _config_panel(base_panel, o, op, ot, oresults,
+                                    _transcript(iteration_dir, eid, slug, baseline_config))
 
         suites += (
             f'<details class="suite" open>'
@@ -201,7 +211,7 @@ def render(skill, bench, iteration_dir):
             f'<span class="name">{esc(eid)}: {esc(slug)}</span>'
             f'<span class="spacer"></span>'
             f'<span class="sub">with</span><span class="badge {wcls}">{wbadge} {wcount}</span>'
-            f'<span class="sub">without</span><span class="badge {ocls}">{obadge} {ocount}</span>'
+            f'<span class="sub">{base_sub}</span><span class="badge {ocls}">{obadge} {ocount}</span>'
             f'</summary>{panels}</details>')
 
     if not suites:
@@ -239,14 +249,51 @@ def render(skill, bench, iteration_dir):
   <h1>{esc(skill)} — evaluation report</h1>
   <div class="meta">model <code>{esc(model)}</code> · {esc(generated)}</div>
   {banner}
-  <h2>Final benchmark result<span class="caption">aggregate across all {n_evals} eval(s) — with skill vs. without</span></h2>
+  <h2>Final benchmark result<span class="caption">aggregate across all {n_evals} eval(s) — with skill vs. {base_panel.lower()}</span></h2>
   <div class="bench">
   <table>
     <thead><tr><th>Metric</th><th class="num">With skill</th>
-      <th class="num">Without</th><th class="num">Δ</th></tr></thead>
+      <th class="num">{base_col}</th><th class="num">Δ</th></tr></thead>
     <tbody>{cmp_rows}</tbody>
   </table>
   </div>
   <h2>Detailed results<span class="caption">every eval — with-skill and without-skill runs, assertions &amp; transcripts</span></h2>
   {suites}
 </div></body></html>"""
+
+
+def _delta_md(delta, fmt):
+    if delta is None:
+        return "—"
+    if delta == 0:
+        return "0"
+    sign = "+" if delta > 0 else ""
+    return f"{sign}{fmt(delta)}"
+
+
+def render_summary_markdown(skill, bench):
+    rs = bench.get("run_summary", {})
+    baseline_config, base_col, _, _ = _baseline_labels(bench)
+    ws, base, delta = rs.get("with_skill", {}), rs.get(baseline_config, {}), rs.get("delta", {})
+
+    def mean(cfg, key):
+        return (cfg.get(key) or {}).get("mean")
+
+    rows = (("Pass rate", "pass_rate", fmt_pct),
+            ("Tokens / run", "tokens", fmt_num),
+            ("Time / run", "time_seconds", fmt_sec))
+
+    lines = [
+        f"# Skill eval: `{skill}`",
+        "",
+        f"With skill vs **{base_col}** · model `{bench.get('model_pinned') or '(unpinned)'}`",
+        "",
+        f"| Metric | With skill | {base_col} | Δ |",
+        "|---|---:|---:|---:|",
+    ]
+    for label, key, fmt in rows:
+        lines.append(f"| {label} | {fmt(mean(ws, key))} | {fmt(mean(base, key))} "
+                     f"| {_delta_md(delta.get(key), fmt)} |")
+    lines += ["", "Per-eval detail, transcripts and gradings are in the run artifact "
+                  "(report.html); the efficiency advisory is in the Quality gate section below."]
+    return "\n".join(lines)
