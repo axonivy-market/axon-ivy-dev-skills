@@ -10,7 +10,8 @@ def _delta(a, b):
     return round(a - b, 4)
 
 
-def aggregate(per_eval, iteration_dir, model_pinned=None):
+def aggregate(per_eval, iteration_dir, model_pinned=None,
+              baseline_config="without_skill", comparison=None):
     def summ(vals):
         if not vals:
             return {"mean": None, "stddev": None}
@@ -28,25 +29,29 @@ def aggregate(per_eval, iteration_dir, model_pinned=None):
                 out.append(v)
         return out
 
+    configs = ("with_skill", baseline_config)
     summary = {}
-    for config in ("with_skill", "without_skill"):
+    for config in configs:
         summary[config] = {
             "pass_rate": summ(values(config, lambda c: c.get("pass_rate"))),
             "time_seconds": summ(values(config, lambda c: (c["duration_ms"] / 1000)
                                         if c.get("duration_ms") is not None else None)),
             "tokens": summ(values(config, lambda c: c.get("total_tokens"))),
         }
-    ws, wo = summary["with_skill"], summary["without_skill"]
+    ws, base = summary["with_skill"], summary[baseline_config]
     summary["delta"] = {
-        "pass_rate": _delta(ws["pass_rate"]["mean"], wo["pass_rate"]["mean"]),
-        "time_seconds": _delta(ws["time_seconds"]["mean"], wo["time_seconds"]["mean"]),
-        "tokens": _delta(ws["tokens"]["mean"], wo["tokens"]["mean"]),
+        "pass_rate": _delta(ws["pass_rate"]["mean"], base["pass_rate"]["mean"]),
+        "time_seconds": _delta(ws["time_seconds"]["mean"], base["time_seconds"]["mean"]),
+        "tokens": _delta(ws["tokens"]["mean"], base["tokens"]["mean"]),
     }
     # Record the model for reproducibility: what we pinned + what actually ran.
-    observed = sorted({m for e in per_eval for cfg in ("with_skill", "without_skill")
+    observed = sorted({m for e in per_eval for cfg in configs
                        if e.get(cfg) and e[cfg].get("models") for m in e[cfg]["models"]})
     benchmark = {"model_pinned": model_pinned, "models_observed": observed,
+                 "baseline_config": baseline_config,
                  "run_summary": summary, "evals": per_eval}
+    if comparison is not None:
+        benchmark["comparison"] = comparison
     write_json(iteration_dir / "benchmark.json", benchmark)
     return benchmark
 
