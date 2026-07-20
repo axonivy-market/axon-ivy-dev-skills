@@ -1,6 +1,6 @@
 ---
 name: axon-ivy-custom-fields
-description: Define custom fields in custom-fields.yaml for tasks, cases, and process starts. Use when working with custom metadata on workflow elements.
+description: Define custom fields in custom-fields.yaml for tasks, cases, and process starts, and localize their labels, descriptions, categories, and values into multiple languages via CMS entries. Use when working with custom metadata on workflow elements, or when translating custom-field text into other languages.
 ---
 
 ## When to Use
@@ -8,12 +8,14 @@ description: Define custom fields in custom-fields.yaml for tasks, cases, and pr
 - Creating TaskSwitchEvent or RequestStart elements that need custom metadata
 - Displaying business context in Portal widgets
 - You get NullPointerException about missing custom field types
+- Translating custom-field labels, descriptions, categories, or values into other languages
 
 ## Auto-Detect Type
 
 - Working with TaskSwitchEvent → Load `task.md`
 - Working with RequestStart case config → Load `case.md`
 - Working with RequestStart start config → Load `start.md`
+- Translating/localizing field labels or values into other languages → Load `localization.md`
 
 ## Configuration Location
 

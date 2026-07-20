@@ -1,0 +1,45 @@
+# =============================================================================
+# REFERENCE: German CMS translations for custom fields.
+# IDENTICAL key hierarchy to cms_en.yaml — only the values are translated.
+# =============================================================================
+
+CustomFields:
+
+  # --- Task custom fields ---
+  Tasks:
+
+    branchOffice:
+      Label: Niederlassung
+      Description: Für die Aufgabe zuständige Niederlassung
+      Values:
+        Zug: Zug
+        Munich: München
+        Vienna: Wien
+
+    priorityLevel:
+      Label: Priorität
+      Description: Geschäftliche Priorität der Aufgabe
+      Values:
+        '1': Niedrig
+        '2': Mittel
+        '3': Hoch
+
+    approvalNeeded:
+      Label: Genehmigung erforderlich
+      Description: Ob die Aufgabe die Genehmigung des Vorgesetzten benötigt
+      Values:
+        'Yes': Ja
+        'No': Nein
+
+  # --- Case custom fields ---
+  Cases:
+
+    caseSummary:
+      Label: Fallzusammenfassung
+      Description: Freitext-Zusammenfassung des Falls
+
+  # --- Category names (shared across Tasks/Cases/Starts) ---
+  Categories:
+    Organization: Organisation
+    Workflow: Arbeitsablauf
+    Classification: Klassifizierung
