@@ -1,0 +1,20 @@
+{
+  "skill_name": "custom-fields-l10n",
+  "evals": [
+    {
+      "id": 0,
+      "name": "demo-localize-approval",
+      "fixture": "ivy-project",
+      "prompt": "need a task custom field called `approved`, just a Yes/No string, category Review. can you add it and also translate it to german - label Genehmigt, values Ja/Nein, category Prüfung",
+      "expected_output": "The field is defined in config/custom-fields.yaml (Tasks > approved, Type STRING, Category Review) with a static fallback label — no translations in that file. Translations live in cms/cms_en.yaml and cms/cms_de.yaml under the /CustomFields/ namespace: Label under CustomFields > Tasks > approved, value labels under CustomFields > Tasks > approved > Values keyed by the stored values, and the category under the shared CustomFields > Categories > Review (not nested under Tasks). Because the value keys are the words Yes and No, they are single-quoted so SnakeYAML (YAML 1.1) does not coerce them to boolean true/false. Both language files have identical key hierarchies.",
+      "assertions": [
+        "config/custom-fields.yaml (at the project root, not under src/) defines a Tasks field named approved with Type STRING, with no German translations in that file",
+        "cms/cms_en.yaml and cms/cms_de.yaml exist at the project root (not under src/) and both parse as valid YAML",
+        "Value labels are localized under CustomFields > Tasks > approved > Values, with the German file mapping Yes → Ja and No → Nein",
+        "The Yes and No value keys are written as single-quoted strings ('Yes'/'No'), so SnakeYAML (YAML 1.1) does not coerce them to boolean true/false",
+        "The category is localized under CustomFields > Categories > Review (a shared Categories folder directly under CustomFields, not nested under Tasks), with German 'Prüfung'",
+        "cms_en.yaml and cms_de.yaml have identical key hierarchies under CustomFields"
+      ]
+    }
+  ]
+}
