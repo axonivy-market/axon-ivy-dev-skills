@@ -109,3 +109,9 @@ public class TestWithConfig {
   }
 }
 ```
+
+### With Static Singletons
+
+When the code reaches its collaborators through `Xxx.getInstance()` static singletons
+(DAOs, services, … — no injected dependency), mock the *static accessor* — see
+`singleton-mock.md` for the `MockedStatic<Xxx>` `@BeforeEach`/`@AfterEach` shape.

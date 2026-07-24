@@ -77,6 +77,7 @@ User explicitly says "integration test", "e2e", "real API", or target is an `*IT
 | --- | --- |
 | No `Ivy.*` imports, pure Java | A |
 | `Ivy.var()`, `Ivy.cms()`, `Ivy.session()` | B |
+| `Xxx.getInstance()` static singleton calls (DAO, Service, …) | B (also load `singleton-mock.md`) |
 | `.p.json` file or `BpmProcess` reference | C |
 | `@Path`, `@GET`, `@POST`, REST client calls | D |
 | User says "integration", "e2e", class ends with `IT` | E |
@@ -92,6 +93,7 @@ After loading the primary pattern from Step 2, conditionally load these:
 | Isolate with fake implementation (interface-based dep) | `test-doubles.md` |
 | Build complex domain test objects | `test-doubles.md` (builder section) |
 | Set Ivy variables for test | `fixture.md` |
+| Mock a `Xxx.getInstance()` static singleton (DAO, Service, …) | `singleton-mock.md` |
 | Mock external REST API | `mock.md` |
 | Load JSON fixture data | `resource.md` |
 | Assert log messages | `log.md` |
