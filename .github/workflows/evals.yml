@@ -1,0 +1,57 @@
+name: Evals
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'
+
+permissions:
+  contents: read
+  copilot-requests: write
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Install Copilot CLI
+        run: |
+          npm install -g @github/copilot
+          copilot --version
+
+      - name: Build skill-evals module
+        run: mvn --batch-mode --projects skill-evals --also-make install -DskipTests
+
+      - name: Run tests in tests module
+        run: mvn --batch-mode --projects tests test
+
+      - name: Publish test summary
+        if: always()
+        run: python .github/scripts/publish_surefire_summary.py tests/target/surefire-reports
+
+      - name: Upload surefire reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: surefire-reports-${{ github.run_id }}
+          path: tests/target/surefire-reports/
+          if-no-files-found: warn
+          retention-days: 14
