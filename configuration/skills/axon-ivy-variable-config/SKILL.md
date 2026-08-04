@@ -1,6 +1,6 @@
 ---
 name: axon-ivy-variable-config
-description: Provide information and rules for Axon Ivy variables configurations. Use when working with Axon Ivy variable.
+description: Provide information and rules for Axon Ivy variables configurations. Use when working (e.g., add, edit, rename, remove or get value) of (Axon Ivy) variables.
 ---
 
 ## When to Use
