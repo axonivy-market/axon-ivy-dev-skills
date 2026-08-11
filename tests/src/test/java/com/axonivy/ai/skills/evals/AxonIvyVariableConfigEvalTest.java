@@ -78,6 +78,6 @@ class AxonIvyVariableConfigEvalTest {
     assertDoesNotThrow(() -> {
       new Yaml().load(variablesYaml);
     });
-    assertThat(variablesYaml.stripTrailing()).contains("PageSize: \"10\"");
+    assertThat(variablesYaml.stripTrailing()).contains("PageSize: 10");
   }
 }
