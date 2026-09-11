@@ -1,6 +1,6 @@
 # Axon Ivy Dev Skills
 
-[![CI Build](https://github.com/axon-ivy-dev-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/axonivy-market/axon-ivy-dev-skills/actions/workflows/ci.yml)
+[![CI Build](https://github.com/axonivy-market/axon-ivy-dev-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/axonivy-market/axon-ivy-dev-skills/actions/workflows/ci.yml)
 
 Agent Skills for building, reviewing, and maintaining [Axon Ivy](https://developer.axonivy.com/) projects with AI coding agents.
 
