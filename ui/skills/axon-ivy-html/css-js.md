@@ -12,7 +12,7 @@ Prefer PrimeFlex utility classes for:
   - Use .p-fluid for form layout if PrimeFaces components are used
 - Spacing (e.g., p-2, m-3, gap-2)
 - Flex utilities (e.g., flex, justify-content-between, align-items-center)
-- Do NOT use inline CSS styles (style="" is forbidden).
+- Do NOT use inline CSS styles (style="" is forbidden) — use `styleClass` with PrimeFlex 3 utilities
 
 ### Targeting PrimeFaces components from custom CSS
 
