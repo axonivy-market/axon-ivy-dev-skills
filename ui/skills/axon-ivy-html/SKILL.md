@@ -5,10 +5,10 @@ description: Rules and best practices for Axon Ivy HTML Dialog implementations i
 
 ## HTML Dialog File Structure — MANDATORY
 
-Every HTML dialog consists of **3 files, all inside one named subfolder under `src_hd/`**. Never put XHTML in `webContent/` and never put the dialog data class in `dataclasses/`.
+Every HTML dialog consists of **3 files, all inside one named subfolder under `dialog/`**. Never put dialog XHTML in `webContent/` and never put the dialog data class in `dataclass/`.
 
 ```
-src_hd/<namespace-path>/<DialogName>/
+dialog/<namespace-path>/<DialogName>/
 ├── <DialogName>.xhtml               ← the UI template
 ├── <DialogName>Data.d.json          ← dialog data class
 └── <DialogName>Process.p.json       ← HTML_DIALOG logic process

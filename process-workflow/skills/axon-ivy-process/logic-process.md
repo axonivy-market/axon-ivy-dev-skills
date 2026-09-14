@@ -1,6 +1,6 @@
 # Dialog Logic Process Elements
 
-Element types used in HTML Dialog process files (`src_hd/**/*Process.p.json`). These processes handle the logic behind dialog UIs — upload handling, validation, data manipulation, and navigation.
+Element types used in HTML Dialog process files (`dialog/**/*Process.p.json`). These processes handle the logic behind dialog UIs — upload handling, validation, data manipulation, and navigation.
 
 ## CRITICAL — End Element Rules
 
@@ -77,7 +77,7 @@ RIGHT:  HtmlDialogMethodStart (upload) → Script → HtmlDialogEnd
 
 ## HtmlDialogEnd (Flow End — Dialog Stays Open)
 
-End element for flows that should **not** close the dialog. Used after `HtmlDialogStart` (initialization), `HtmlDialogMethodStart` (UI actions), and `HtmlDialogEventStart` when the event should not navigate away (e.g., close/cancel without result).
+End element for flows that should **not** close the dialog. Used after `HtmlDialogStart` (initialization), `HtmlDialogMethodStart` (UI actions), and any `HtmlDialogEventStart` whose event stays on the page (e.g. a row-selection or refresh event).
 
 ```json
 {
@@ -170,11 +170,11 @@ Entry point triggered by a UI event (e.g., submit, close, row selection). Events
 
 ## Dialog Process Structure
 
-A dialog process file lives in `src_hd/` and typically contains multiple flows:
+A dialog process file lives next to its `.xhtml` in the dialog folder and typically contains multiple flows:
 
 ```json
 {
-  "$schema": "https://json-schema.axonivy.com/14.0-dev/project/process.json",
+  "$schema": "https://json-schema.axonivy.com/14.0/project/process.json",
   "id": "UNIQUE_HEX_ID",
   "kind": "HTML_DIALOG",
   "config": {
@@ -211,7 +211,7 @@ A working example of a dialog process that handles file upload, removal, submit,
 
 ```json
 {
-  "$schema": "https://json-schema.axonivy.com/14.0-dev/project/process.json",
+  "$schema": "https://json-schema.axonivy.com/14.0/project/process.json",
   "id": "1A4E9F78C2BDC1A1",
   "kind": "HTML_DIALOG",
   "config": {
