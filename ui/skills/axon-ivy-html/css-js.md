@@ -25,22 +25,21 @@ rendered DOM. (The Freya theme also honors some `p-button-*` utility classes, bu
 
 ### Icons
 
-- You are able to use FontAwesome and Streamlines icons.
-- Prefer to use Streamlines icons.
-
-Example of FontAwesome icon usage (style class: `fa fa-*`):
+Use **Tabler Icons** (`ti ti-*`). Both classes are required: `ti` loads the font, `ti-<name>` picks
+the glyph. The font ships with the platform — **no install, no `@font-face`, no stylesheet import**.
 
 ```xml
-<p:commandButton id="proceed" icon="fa fa-check" styleClass="ui-button-primary" />
+<p:commandButton id="proceed" icon="ti ti-check" styleClass="ui-button-primary" />
+<p:commandButton icon="ti ti-trash" styleClass="ui-button-danger" />
+<i class="ti ti-cloud-upload text-4xl" />
+<h:panelGroup id="warn-icon" styleClass="ti ti-alert-triangle" />
 ```
 
-Example of Streamline icon usage (style class: `si si-*`):
+Refer to `icons.txt` for a curated list of Tabler names, and for how to look up the rest.
 
-```xml
-<p:commandButton id="proceed" icon="si si-cog" styleClass="ui-button-primary" />
-```
-
-Refer to `icons.txt` for available icons
+PrimeIcons (`pi pi-*`) also resolve and are what the Designer scaffold emits, but prefer `ti ti-*`
+for new markup — the Portal reference implementation uses Tabler for ~97% of its icons, buttons
+included.
 
 ## Custom CSS Rules
 

@@ -73,7 +73,7 @@ If no layout is specified, assume 2-column layout.
         <p:commandLink id="cancel" actionListener="#{logic.close}"
                     process="@this" value="Cancel" styleClass="ui-button-secondary mr-2" />
         <p:commandButton id="proceed" actionListener="#{logic.submit}"
-                        value="Create Project" update="form" icon="si si-check-1"
+                        value="Create Project" update="form" icon="ti ti-check"
                         styleClass="ui-button-primary" />
     </div>
   </div>
@@ -105,7 +105,7 @@ If no layout is specified, assume 2-column layout.
                    actionListener="#{logic.submit}"
                    value="Submit"
                    update="form"
-                   icon="si si-check-1"
+                   icon="ti ti-check"
                    styleClass="ui-button-primary" />
 </div>
 ```
