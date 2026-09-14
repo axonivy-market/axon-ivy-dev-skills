@@ -160,7 +160,7 @@ Rules:
 Notes:
 - No `<f:event preRenderComponent>` needed — init runs in the dialog start (`out.bean.init()`).
 - Use `#{data.bean.method}` for business actions that **stay** in the dialog; use `#{logic.xxx}`
-  only for navigation events (`submit` → `HtmlDialogExit`, `close` → exit). See `logic-process.md`.
+  only for navigation events (`submit` → `HtmlDialogExit`, `close` → exit). See `logic-process.md` in the `axon-ivy-process` skill.
 - Avoid entity-typed `p:selectOneMenu` converters by binding to a String id and resolving in an
   AJAX listener (`onChange`).
 

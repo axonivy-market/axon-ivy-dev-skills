@@ -16,52 +16,8 @@ On small screens:
 - Columns must stack vertically
 - Use PrimeFlex responsive classes
 
-## Dialog Type Detection
-
-### Page Dialog (Template-Based)
-
-Detect a page dialog by:
-
-```xml
-<ui:composition template="/layouts/*.xhtml">
-```
-
-Suggested Structure for Page Dialog
-
-```html
-<div class="card">
-<h:form id="form" styleClass="grid w-full">
-
-  <!-- Global validation messages -->
-  <div class="col-12">
-    <p:messages id="form-messages" showDetail="true" />
-  </div>
-
-  <!-- FORM CONTENT GOES HERE -->
-
-  <!-- Action Buttons -->
-  <div class="col-12 mt-3 text-right">
-    <!-- Buttons here -->
-  </div>
-
-</h:form>
-</div>
-```
-
-### Component Dialog (IvyComponent)
-
-Detect a component dialog by:
-
-```xml
-<cc:interface componentType="IvyComponent">
-```
-
-Rules for Component Dialog
-
-- Only generate `<h:form>` if parent dialog didn't define it or there is no parent dialog
-- DO NOT generate messages block
-- Only generate form content rows
-- Assume the parent dialog already manages form and actions
+These rules cover the fields **inside** a form. For the two dialog types and which of them owns the
+`<h:form>` / `<p:messages>` / action row, see `dialogs.md`.
 
 ## Form Layout Rules
 

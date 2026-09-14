@@ -66,74 +66,9 @@ Prefer PrimeFaces components (`p:*`) over raw HTML inputs when possible. Use:
 
 ## Common Pitfalls (PrimeFaces 14)
 
-### DataTable sorting — use `sortBy`, not `sortField`
-
-PrimeFaces 14 binds the sort target with `sortBy="#{...}"` (an EL expression on the row variable). The legacy `sortField` attribute is not recognized.
-
-```xhtml
-<!-- WRONG (PrimeFaces 14) -->
-<p:dataTable value="#{bean.projects}" var="proj" sortField="sortOrder">
-
-<!-- RIGHT -->
-<p:dataTable value="#{bean.projects}" var="proj" sortBy="#{proj.sortOrder}">
-```
-
-### Tooltip target must be a JSF component
-
-`<p:tooltip for="...">` resolves the target via the JSF component tree. Plain HTML elements (`<span>`, `<div>`) have no client ID in that tree, so the tooltip silently fails to attach.
-
-```xhtml
-<!-- WRONG — span is not a JSF component -->
-<span id="info-icon" class="pi pi-info-circle" />
-<p:tooltip for="info-icon" value="..." />
-
-<!-- RIGHT — h:panelGroup is a JSF component with a real client ID -->
-<h:panelGroup id="info-icon" styleClass="pi pi-info-circle" />
-<p:tooltip for="info-icon" value="..." />
-```
-
-### `<p:dialog>` is NOT a NamingContainer
-
-Unlike `<p:tabView>` / `<p:tab>`, a `<p:dialog>` does not create a JSF naming scope. IDs of components inside the dialog stay flat under the surrounding form. Do **not** prefix them with the dialog ID in `update` attributes.
-
-```xhtml
-<p:dialog id="quick-alloc-dialog">
-  <h:panelGroup id="quick-pt" layout="block">...</h:panelGroup>
-</p:dialog>
-
-<!-- WRONG — "quick-alloc-dialog:quick-pt" does not exist -->
-<p:commandButton update="quick-alloc-dialog:quick-pt" />
-
-<!-- RIGHT -->
-<p:commandButton update="quick-pt" />
-<!-- or absolute: -->
-<p:commandButton update=":main-form:quick-pt" />
-```
-
-### `<p:panelGrid columns="N">` — wrap layout `<div>`s in `<h:panelGroup>`
-
-`<p:panelGrid columns="N">` distributes its **direct children** across N columns and counts every direct child as one cell. A plain HTML `<div>` is not a JSF component but still renders as a child element, breaking the column count and shifting all subsequent cells.
-
-```xhtml
-<!-- WRONG — <div> shifts subsequent cells -->
-<p:panelGrid columns="2">
-  <p:outputLabel value="Name" />
-  <div class="flex">
-    <p:inputText value="#{bean.name}" />
-    <p:commandButton icon="pi pi-search" />
-  </div>
-  <!-- next label/input now lands in the wrong column -->
-</p:panelGrid>
-
-<!-- RIGHT — h:panelGroup renders <div> AND counts as one JSF child -->
-<p:panelGrid columns="2">
-  <p:outputLabel value="Name" />
-  <h:panelGroup layout="block" styleClass="flex">
-    <p:inputText value="#{bean.name}" />
-    <p:commandButton icon="pi pi-search" />
-  </h:panelGroup>
-</p:panelGrid>
-```
+DataTable `sortBy` vs `sortField`, `<p:tooltip for>` targets, `<p:dialog>` ID prefixes in `update`,
+and `<p:panelGrid columns="N">` child counting are covered by the **`axon-ivy-primefaces-verify`**
+skill (items 10-13) — use it to check finished markup. The pitfalls below exist only here.
 
 ### ConfirmDialog — `<p:confirm>` belongs inside the trigger
 
