@@ -1,8 +1,11 @@
 # Dialog Bean (Controller Bean or JSF Managed Bean)
 
 Rules for the Java bean behind an Axon Ivy HTML Dialog. **Prefer a bean over Axon Ivy process
-logic** for UI-related behavior (validation, dynamic visibility, uploads, autocomplete). Keep
+logic** for UI-related behavior (validation, dynamic visibility, autocomplete). Keep
 process logic (`#{logic.xxx}`) only for navigation (submit/cancel).
+
+**Exception — file upload.** Handle `p:fileUpload` with `#{logic.upload}` and a
+`HtmlDialogMethodStart`, not a bean. See `file-upload.md`.
 
 ## Two valid patterns — ASK the user first
 
@@ -34,7 +37,6 @@ Then follow the matching section below. **File location for both:** `src/package
 Create a bean (either pattern) when a dialog needs:
 - Validation or business logic beyond simple field binding
 - Dynamic UI visibility/read-only control
-- File upload/download handling
 - Autocomplete / dynamic dropdown logic
 - Any reusable UI behavior
 
@@ -160,7 +162,7 @@ Rules:
 Notes:
 - No `<f:event preRenderComponent>` needed — init runs in the dialog start (`out.bean.init()`).
 - Use `#{data.bean.method}` for business actions that **stay** in the dialog; use `#{logic.xxx}`
-  only for navigation events (`submit` → `HtmlDialogExit`, `close` → exit). See `logic-process.md`.
+  only for navigation events (`submit` → `HtmlDialogExit`, `close` → exit). See `logic-process.md` in the `axon-ivy-process` skill.
 - Avoid entity-typed `p:selectOneMenu` converters by binding to a String id and resolving in an
   AJAX listener (`onChange`).
 
@@ -177,6 +179,8 @@ bridges all data between `#{data.*}` and the bean.
 > decapitalized class name (`MyBean` → `#{myBean}`); override it with `@Named("otherName")`.
 
 **Key principle: the bean NEVER references `#{data.xxx}` or `#{logic.xxx}`. The XHTML handles ALL data bridging.**
+
+This is the pattern the Axon Ivy **Portal** uses throughout — it has no Pattern A beans at all.
 
 ### Class Structure
 
@@ -328,30 +332,6 @@ public class RoleSelectionBean implements Serializable {
 
 ---
 
-## Shared — File Upload Listener (both patterns)
-
-The bean method must accept `FileUploadEvent` (not no-arg):
-
-```java
-import org.primefaces.event.FileUploadEvent;
-
-public void upload(FileUploadEvent event) {
-  if (event == null || event.getFile() == null) return;
-  try {
-    java.io.File tempFile = java.io.File.createTempFile("upload_", ".pdf");
-    java.nio.file.Files.write(tempFile.toPath(), event.getFile().getContent());
-    this.inputFile = tempFile;
-  } catch (Exception e) {
-    Ivy.log().error("Failed to process uploaded file", e);
-  }
-}
-
-public void removeFile() {
-  if (inputFile != null && inputFile.exists()) inputFile.delete();
-  inputFile = null;
-}
-```
-
 ## Shared — Displaying Messages
 
 ```java
@@ -372,5 +352,4 @@ FacesContext.getCurrentInstance().addMessage("form-messages",
 - **(Pattern A) Forgetting `out.bean.init();`** in the `HtmlDialogStart` code — the bean is created but not initialized.
 - **(Pattern A) Declaring the `bean` field** missing from the dialog `…Data.d.json` — `#{data.bean}` won't resolve.
 - **(Pattern B) Missing setter** for fields used in `setPropertyActionListener` — silently fails.
-- **No-arg upload method** with `listener` attribute — must accept `FileUploadEvent`.
-```
+- **Handling `p:fileUpload` in a bean** — use `#{logic.upload}` + `HtmlDialogMethodStart`; see `file-upload.md`.

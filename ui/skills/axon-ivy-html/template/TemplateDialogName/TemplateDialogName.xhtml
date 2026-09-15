@@ -7,14 +7,26 @@
     <ui:define name="title">Dialog Title</ui:define>
     <ui:define name="content">
 
-      <h:form id="form">
-        <p:messages />
+      <h:form id="form" styleClass="grid">
+        <div class="col-12">
+          <p:messages id="form-messages" showDetail="true" />
+        </div>
 
         <!-- FORM CONTENT GOES HERE -->
 
-        <div class="command-btns">
-          <p:commandLink id="cancel" actionListener="#{ivyWorkflowView.cancel()}" process="@this" value="Cancel" />
-          <p:commandButton id="proceed" actionListener="#{logic.submit}" value="Proceed" update="form" icon="pi pi-check" />
+        <div class="col-12 mt-3 text-right">
+          <p:commandLink id="cancel"
+                         actionListener="#{logic.close}"
+                         process="@this"
+                         value="Cancel"
+                         styleClass="ui-button-secondary mr-2" />
+
+          <p:commandButton id="proceed"
+                           actionListener="#{logic.submit}"
+                           value="Submit"
+                           update="form"
+                           icon="ti ti-check"
+                           styleClass="ui-button-primary" />
         </div>
       </h:form>
 

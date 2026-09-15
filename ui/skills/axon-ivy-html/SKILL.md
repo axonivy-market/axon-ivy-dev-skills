@@ -19,10 +19,8 @@ dialog/<namespace-path>/<DialogName>/
 
 ## Dialog Types
 
-Load the appropriate file when **creating a new dialog**:
-
-- Creating a **Template Dialog** (full-page user task) → Load `dialog-template.md`
-- Creating a **Component Dialog** (reusable composite component) → Load `dialog-component.md`
+Creating or editing a dialog of either type (full-page Template Dialog, or reusable Component
+Dialog) → Load `dialogs.md`.
 
 ## Always Load
 
@@ -36,9 +34,9 @@ These references are needed for every HTML dialog:
 - Building input forms → Load `form-design.md`
 - Using date picker or calendar components (`p:datePicker`) → Load `date-picker.md`
 - Using file upload components (`p:fileUpload`) → Load `file-upload.md`
-  - Implementing a file upload dialog process from scratch → also Load `logic-process-example.md`
-- Working with dialog logic, events, or methods (`#{logic.*}`, `#{data.*}`) → Load `logic-process.md` and `../axon-ivy-process/code.md`
+- Working with dialog logic, events, or methods (`#{logic.*}`, `#{data.*}`) → Load `logic-process.md` and `code.md` from the `axon-ivy-process` skill
 - Creating or updating managed beans for dialogs → Load `managed-bean.md`
-- Using Ivy HTML components (`<ic:*>`) → Load `ivy.md`
+- Using Ivy HTML components (`<ic:*>`) → Load `dialogs.md`
+- Checking finished PrimeFaces markup → Use the `axon-ivy-primefaces-verify` skill
 - Looking up icon names → Refer to `icons.txt`
 - Adding/updating UI labels or translations → Use `axon-ivy-cms` skill to create CMS entries
