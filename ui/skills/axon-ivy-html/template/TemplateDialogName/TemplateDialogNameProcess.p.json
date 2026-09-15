@@ -22,7 +22,7 @@
     }, {
       "id" : "f3",
       "type" : "HtmlDialogEventStart",
-      "name" : "submit",
+      "name" : "close",
       "config" : {
         "guid" : "UNIQUE_GUID_16CHARS_2"
       },
@@ -32,5 +32,18 @@
       "id" : "f4",
       "type" : "HtmlDialogExit",
       "visual" : { "at" : { "x" : 224, "y" : 160 } }
+    }, {
+      "id" : "f6",
+      "type" : "HtmlDialogEventStart",
+      "name" : "submit",
+      "config" : {
+        "guid" : "UNIQUE_GUID_16CHARS_3"
+      },
+      "visual" : { "at" : { "x" : 96, "y" : 256 } },
+      "connect" : [ { "id" : "f8", "to" : "f7" } ]
+    }, {
+      "id" : "f7",
+      "type" : "HtmlDialogExit",
+      "visual" : { "at" : { "x" : 224, "y" : 256 } }
     } ]
 }

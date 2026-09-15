@@ -108,7 +108,7 @@ For image uploads, add a `p:graphicImage` preview instead of a text-based file n
 - **Do NOT** use a separate upload button with `mode="simple"` — use `auto="true"` instead.
 - **Do NOT** bind `value` directly with `mode="simple"` — use `listener` for server-side handling.
 - **Do NOT** forget `update` on the `p:fileUpload` to refresh the panel after upload.
-- **Do NOT** create a managed bean for file upload — use `#{logic.*}` with `HtmlDialogMethodStart` in the dialog process instead.
+- **Do NOT** create a managed bean for file upload — use `#{logic.*}` with `HtmlDialogMethodStart` in the dialog process instead. This is the one exception to the "prefer a bean" guidance in `managed-bean.md`.
 
 ## Process Logic Checklist
 
