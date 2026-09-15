@@ -22,7 +22,7 @@ Always use **advanced mode** (default) with drag-and-drop support instead of `mo
 
 The drop zone panel should contain:
 
-1. An upload icon (e.g., `si si-file-code-upload-1`)
+1. An upload icon (e.g., `ti ti-cloud-upload`)
 2. A descriptive label ("Drag and drop file here")
 3. A `p:link` that triggers `PF('widgetVar').show()` as a fallback for manual file selection
 4. A file preview section (shown after upload) with file name and optional metadata
@@ -55,7 +55,7 @@ The drop zone panel should contain:
     <!-- Empty state: drag & drop prompt -->
     <h:panelGroup rendered="#{empty data.inputFile}"
       styleClass="flex flex-column align-items-center gap-2">
-      <i class="si si-file-code-upload-1 text-4xl text-secondary" />
+      <i class="ti ti-cloud-upload text-4xl text-secondary" />
       <p:outputLabel value="#{ivy.cms.co('/Path/To/DragAndDropLabel')}" styleClass="text-secondary" />
       <p:link value="#{ivy.cms.co('/Path/To/BrowseLabel')}"
         onclick="PF('fileUpload').show();return false" />
@@ -64,7 +64,7 @@ The drop zone panel should contain:
     <!-- Uploaded state: file preview -->
     <h:panelGroup rendered="#{not empty data.inputFile}"
       styleClass="flex align-items-center gap-2">
-      <i class="si si-file-pdf text-2xl" />
+      <i class="ti ti-file-type-pdf text-2xl" />
       <h:outputText value="#{data.inputFile.name}" styleClass="font-semibold" />
     </h:panelGroup>
   </p:outputPanel>
@@ -73,7 +73,7 @@ The drop zone panel should contain:
   <h:panelGroup styleClass="flex justify-content-end mt-2"
     rendered="#{not empty data.inputFile}">
     <p:commandButton id="remove-file-btn"
-      icon="si si-bin-1" styleClass="ui-button-outlined ui-button-danger"
+      icon="ti ti-trash" styleClass="ui-button-outlined ui-button-danger"
       ariaLabel="#{ivy.cms.co('/Labels/Remove')}"
       actionListener="#{logic.removeFile}"
       process="@this" update="file-upload-panel" />
@@ -108,7 +108,7 @@ For image uploads, add a `p:graphicImage` preview instead of a text-based file n
 - **Do NOT** use a separate upload button with `mode="simple"` — use `auto="true"` instead.
 - **Do NOT** bind `value` directly with `mode="simple"` — use `listener` for server-side handling.
 - **Do NOT** forget `update` on the `p:fileUpload` to refresh the panel after upload.
-- **Do NOT** create a managed bean for file upload — use `#{logic.*}` with `HtmlDialogMethodStart` in the dialog process instead.
+- **Do NOT** create a managed bean for file upload — use `#{logic.*}` with `HtmlDialogMethodStart` in the dialog process instead. This is the one exception to the "prefer a bean" guidance in `managed-bean.md`.
 
 ## Process Logic Checklist
 

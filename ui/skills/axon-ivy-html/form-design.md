@@ -32,19 +32,19 @@ These rules cover the fields **inside** a form. For the two dialog types and whi
 If no layout is specified, assume 2-column layout.
 
 ```html
-<h:form styleClass="grid">
+<h:form id="form" styleClass="grid">
   <!-- Error messages -->
   <div class="col-12">
-    <p:messages id="form-messages">
+    <p:messages id="form-messages" showDetail="true" />
   </div>
 
   <!-- Left Column -->
   <div class="col-6 p-fluid grid pr-1">
-    <!-- normal field -->
     <div class="grid p-fluid field col-12 align-content-center align-items-center">
       <div class="col-5">Label 1</div>
       <div class="col-7">Field 1</div>
     </div>
+  </div>
 
   <!-- Right Column -->
   <div class="col-6 p-fluid grid pl-1">
@@ -60,23 +60,13 @@ If no layout is specified, assume 2-column layout.
 
   <!-- Full width field -->
   <div class="col-12 p-fluid grid">
-      <div class="grid p-fluid field col-12">
-        <div class="col-12 mb-3">label 4</div>
-        <div class="col-12">field 5</div>
-      </div>
+    <div class="grid p-fluid field col-12">
+      <div class="col-12 mb-3">Label 4</div>
+      <div class="col-12">Field 4</div>
     </div>
   </div>
 
- <!-- Buttons -->
-  <div class="grid mt-3">
-    <div class="col-12 text-right">
-        <p:commandLink id="cancel" actionListener="#{logic.close}"
-                    process="@this" value="Cancel" styleClass="ui-button-secondary mr-2" />
-        <p:commandButton id="proceed" actionListener="#{logic.submit}"
-                        value="Create Project" update="form" icon="si si-check-1"
-                        styleClass="ui-button-primary" />
-    </div>
-  </div>
+  <!-- Buttons — see "Standard Button Pattern" below -->
 </h:form>
 ```
 
@@ -93,6 +83,11 @@ If no layout is specified, assume 2-column layout.
 
 ### Standard Button Pattern
 
+The canonical action row for every dialog. `dialogs.md` points here, and
+`template/TemplateDialogName/TemplateDialogName.xhtml` uses this block verbatim — change one, change
+both. `close` and `submit` must each have a matching `HtmlDialogEventStart` in
+`<DialogName>Process.p.json` (see `logic-process.md` in the `axon-ivy-process` skill). Only `value` varies per dialog.
+
 ```html
 <div class="col-12 mt-3 text-right">
   <p:commandLink id="cancel"
@@ -101,11 +96,11 @@ If no layout is specified, assume 2-column layout.
                  value="Cancel"
                  styleClass="ui-button-secondary mr-2" />
 
-  <p:commandButton id="submit"
+  <p:commandButton id="proceed"
                    actionListener="#{logic.submit}"
                    value="Submit"
                    update="form"
-                   icon="si si-check-1"
+                   icon="ti ti-check"
                    styleClass="ui-button-primary" />
 </div>
 ```

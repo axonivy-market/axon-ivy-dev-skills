@@ -12,7 +12,7 @@ field, build the group with CSS instead of the component:
 
 ```xml
 <span class="my-inputgroup">
-  <span class="my-inputgroup-addon"><i class="pi pi-user"></i></span>
+  <span class="my-inputgroup-addon"><i class="ti ti-user"></i></span>
   <p:inputText id="firstName" value="#{data.bean.customer.firstName}" />
 </span>
 ```
@@ -75,7 +75,7 @@ skill (items 10-13) — use it to check finished markup. The pitfalls below exis
 `<p:confirm>` must be nested inside the button or link that opens the confirmation. The `<p:confirmDialog global="true">` is declared once per page.
 
 ```xhtml
-<p:commandButton actionListener="#{bean.delete(item)}" icon="pi pi-trash">
+<p:commandButton actionListener="#{bean.delete(item)}" icon="ti ti-trash">
     <p:confirm header="..." message="#{bean.getDeleteConfirmMessage(item)}" />
 </p:commandButton>
 
