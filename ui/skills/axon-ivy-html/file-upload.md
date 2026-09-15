@@ -22,7 +22,7 @@ Always use **advanced mode** (default) with drag-and-drop support instead of `mo
 
 The drop zone panel should contain:
 
-1. An upload icon (e.g., `si si-file-code-upload-1`)
+1. An upload icon (e.g., `ti ti-cloud-upload`)
 2. A descriptive label ("Drag and drop file here")
 3. A `p:link` that triggers `PF('widgetVar').show()` as a fallback for manual file selection
 4. A file preview section (shown after upload) with file name and optional metadata
@@ -55,7 +55,7 @@ The drop zone panel should contain:
     <!-- Empty state: drag & drop prompt -->
     <h:panelGroup rendered="#{empty data.inputFile}"
       styleClass="flex flex-column align-items-center gap-2">
-      <i class="si si-file-code-upload-1 text-4xl text-secondary" />
+      <i class="ti ti-cloud-upload text-4xl text-secondary" />
       <p:outputLabel value="#{ivy.cms.co('/Path/To/DragAndDropLabel')}" styleClass="text-secondary" />
       <p:link value="#{ivy.cms.co('/Path/To/BrowseLabel')}"
         onclick="PF('fileUpload').show();return false" />
@@ -64,7 +64,7 @@ The drop zone panel should contain:
     <!-- Uploaded state: file preview -->
     <h:panelGroup rendered="#{not empty data.inputFile}"
       styleClass="flex align-items-center gap-2">
-      <i class="si si-file-pdf text-2xl" />
+      <i class="ti ti-file-type-pdf text-2xl" />
       <h:outputText value="#{data.inputFile.name}" styleClass="font-semibold" />
     </h:panelGroup>
   </p:outputPanel>
@@ -73,7 +73,7 @@ The drop zone panel should contain:
   <h:panelGroup styleClass="flex justify-content-end mt-2"
     rendered="#{not empty data.inputFile}">
     <p:commandButton id="remove-file-btn"
-      icon="si si-bin-1" styleClass="ui-button-outlined ui-button-danger"
+      icon="ti ti-trash" styleClass="ui-button-outlined ui-button-danger"
       ariaLabel="#{ivy.cms.co('/Labels/Remove')}"
       actionListener="#{logic.removeFile}"
       process="@this" update="file-upload-panel" />
@@ -108,132 +108,78 @@ For image uploads, add a `p:graphicImage` preview instead of a text-based file n
 - **Do NOT** use a separate upload button with `mode="simple"` — use `auto="true"` instead.
 - **Do NOT** bind `value` directly with `mode="simple"` — use `listener` for server-side handling.
 - **Do NOT** forget `update` on the `p:fileUpload` to refresh the panel after upload.
-- **Do NOT** use `java.nio.file.Files.write(Path, byte[])` in IvyScript — it resolves to the wrong overload (`Iterable<CharSequence>`). Use `java.io.FileOutputStream` instead.
-- **Do NOT** create a managed bean for file upload — use `#{logic.*}` with `HtmlDialogMethodStart` in the dialog process instead.
+- **Do NOT** create a managed bean for file upload — use `#{logic.*}` with `HtmlDialogMethodStart` in the dialog process instead. This is the one exception to the "prefer a bean" guidance in `managed-bean.md`.
 
 ## Process Logic Checklist
 
-After creating or updating the XHTML file upload, **always verify the dialog data class and process** have the required fields and methods.
+Verify the data class and process after creating or updating the XHTML.
+MethodStart JSON and a complete assembled process: `logic-process.md` in the `axon-ivy-process` skill.
 
-### Required Steps
+1. **Data class** — needs `inputFile` (`java.io.File`) and `uploadedFile` (`Object`):
 
-1. **Verify the data class** — the dialog data class (`.d.json`) must have these fields:
-   - A `java.io.File` field for the uploaded file (e.g., `inputFile`)
-   - An `Object` field for temporary event storage (e.g., `uploadedFile`)
+```json
+{
+  "fields": [
+    { "name": "inputFile", "type": "java.io.File", "comment": "Uploaded file" },
+    { "name": "uploadedFile", "type": "Object", "comment": "Temporary PrimeFaces uploaded file reference" }
+  ]
+}
+```
 
-   If the fields are missing, add them:
-   ```json
-   {
-     "fields": [
-       {
-         "name": "inputFile",
-         "type": "java.io.File",
-         "comment": "Uploaded file"
-       },
-       {
-         "name": "uploadedFile",
-         "type": "Object",
-         "comment": "Temporary PrimeFaces uploaded file reference"
-       }
-     ]
-   }
-   ```
+2. **`upload` method** — `HtmlDialogMethodStart` named `upload(FileUploadEvent)`, `input.map` maps `param.event` → `out.uploadedFile`, connected to:
 
-2. **Verify the upload method in the process** — the dialog process (`.p.json`) must have a `HtmlDialogMethodStart` for `upload` that accepts `FileUploadEvent`, maps it to the data field, and connects to a Script step that saves the file:
+```json
+{
+  "type": "Script",
+  "name": "Save uploaded file",
+  "config": {
+    "output": {
+      "code": [
+        "import org.primefaces.event.FileUploadEvent;",
+        "",
+        "FileUploadEvent event = in.uploadedFile as FileUploadEvent;",
+        "if (event != null && event.getFile() != null) {",
+        "  java.io.File tempFile = java.io.File.createTempFile(\"upload_\", \".pdf\");",
+        "  java.io.FileOutputStream fos = new java.io.FileOutputStream(tempFile);",
+        "  fos.write(event.getFile().getContent());",
+        "  fos.close();",
+        "  in.inputFile = tempFile;",
+        "}",
+        "in.uploadedFile = null;"
+      ]
+    }
+  }
+}
+```
 
-   **HtmlDialogMethodStart:**
-   ```json
-   {
-     "id": "f_upload",
-     "type": "HtmlDialogMethodStart",
-     "name": "upload(FileUploadEvent)",
-     "config": {
-       "signature": "upload",
-       "input": {
-         "params": [
-           { "name": "event", "type": "org.primefaces.event.FileUploadEvent", "desc": "" }
-         ],
-         "map": {
-           "out.uploadedFile": "param.event"
-         }
-       },
-       "guid": "UNIQUE_GUID"
-     }
-   }
-   ```
+XHTML uses `listener="#{logic.upload}"` — no parentheses, no arguments; PrimeFaces passes the event.
 
-   **Script (Save uploaded file):**
-   ```json
-   {
-     "type": "Script",
-     "name": "Save uploaded file",
-     "config": {
-       "output": {
-         "code": [
-           "import org.primefaces.event.FileUploadEvent;",
-           "",
-           "FileUploadEvent event = in.uploadedFile as FileUploadEvent;",
-           "if (event != null && event.getFile() != null) {",
-           "  java.io.File tempFile = java.io.File.createTempFile(\"upload_\", \".pdf\");",
-           "  java.io.FileOutputStream fos = new java.io.FileOutputStream(tempFile);",
-           "  fos.write(event.getFile().getContent());",
-           "  fos.close();",
-           "  in.inputFile = tempFile;",
-           "}",
-           "in.uploadedFile = null;"
-         ]
-       }
-     }
-   }
-   ```
+**Never** `java.nio.file.Files.write(path, bytes)` — IvyScript picks the `Iterable<CharSequence>` overload → `ClassCastException: Byte cannot be cast to CharSequence`. Use `FileOutputStream`.
 
-   **CRITICAL — Writing bytes in IvyScript**: Do NOT use `java.nio.file.Files.write(tempFile.toPath(), bytes)` — IvyScript resolves it to the `Iterable<CharSequence>` overload, causing `ClassCastException: Byte cannot be cast to CharSequence`. Always use `java.io.FileOutputStream` instead.
+3. **`removeFile` method** — `HtmlDialogMethodStart` named `removeFile()`, button uses `actionListener="#{logic.removeFile}"`, connected to:
 
-   - The `listener` attribute in XHTML must be `#{logic.upload}` — no parentheses, no arguments.
-   - The `HtmlDialogMethodStart` receives the `FileUploadEvent` automatically from PrimeFaces.
-   - The `input.map` maps `param.event` to `out.uploadedFile` so the Script step can access it via `in.uploadedFile`.
+```json
+{
+  "type": "Script",
+  "name": "Clear uploaded file",
+  "config": {
+    "output": {
+      "code": [
+        "if (in.inputFile != null && in.inputFile.exists()) {",
+        "  in.inputFile.delete();",
+        "}",
+        "in.inputFile = null;"
+      ]
+    }
+  }
+}
+```
 
-3. **Verify the removeFile method in the process** — if the XHTML has a remove/delete button, the process must have a `HtmlDialogMethodStart` for `removeFile` connected to a Script step:
+4. **Rendered-state bindings** — bind to `#{data.inputFile}`, not a bean:
+   - `rendered="#{empty data.inputFile}"` — upload zone
+   - `rendered="#{not empty data.inputFile}"` — preview + remove button
+   - `disabled="#{empty data.inputFile}"` — submit
 
-   **HtmlDialogMethodStart:**
-   ```json
-   {
-     "type": "HtmlDialogMethodStart",
-     "name": "removeFile()",
-     "config": {
-       "signature": "removeFile",
-       "guid": "UNIQUE_GUID"
-     }
-   }
-   ```
-
-   **Script (Clear uploaded file):**
-   ```json
-   {
-     "type": "Script",
-     "name": "Clear uploaded file",
-     "config": {
-       "output": {
-         "code": [
-           "if (in.inputFile != null && in.inputFile.exists()) {",
-           "  in.inputFile.delete();",
-           "}",
-           "in.inputFile = null;"
-         ]
-       }
-     }
-   }
-   ```
-
-   - The remove button in XHTML must use `actionListener="#{logic.removeFile}"`.
-
-4. **Verify rendered-state bindings** — the XHTML must use `#{data.inputFile}` (not a bean reference) for all rendering conditions:
-   - `rendered="#{empty data.inputFile}"` — show upload zone
-   - `rendered="#{not empty data.inputFile}"` — show file preview and remove button
-   - `disabled="#{empty data.inputFile}"` — disable submit when no file uploaded
-
-5. **Verify process flow connections** — each method flow must end with `HtmlDialogEnd` (NOT `HtmlDialogExit`):
-   - `HtmlDialogMethodStart (upload)` → `Script (save)` → `HtmlDialogEnd`
-   - `HtmlDialogMethodStart (removeFile)` → `Script (clear)` → `HtmlDialogEnd`
-
-   **CRITICAL**: `HtmlDialogExit` exits the dialog and returns to the calling process. Only use it for navigation events like submit. For methods that should keep the dialog open (upload, removeFile, validate), always use `HtmlDialogEnd`.
+5. **Flow ends** — both method flows end with `HtmlDialogEnd` so the dialog stays open:
+   - `upload` → `Script (save)` → `HtmlDialogEnd`
+   - `removeFile` → `Script (clear)` → `HtmlDialogEnd`

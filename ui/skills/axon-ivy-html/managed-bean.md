@@ -1,19 +1,22 @@
 # Dialog Bean (Controller Bean or JSF Managed Bean)
 
 Rules for the Java bean behind an Axon Ivy HTML Dialog. **Prefer a bean over Axon Ivy process
-logic** for UI-related behavior (validation, dynamic visibility, uploads, autocomplete). Keep
+logic** for UI-related behavior (validation, dynamic visibility, autocomplete). Keep
 process logic (`#{logic.xxx}`) only for navigation (submit/cancel).
+
+**Exception — file upload.** Handle `p:fileUpload` with `#{logic.upload}` and a
+`HtmlDialogMethodStart`, not a bean. See `file-upload.md`.
 
 ## Two valid patterns — ASK the user first
 
 Axon Ivy supports **two equally valid** ways to back a dialog with Java. Pick one per dialog and
 stay consistent.
 
-| | **A. Controller bean** (Ivy-native) | **B. JSF managed bean** |
+| | **A. Controller bean** (Ivy-native) | **B. CDI/JSF managed bean** |
 |---|---|---|
-| Wiring | Plain POJO held as a `bean` **field on the dialog data class**; referenced as `#{data.bean.*}` | `@ManagedBean @ViewScoped` class referenced as `#{beanName.*}` |
+| Wiring | Plain POJO held as a `bean` **field on the dialog data class**; referenced as `#{data.bean.*}` | `@Named @ViewScoped` class referenced as `#{beanName.*}` |
 | Init | In `HtmlDialogStart` `input.code`: `out.bean.init();` (Ivy auto-instantiates the `bean` field — do NOT use `new`) | `@PostConstruct` or a `preRender()` called from `<f:event>` |
-| Annotations | **None** (plain `Serializable` POJO) | `@ManagedBean @ViewScoped` (`javax.faces.bean.*`) |
+| Annotations | **None** (plain `Serializable` POJO) | `@Named` (`jakarta.inject`) + `@ViewScoped` (`jakarta.faces.view`) |
 | Data access | Bean *is* `data.bean`; holds its own state, may call services/DAOs directly | Bean is independent; **XHTML bridges** all `#{data.*}` ↔ bean |
 | Best when | Generated/round-tripped by **Axon Ivy Designer**; bean owns the dialog's whole state | Reusable component logic, autocomplete, behavior shared across dialogs |
 
@@ -21,20 +24,19 @@ stay consistent.
 > clearly uses one (then match the existing convention). Suggested question:
 >
 > *"Should I back this dialog with a **controller bean** (`#{data.bean}`, the Ivy-Designer-native
-> style) or a **JSF `@ManagedBean`**?"*
+> style) or a **CDI `@Named @ViewScoped` bean**?"*
 >
 > If unsure and the project has a reference: the controller bean is what Axon Ivy Designer
 > generates and round-trips; the JSF managed bean is the portable standard-JSF style.
 
 Then follow the matching section below. **File location for both:** `src/package/bean/` (or
-`src/package/managedbean/`). **NEVER** put the bean in `src_hd/`.
+`src/package/managedbean/`). **NEVER** put the bean in `dialog/`.
 
 ## When to Create a Bean
 
 Create a bean (either pattern) when a dialog needs:
 - Validation or business logic beyond simple field binding
 - Dynamic UI visibility/read-only control
-- File upload/download handling
 - Autocomplete / dynamic dropdown logic
 - Any reusable UI behavior
 
@@ -54,8 +56,8 @@ package package.bean;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.FacesContext;
 
 public class MyDialogBean implements Serializable {
 
@@ -100,11 +102,11 @@ Rules:
 
 ### 2. The data class — declare the `bean` field
 
-`src_hd/<ns-path>/<Dialog>/<Dialog>Data.d.json`:
+`dialog/<ns-path>/<Dialog>/<Dialog>Data.d.json`:
 
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
   "simpleName" : "MyDialogData",
   "namespace" : "package.path.MyDialog",
   "fields" : [ {
@@ -160,18 +162,25 @@ Rules:
 Notes:
 - No `<f:event preRenderComponent>` needed — init runs in the dialog start (`out.bean.init()`).
 - Use `#{data.bean.method}` for business actions that **stay** in the dialog; use `#{logic.xxx}`
-  only for navigation events (`submit` → `HtmlDialogExit`, `close` → exit). See `logic-process.md`.
+  only for navigation events (`submit` → `HtmlDialogExit`, `close` → exit). See `logic-process.md` in the `axon-ivy-process` skill.
 - Avoid entity-typed `p:selectOneMenu` converters by binding to a String id and resolving in an
   AJAX listener (`onChange`).
 
 ---
 
-## Pattern B — JSF managed bean (`@ManagedBean`)
+## Pattern B — CDI/JSF managed bean (`@Named @ViewScoped`)
 
-A standard JSF `@ManagedBean @ViewScoped` class referenced as `#{beanName.*}`, independent of the
-dialog data class. The XHTML bridges all data between `#{data.*}` and the bean.
+A standard CDI bean referenced as `#{beanName.*}`, independent of the dialog data class. The XHTML
+bridges all data between `#{data.*}` and the bean.
+
+> **Ivy 14 = Jakarta Faces 4.** The legacy `javax.faces.bean.*` package (`@ManagedBean`,
+> `javax.faces.bean.ViewScoped`) was **removed** in Faces 4 — using it does not compile. Use
+> `jakarta.inject.Named` + `jakarta.faces.view.ViewScoped`. The EL name defaults to the
+> decapitalized class name (`MyBean` → `#{myBean}`); override it with `@Named("otherName")`.
 
 **Key principle: the bean NEVER references `#{data.xxx}` or `#{logic.xxx}`. The XHTML handles ALL data bridging.**
+
+This is the pattern the Axon Ivy **Portal** uses throughout — it has no Pattern A beans at all.
 
 ### Class Structure
 
@@ -179,10 +188,11 @@ dialog data class. The XHTML bridges all data between `#{data.*}` and the bean.
 package package.managedbean;
 
 import java.io.Serializable;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
 
-@ManagedBean
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Named;
+
+@Named
 @ViewScoped
 public class MyBean implements Serializable {
 
@@ -215,7 +225,8 @@ public class MyBean implements Serializable {
 ### Rules
 
 1. **Always `implements Serializable`** — `@ViewScoped` beans must be serializable.
-2. **Always `@ManagedBean @ViewScoped`** — one bean instance per page view.
+2. **Always `@Named` + `jakarta.faces.view.ViewScoped`** — one bean instance per page view. Never
+   `javax.faces.bean.*` (removed in Faces 4) and never `jakarta.faces.bean.*` (does not exist).
 3. **Use `preRender()` for init** — never use constructor for Ivy API calls.
 4. **Bean NEVER references `#{data.xxx}` or `#{logic.xxx}`** — XHTML handles bridging.
 5. **All bridged fields need getter AND setter** — `setPropertyActionListener` calls setters.
@@ -263,12 +274,13 @@ package com.axonivy.portal.components.bean;
 
 import java.io.Serializable;
 import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.el.MethodExpression;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
 
-@ManagedBean
+import jakarta.annotation.PostConstruct;
+import jakarta.el.MethodExpression;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Named;
+
+@Named
 @ViewScoped
 public class RoleSelectionBean implements Serializable {
 
@@ -292,7 +304,7 @@ public class RoleSelectionBean implements Serializable {
 }
 ```
 
-**XHTML (composite component):** `src_hd/.../RoleSelection.xhtml`
+**XHTML (composite component):** `dialog/.../RoleSelection/RoleSelection.xhtml`
 
 ```xml
 <cc:interface componentType="IvyComponent">
@@ -320,30 +332,6 @@ public class RoleSelectionBean implements Serializable {
 
 ---
 
-## Shared — File Upload Listener (both patterns)
-
-The bean method must accept `FileUploadEvent` (not no-arg):
-
-```java
-import org.primefaces.event.FileUploadEvent;
-
-public void upload(FileUploadEvent event) {
-  if (event == null || event.getFile() == null) return;
-  try {
-    java.io.File tempFile = java.io.File.createTempFile("upload_", ".pdf");
-    java.nio.file.Files.write(tempFile.toPath(), event.getFile().getContent());
-    this.inputFile = tempFile;
-  } catch (Exception e) {
-    Ivy.log().error("Failed to process uploaded file", e);
-  }
-}
-
-public void removeFile() {
-  if (inputFile != null && inputFile.exists()) inputFile.delete();
-  inputFile = null;
-}
-```
-
 ## Shared — Displaying Messages
 
 ```java
@@ -353,7 +341,7 @@ FacesContext.getCurrentInstance().addMessage("form-messages",
 
 ## Common Mistakes
 
-- **Bean in `src_hd/`** — always use `src/package/bean/` or `src/package/managedbean/`.
+- **Bean in `dialog/`** — always use `src/package/bean/` or `src/package/managedbean/`.
 - **Mixing the patterns in one dialog** — pick A or B and be consistent.
 - **Constructor with Ivy API** — use `init()` (Pattern A) or `preRender()`/`@PostConstruct` (Pattern B).
 - **(Pattern A) Using `out.bean = new MyBean();` in the start code** — INVALID. Ivy auto-instantiates the
@@ -364,5 +352,4 @@ FacesContext.getCurrentInstance().addMessage("form-messages",
 - **(Pattern A) Forgetting `out.bean.init();`** in the `HtmlDialogStart` code — the bean is created but not initialized.
 - **(Pattern A) Declaring the `bean` field** missing from the dialog `…Data.d.json` — `#{data.bean}` won't resolve.
 - **(Pattern B) Missing setter** for fields used in `setPropertyActionListener` — silently fails.
-- **No-arg upload method** with `listener` attribute — must accept `FileUploadEvent`.
-```
+- **Handling `p:fileUpload` in a bean** — use `#{logic.upload}` + `HtmlDialogMethodStart`; see `file-upload.md`.

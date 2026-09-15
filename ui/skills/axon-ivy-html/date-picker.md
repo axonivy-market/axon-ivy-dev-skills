@@ -38,7 +38,7 @@ Rules and patterns for using `<p:datePicker>` in Axon Ivy HTML Dialogs.
 Use two `p:datePicker` components side by side for date ranges. The `p:ajax` on the start date can update the end date to enforce constraints.
 
 ```xml
-<div class="ui-g-6 ui-sm-12">
+<div class="col-12 md:col-6">
   <p:outputLabel for="from-date" value="From:" />
   <p:datePicker id="from-date"
     value="#{data.fromDate}"
@@ -52,7 +52,7 @@ Use two `p:datePicker` components side by side for date ranges. The `p:ajax` on 
   </p:datePicker>
 </div>
 
-<div class="ui-g-6 ui-sm-12">
+<div class="col-12 md:col-6">
   <p:outputLabel for="to-date" value="To:" />
   <p:datePicker id="to-date"
     value="#{data.toDate}"
@@ -108,4 +108,11 @@ Use two `p:datePicker` components side by side for date ranges. The `p:ajax` on 
 WRONG: pattern="MMM dd, yyyy"   ← causes "'Mar 07, 2025' could not be understood as a date"
 RIGHT: pattern="MM/dd/yyyy"
 RIGHT: pattern="dd.MM.yyyy"
+```
+
+7. **When `showIcon="true"`, set the width on both `styleClass` and `inputStyleClass`** — `styleClass` alone stretches the wrapper, not the input.
+
+```
+WRONG: styleClass="w-full"
+RIGHT: styleClass="w-full flex" inputStyleClass="flex-1"
 ```

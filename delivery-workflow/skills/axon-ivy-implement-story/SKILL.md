@@ -53,8 +53,8 @@ Load the appropriate skill(s) based on story type:
 | Roles + Config | `axon-ivy-user-role-config` | — |
 
 > When loading `axon-ivy-html` for a UI creation task:
-> - Creating a full-page user task dialog → also load `axon-ivy-html/dialog-template.md`
-> - Creating a reusable composite component → also load `axon-ivy-html/dialog-component.md`
+> - Creating a full-page user task dialog → also load `axon-ivy-html/dialogs.md`
+> - Creating a reusable composite component → also load `axon-ivy-html/dialogs.md`
 
 ### Step 4: Implement Part by Part
 
