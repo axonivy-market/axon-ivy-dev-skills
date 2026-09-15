@@ -148,6 +148,10 @@ Load these only when the process contains the relevant element type:
 - `task` — task assignment configuration (name, description, responsible, expiry, customFields)
 - `output.map` — maps dialog `result.*` back to process data
 
+**Note — data-class boundary**: `call.map` and `output.map` bridge the process's data class and the dialog's **separate** data class — nothing crosses automatically, in either direction. See `logic-process.md` → "CRITICAL — Process Data vs Dialog Data Are Separate".
+
+**UserTask is a save point.** Process data is persisted at task creation and restored when the task is worked. A data-class field that must survive to the dialog has to be marked `PERSISTENT` (see `axon-ivy-data`) **or** be re-materialized here in `call.code` (see skills about persistence). A non-persistent, non-reloaded field arrives **null** in the dialog.
+
 **Task responsible types:**
 
 - `ROLE_FROM_ATTRIBUTE` — role name from expression: `"script": "in.roleName"`
@@ -227,6 +231,8 @@ Use `DialogCall` to display an HTML dialog. Typically connected after a `TaskSwi
 ```
 
 **Note**: `dialog` uses `.` (dot) package separators. This is different from `SubProcessCall.processCall` which uses `/` (slash) path separators.
+
+**Note — data-class boundary**: the dialog has its own data class; pass values in via the dialog's `HtmlDialogStart.input.map` and read them back through `output.map` here. Nothing crosses automatically. See `logic-process.md` → "CRITICAL — Process Data vs Dialog Data Are Separate".
 
 **CRITICAL — Dialog ID is the folder path, NOT folder + class name.** The dialog ID is composed of the package (parent folders under `src_hd/`) plus the dialog folder name. The dialog folder name appears **once** at the end — do NOT append it again. Same rule applies to `UserTask.dialog`.
 

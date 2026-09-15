@@ -2,6 +2,23 @@
 
 Element types used in HTML Dialog process files (`dialog/**/*Process.p.json`). These processes handle the logic behind dialog UIs — upload handling, validation, data manipulation, and navigation.
 
+## CRITICAL — Process Data vs Dialog Data Are Separate
+
+A dialog has its **own data class** (`*Data.d.json`, referenced by the dialog process's `config.data`). It is a **different object** from the calling process's master data class. **Nothing crosses automatically** — a value is visible inside the dialog only if you mapped it in, and returns to the process only if you mapped it out. You must bridge the boundary in **both directions**:
+
+| Direction | Caller side | Dialog side |
+|---|---|---|
+| **In** (process → dialog) | `UserTask`/`DialogCall` `call.map`: `param.x = in.x` | `HtmlDialogStart.input.map`: `out.x = param.x` (read downstream as `in.x`) |
+| **Out** (dialog → process) | `output.map`: `out.x = result.x` | `HtmlDialogStart.result.map`: `result.x = in.x` |
+
+Every value the dialog needs must have BOTH halves of the "In" chain; every value the process needs back must have BOTH halves of the "Out" chain. A half-mapping silently fails.
+
+Symptom: dialog field is empty / "" (Ivy String default), or caller reports
+         Output 'out.x': Field not found.
+Cause:   a missing or mismatched boundary map — not a bug in the dialog logic itself.
+
+Because the data classes are separate, business logic that needs process data should run **in the process** and pass a finished result into the dialog to display (see `axon-ivy-html` → "Separation of Concerns"). Don't reach for process data from inside dialog logic that wasn't mapped in.
+
 ## CRITICAL — End Element Rules
 
 **Choose the correct end element based on whether the flow should exit the dialog:**

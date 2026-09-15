@@ -41,6 +41,20 @@ See `schema.json` in this skill folder for full JSON schema reference.
 
 **Modifiers:** `PERSISTENT`, `ID`, `GENERATED`, `NOT_NULLABLE`, `UNIQUE`, `NOT_UPDATEABLE`, `NOT_INSERTABLE`, `VERSION`
 
+### The PERSISTENT modifier — survives a task save point
+
+`PERSISTENT` matters for ordinary **process data**, not just JPA entities. A **UserTask (and any wait/signal) is a save point**: Ivy persists the process data there and restores it when the step resumes. A field **without** `PERSISTENT` is **dropped to null** across that save point.
+
+Big object should not be PERSISTENT because the task's serialized data will consume a lot of memory. We should minimalistic with persisting data, only set it when really needed. Alternatively, we can use a database or the Axon Ivy business data repository (see persistence skills) to store the data and only persist the ID in the process data.
+
+Any field whose value must still be present *after* a UserTask (e.g. a result object the task's dialog will display) needs `"modifiers": ["PERSISTENT"]`; a custom-type field also needs its Java type to `implement Serializable`.
+
+```json
+{ "name": "inviteResult", "type": "com.example.InviteResult", "modifiers": ["PERSISTENT"] }
+```
+
+**Symptom of a missing flag:** the value is correct in a Script/log right up to the UserTask, then null in the task's dialog — and it looks like a broken mapping, but the mapping is navigating a null.
+
 ## Field Type Reference
 
 | Type | JSON value | Notes |
