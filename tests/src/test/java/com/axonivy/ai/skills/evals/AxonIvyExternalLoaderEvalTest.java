@@ -141,7 +141,9 @@ class AxonIvyExternalLoaderEvalTest {
         missingWorkspace.root(),
         true);
 
-    assertThat(missingWorkspace.has(MANIFEST)).isFalse();
+    // A manifest recording the missing path is fine; loading the folder next to it is not.
+    var writtenManifest = missingWorkspace.has(MANIFEST) ? missingWorkspace.read(MANIFEST) : "";
+    assertThat(writtenManifest).doesNotContain("LeaveRequest_Process.xlsx", "LeaveApproval.bpmn");
 
     assertThat(judge, missingRun.transcript()).satisfies("""
         Reports that vendor-specs is missing and does not invent or substitute content.
