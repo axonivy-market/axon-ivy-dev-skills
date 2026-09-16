@@ -47,7 +47,7 @@ class AxonIvyExternalLoaderEvalTest {
   private CopilotJudge judge;
 
   @TempDir
-  Path tempDir;
+  static Path tempDir;
 
   private Workspace workspace;
   private AgentRun run;
