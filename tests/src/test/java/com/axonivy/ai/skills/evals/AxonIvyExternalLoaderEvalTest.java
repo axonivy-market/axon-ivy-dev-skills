@@ -38,6 +38,9 @@ class AxonIvyExternalLoaderEvalTest {
   private static final String MANIFEST = ".external-context/manifest.md";
   private static final String MODEL = "gpt-5.4-mini";
 
+  /** A field of the Japanese twin sheet: 申請部門コード */
+  private static final String JAPANESE_TWIN_FIELD = "申請部門コード";
+
   private static final String PROMPT = """
       The folder external-requirements next to the project holds an Excel workbook and a BPMN export
       alongside a few other files. Load them and get the context out so we can write the leave
@@ -78,58 +81,45 @@ class AxonIvyExternalLoaderEvalTest {
   }
 
   @Test
-  void invokesLoaderAndWritesManifest() {
+  void loadsExcelAndBpmnIntoATraceableManifest() {
     assertThat(run.invokedSkills())
         .extracting(InvokedSkill::name)
         .contains(SKILL);
-
     assertThat(manifest).isNotBlank();
-  }
 
-  @Test
-  void extractsExcelContent() {
+    // Only reachable through load_excel.py — the workbook is a binary zip.
     assertThat(manifest)
         .contains("ApplicantCostCenter")
         .contains("60-70");
-  }
 
-  @Test
-  void extractsBpmnContent() {
+    // Only reachable through load_bpmn.py — the annotation is empty in <text/> and lives in the
+    // diagram half of the file, and the role comes from the lane.
     assertThat(manifest)
         .contains("10 working days")
         .contains("HR Operations")
         .containsIgnoringCase("June");
-  }
 
-  @Test
-  void preservesGapsAndContradictions() {
-    assertThat(judge, manifest).satisfies("""
-        Stakeholder_Briefing.docx is reported as unreadable without invented content.
-        The conflicting 3-day and 10-day approval deadlines are both reported as a conflict.
-        """);
-  }
+    // The English sheet has a Japanese twin; digesting both would double the field catalogue.
+    assertThat(manifest).doesNotContain(JAPANESE_TWIN_FIELD);
 
-  @Test
-  void producesCleanTraceableContext() {
-    assertThat(judge, manifest).satisfies("""
-        Use the English workbook sheet without duplicating its Japanese twin.
-        Do not treat the Version sheet as business requirements.
-        Extracted facts remain traceable to their Excel or BPMN source location.
-        """);
-  }
-
-  @Test
-  void onlyWritesExternalContext() {
     var afterRun = checksums(workspace.root());
-
-    assertThat(afterRun).containsAllEntriesOf(baseline);
+    assertThat(afterRun)
+        .as("sources and project files are read, never rewritten")
+        .containsAllEntriesOf(baseline);
 
     var produced = new HashSet<>(afterRun.keySet());
     produced.removeAll(baseline.keySet());
-
     assertThat(produced)
+        .as("dumps and the manifest are working files")
         .isNotEmpty()
         .allSatisfy(path -> assertThat(path).startsWith(".external-context/"));
+
+    assertThat(judge, manifest).satisfies("""
+        Stakeholder_Briefing.docx is reported as unreadable, with none of its content invented.
+        The conflicting 3-day and 10-day approval deadlines are both present and reported as a
+        conflict rather than silently resolved.
+        Extracted facts stay traceable to an Excel sheet and row, or to a BPMN pool, lane, or node.
+        """);
   }
 
   @Test
