@@ -39,8 +39,9 @@ class AxonIvyExternalLoaderEvalTest {
   private static final String MODEL = "gpt-5.4-mini";
 
   private static final String PROMPT = """
-      I dropped a folder called external-requirements next to the project.
-      Pull the content out of those files so we can write the leave approval requirements from it.
+      The folder external-requirements next to the project holds an Excel workbook and a BPMN export
+      alongside a few other files. Load them and get the context out so we can write the leave
+      approval requirements from it.
       """;
 
   private CopilotAgentRunner runner;
@@ -136,7 +137,7 @@ class AxonIvyExternalLoaderEvalTest {
     var missingWorkspace = materializeProjectWithSources(missingPathDir);
 
     var missingRun = runner.run(
-        "Extract vendor-specs so we can write requirements from it.",
+        "Load the Excel and BPMN files in vendor-specs so we can write requirements from them.",
         missingWorkspace.root(),
         true);
 

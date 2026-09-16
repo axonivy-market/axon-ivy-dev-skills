@@ -1,8 +1,12 @@
 ---
-
 name: axon-ivy-external-loader
-description: Load Excel (.xlsx) and BPMN (.bpmn) requirement sources that cannot be read directly, and produce one traceable digest before requirements or implementation work.
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+description: Use this skill when need to load, to get context from Excel (.xlsx) and BPMN (.bpmn) files.
+---
+
+## Requirements
+
+* Python 3 on PATH (`python` or `python3`).
+* load_excel.py` needs `openpyxl`; install with `pip install openpyxl`.
 
 ## Use
 
@@ -18,9 +22,8 @@ Input is a file, folder, or glob. Folders are not recursive. If the path does no
 
 ## Load
 
-Inventory the requested sources first. Ignore temporary/system files such as `~$*`, `.DS_Store`, and `Thumbs.db`.
-
-Run the appropriate loader:
+Only load the suitable file types from the sources run the appropriate loaders.
+If missing `openpyxl`, run `pip install openpyxl` and retry once.
 
 ```bash
 python <skill-dir>/loaders/load_excel.py <path> --out .external-context/excel_dump.txt
@@ -31,7 +34,6 @@ Useful options:
 
 * Excel: `--sheet NAME`, `--max-rows N`
 * BPMN: `--format flow`, `--format prose`
-* Use `--help` for others.
 
 A `.xml` file whose root element is `<definitions>` may be passed directly to the BPMN loader.
 
@@ -82,7 +84,7 @@ Source: <requested path>
 - Spec_v2.docx — unreadable; request a supported export.
 ```
 
-Keep dumps and the manifest under `.external-context/`. They are temporary working files, not project sources.
+Keep dumps and the manifest under `.external-context/`. They are temporary working files.
 
 Only persist the digest elsewhere when the user explicitly asks.
 
