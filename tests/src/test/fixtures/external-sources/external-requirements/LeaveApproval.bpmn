@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:igx="http://www.igrafx.com/bpmn/extensions"
+                  id="Definitions_LeaveApproval"
+                  targetNamespace="http://contoso.example/leave"
+                  exporter="iGrafx Process" exporterVersion="17.2">
+
+  <bpmn:collaboration id="Collab_1" name="Leave Approval">
+    <bpmn:participant id="Pool_HR" name="Contoso HR" processRef="Process_LeaveApproval"/>
+  </bpmn:collaboration>
+
+  <bpmn:process id="Process_LeaveApproval" name="Leave Approval" isExecutable="false">
+    <bpmn:documentation>Handles paid and unpaid leave requests for all permanent staff.</bpmn:documentation>
+
+    <igx:phase id="Phase_1" name="Intake"/>
+    <igx:phase id="Phase_2" name="Decision"/>
+
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_Employee" name="Employee">
+        <bpmn:flowNodeRef>Start_Request</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Submit</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_HR" name="HR Operations">
+        <bpmn:flowNodeRef>Task_Approve</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Decision</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Approved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Rejected</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:startEvent id="Start_Request" name="Leave needed">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:userTask id="Task_Submit" name="Submit Leave Request">
+      <bpmn:documentation>The employee files the request in the self-service portal.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <igx:customDataValue name="bp_Department">Employee Self-Service</igx:customDataValue>
+        <igx:customDataValue name="bp_Content">1. Pick the absence category.
+2. Enter the first and last day of absence.
+3. Name a substitute colleague.</igx:customDataValue>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:userTask id="Task_Approve" name="Manager Approval">
+      <bpmn:documentation>The line manager reviews the request against the team absence calendar.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <igx:customDataValue name="bp_Department">HR Operations</igx:customDataValue>
+        <igx:customDataValue name="bp_b010">SAP HR, Outlook Calendar</igx:customDataValue>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:exclusiveGateway id="Gw_Decision" name="Approved?" gatewayDirection="Diverging">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_Yes</bpmn:outgoing>
+      <bpmn:outgoing>Flow_No</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:endEvent id="End_Approved" name="Leave booked">
+      <bpmn:incoming>Flow_Yes</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="End_Rejected" name="Request declined">
+      <bpmn:incoming>Flow_No</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="Start_Request" targetRef="Task_Submit"/>
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_Submit" targetRef="Task_Approve"/>
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_Approve" targetRef="Gw_Decision"/>
+    <bpmn:sequenceFlow id="Flow_Yes" name="Approved" sourceRef="Gw_Decision" targetRef="End_Approved"/>
+    <bpmn:sequenceFlow id="Flow_No" name="Rejected" sourceRef="Gw_Decision" targetRef="End_Rejected"/>
+
+    <!-- The exporter leaves the semantic text empty and stores the real content in the diagram below. -->
+    <bpmn:textAnnotation id="Note_Deadline">
+      <bpmn:text/>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Deadline" sourceRef="Note_Deadline" targetRef="Task_Approve"/>
+
+    <bpmn:textAnnotation id="Note_Volume">
+      <bpmn:text/>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Volume" sourceRef="Note_Volume" targetRef="Task_Submit"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="Diagram_1">
+    <bpmndi:BPMNPlane id="Plane_1" bpmnElement="Collab_1">
+      <bpmndi:BPMNShape id="Shape_Pool" bpmnElement="Pool_HR">
+        <dc:Bounds x="120" y="80" width="900" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Submit" bpmnElement="Task_Submit">
+        <dc:Bounds x="260" y="140" width="120" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Approve" bpmnElement="Task_Approve">
+        <dc:Bounds x="440" y="140" width="120" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Note_Deadline" bpmnElement="Note_Deadline">
+        <dc:Bounds x="440" y="280" width="220" height="60"/>
+        <bpmndi:BPMNLabel>
+          <igx:htmlText>Manager approval must complete within 10 working days.</igx:htmlText>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Note_Volume" bpmnElement="Note_Volume">
+        <dc:Bounds x="260" y="280" width="220" height="60"/>
+        <bpmndi:BPMNLabel>
+          <igx:htmlText>Peak season runs from June to August, when the substitute field becomes mandatory.</igx:htmlText>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

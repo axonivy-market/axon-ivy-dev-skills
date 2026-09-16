@@ -1,0 +1,91 @@
+---
+
+name: axon-ivy-external-loader
+description: Load Excel (.xlsx) and BPMN (.bpmn) requirement sources that cannot be read directly, and produce one traceable digest before requirements or implementation work.
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Use
+
+Use when the user or another skill points to external Excel or BPMN requirement files.
+
+* `.xlsx` → `load_excel.py`
+* `.bpmn` → `load_bpmn.py`
+* Read supported text formats directly.
+* Report unsupported/unreadable files as gaps.
+* Read only. Never modify source files.
+
+Input is a file, folder, or glob. Folders are not recursive. If the path does not exist or resolves to nothing, report it and stop. Never guess another path.
+
+## Load
+
+Inventory the requested sources first. Ignore temporary/system files such as `~$*`, `.DS_Store`, and `Thumbs.db`.
+
+Run the appropriate loader:
+
+```bash
+python <skill-dir>/loaders/load_excel.py <path> --out .external-context/excel_dump.txt
+python <skill-dir>/loaders/load_bpmn.py <path> --out .external-context/bpmn_dump.txt
+```
+
+Useful options:
+
+* Excel: `--sheet NAME`, `--max-rows N`
+* BPMN: `--format flow`, `--format prose`
+* Use `--help` for others.
+
+A `.xml` file whose root element is `<definitions>` may be passed directly to the BPMN loader.
+
+Always read the generated dump. A successful loader message is not extracted content. If a dump is too large, search/read the relevant sections and record that limitation.
+
+## Digest
+
+Create a factual digest for each source covering relevant structure and content such as fields, roles, rules, volumes, deadlines, SLAs, thresholds, and integrations.
+
+Keep every fact traceable:
+
+* Excel: file + sheet + cell/row
+* BPMN: file + process/pool/lane/node
+
+Apply these rules:
+
+* Prefer an English `*_EN` sheet over an equivalent translated twin; do not digest both.
+* Skip exporter/configuration sheets such as `Version`, `ParameterSheet`, and `ConfigItem` as business requirements.
+* Account for headers below row 1 and merged section headings.
+* If a formula has no cached value, report the formula; do not calculate it.
+* Preserve BPMN annotations, lanes, departments, and relevant vendor fields.
+* Treat numbers according to context: volume, limit, deadline, threshold, SLA, etc.
+* Report contradictions; do not resolve them.
+* Never infer missing content or summarise from filenames alone.
+
+## Manifest
+
+Write `.external-context/manifest.md` and return its content.
+
+```markdown
+# External Context Manifest
+
+Source: <requested path>
+
+## Sources
+| File | Type | Status | Notes |
+|------|------|--------|-------|
+| Process_Master.xlsx | Excel | loaded | EN sheet used |
+
+## Digest
+### Process_Master.xlsx
+<facts with sheet/cell or BPMN location references>
+
+## Findings
+- Contradiction: workbook says 3 working days; BPMN note says 10 working days.
+
+## Gaps
+- Spec_v2.docx — unreadable; request a supported export.
+```
+
+Keep dumps and the manifest under `.external-context/`. They are temporary working files, not project sources.
+
+Only persist the digest elsewhere when the user explicitly asks.
+
+When called by another skill, return the manifest and dump paths; use a subagent only when the sources are large and the caller needs only the digest.
+
+Before returning, ensure every requested file is represented as a source or gap, every generated dump was inspected, and every extracted fact remains traceable.
