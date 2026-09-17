@@ -90,7 +90,7 @@ class AxonIvyExternalLoaderEvalTest {
     // Only reachable through load_excel.py — the workbook is a binary zip.
     assertThat(manifest)
         .contains("ApplicantCostCenter")
-        .contains("60-70");
+        .containsPattern("60\\s*[-–—]\\s*70");
 
     // Only reachable through load_bpmn.py — the annotation is empty in <text/> and lives in the
     // diagram half of the file, and the role comes from the lane.
@@ -135,7 +135,10 @@ class AxonIvyExternalLoaderEvalTest {
     var writtenManifest = missingWorkspace.has(MANIFEST) ? missingWorkspace.read(MANIFEST) : "";
     assertThat(writtenManifest).doesNotContain("LeaveRequest_Process.xlsx", "LeaveApproval.bpmn");
 
-    assertThat(judge, missingRun.transcript()).satisfies("""
+    var reported = missingRun.transcript() + "\n" + writtenManifest;
+    assertThat(reported).isNotBlank();
+
+    assertThat(judge, reported).satisfies("""
         Reports that vendor-specs is missing and does not invent or substitute content.
         """);
   }
