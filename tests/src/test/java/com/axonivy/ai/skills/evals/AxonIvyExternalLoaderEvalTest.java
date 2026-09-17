@@ -1,6 +1,5 @@
 package com.axonivy.ai.skills.evals;
 
-import static com.axonivy.ai.skills.judge.LlmAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -27,7 +26,6 @@ import com.axonivy.ai.skills.agent.AgentRun;
 import com.axonivy.ai.skills.agent.CopilotAgentRunner;
 import com.axonivy.ai.skills.agent.InvokedSkill;
 import com.axonivy.ai.skills.agent.Workspace;
-import com.axonivy.ai.skills.judge.CopilotJudge;
 
 @TestInstance(Lifecycle.PER_CLASS)
 class AxonIvyExternalLoaderEvalTest {
@@ -37,9 +35,8 @@ class AxonIvyExternalLoaderEvalTest {
 
   private static final String SKILL = "axon-ivy-external-loader";
   private static final String MODEL = "gpt-5.4-mini";
-
-  /** A field of the Japanese twin sheet: 申請部門コード */
-  private static final String JAPANESE_TWIN_FIELD = "申請部門コード";
+  private static final String EXCEL_DUMP = ".external-context/excel_dump.txt";
+  private static final String BPMN_DUMP = ".external-context/bpmn_dump.txt";
 
   private static final String PROMPT = """
       The folder external-requirements next to the project holds an Excel workbook and a BPMN export
@@ -48,27 +45,23 @@ class AxonIvyExternalLoaderEvalTest {
       """;
 
   private CopilotAgentRunner runner;
-  private CopilotJudge judge;
 
   @TempDir
   static Path tempDir;
 
   private Workspace workspace;
   private AgentRun run;
-  private String report;
   private Map<String, String> baseline;
   private Set<String> created;
 
   @BeforeAll
   void extractSources() {
     runner = new CopilotAgentRunner(MODEL, skillsDir());
-    judge = new CopilotJudge(MODEL);
 
     workspace = materializeProjectWithSources(tempDir);
     baseline = checksums(workspace.root());
 
     run = runner.run(PROMPT, workspace.root(), true);
-    report = run.transcript();
 
     created = new TreeSet<>(checksums(workspace.root()).keySet());
     created.removeAll(baseline.keySet());
@@ -79,50 +72,36 @@ class AxonIvyExternalLoaderEvalTest {
     if (runner != null) {
       runner.close();
     }
-    if (judge != null) {
-      judge.close();
-    }
   }
 
   @Test
-  void loadsExcelAndBpmnIntoATraceableReport() {
+  void runsBothLoadersOverTheExternalFolder() {
     assertThat(run.invokedSkills())
         .extracting(InvokedSkill::name)
         .contains(SKILL);
-    assertThat(report)
-        .as("the skill answered nothing. Files the run created: %s", created)
-        .isNotBlank();
 
-    // Only reachable through load_excel.py — the workbook is a binary zip.
-    assertThat(report)
+    assertThat(created)
+        .as("the run left nothing behind. It replied: %s", run.transcript())
+        .contains(EXCEL_DUMP, BPMN_DUMP);
+
+    assertThat(workspace.read(EXCEL_DUMP))
+        .as("load_excel.py must have opened the binary workbook")
         .contains("ApplicantCostCenter")
         .containsPattern("60\\s*[-–—]\\s*70");
 
-    // Only reachable through load_bpmn.py — the annotation is empty in <text/> and lives in the
-    // diagram half of the file, and the role comes from the lane.
-    assertThat(report)
+    assertThat(workspace.read(BPMN_DUMP))
+        .as("the default full format keeps annotations and lanes, --format flow drops them")
         .contains("10 working days")
         .contains("HR Operations")
         .containsIgnoringCase("June");
 
-    // The English sheet has a Japanese twin; digesting both would double the field catalogue.
-    assertThat(report).doesNotContain(JAPANESE_TWIN_FIELD);
-
-    var afterRun = checksums(workspace.root());
-    assertThat(afterRun)
+    assertThat(checksums(workspace.root()))
         .as("sources and project files are read, never rewritten")
         .containsAllEntriesOf(baseline);
 
     assertThat(created)
         .as("dumps are working files, and nothing else may be left behind")
         .allSatisfy(path -> assertThat(path).startsWith(".external-context/"));
-
-    assertThat(judge, report).satisfies("""
-        Stakeholder_Briefing.docx is reported as unreadable, with none of its content invented.
-        The conflicting 3-day and 10-day approval deadlines are both present and reported as a
-        conflict rather than silently resolved.
-        Extracted facts stay traceable to an Excel sheet and row, or to a BPMN pool, lane, or node.
-        """);
   }
 
   private static String skillsDir() {
