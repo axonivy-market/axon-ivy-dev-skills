@@ -33,7 +33,7 @@ List each component:
 
 ### Configuration update
 
-- Register the tag library in `webContent/WEB-INF/web.xml` under `javax.faces.FACELETS_LIBRARIES`
+- Register the tag library in `webContent/WEB-INF/web.xml` under `jakarta.faces.FACELETS_LIBRARIES`
 
 ---
 

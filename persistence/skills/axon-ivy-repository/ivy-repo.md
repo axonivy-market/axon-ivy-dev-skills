@@ -59,7 +59,8 @@ public class EntityRepository {
       throw new IllegalArgumentException("Entity cannot be null");
     }
 
-    return Ivy.repo().save(entity).getContext();
+    String id = Ivy.repo().save(entity).getId();
+    return Ivy.repo().find(id, Entity.class);
   }
 
   /**
@@ -119,7 +120,8 @@ public class EntityRepository {
       return null;
     }
 
-    return Ivy.repo().save(entity).getContext();
+    String id = Ivy.repo().save(entity).getId();
+    return Ivy.repo().find(id, Entity.class);
   }
 
   /**

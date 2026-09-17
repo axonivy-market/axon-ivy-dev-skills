@@ -23,22 +23,25 @@ Use this skill when Java code in `src/` needs to consume the **Business Calendar
 
 ## 1. Accessing the calendar configuration
 
-Always go through `IApplication.current()`. The older `Ivy.wf().getApplication()` is **deprecated** since 9.4 and will be removed.
+Get the calendar settings from `IBusinessCalendarSettings.of(Application.current())`.
 
 ```java
-import ch.ivyteam.ivy.application.IApplication;
-import ch.ivyteam.ivy.calendar.IBusinessCalendarConfiguration;
+import ch.ivyteam.ivy.application.app.Application;
+import ch.ivyteam.ivy.application.calendar.IBusinessCalendarConfiguration;
+import ch.ivyteam.ivy.application.calendar.IBusinessCalendarSettings;
 
-IApplication app = IApplication.current();
+IBusinessCalendarSettings settings = IBusinessCalendarSettings.of(Application.current());
 
 // Find a specific calendar by name
 IBusinessCalendarConfiguration config =
-    app.getBusinessCalendarSettings().findBusinessCalendarConfiguration("MyCalendar");
+    settings.findBusinessCalendarConfiguration("MyCalendar");
 
 // Or list all configured calendars (e.g. to populate a dropdown)
-List<IBusinessCalendarConfiguration> all =
-    app.getBusinessCalendarSettings().getAllBusinessCalendarConfigurationsAsList();
+ch.ivyteam.ivy.scripting.objects.List<IBusinessCalendarConfiguration> all =
+    settings.getAllBusinessCalendarConfigurationsAsList();
 ```
+
+`getAllBusinessCalendarConfigurationsAsList()` returns `ch.ivyteam.ivy.scripting.objects.List`.
 
 If `findBusinessCalendarConfiguration(name)` returns `null`, the calendar does not exist in the application — handle this gracefully (fall back to a default like 5 working days).
 
@@ -46,15 +49,15 @@ If `findBusinessCalendarConfiguration(name)` returns `null`, the calendar does n
 
 ## 2. Free-day model classes
 
-The free-day model uses **concrete classes without an `I-` prefix**. Don't search for `IFreeDate` — it doesn't exist.
-
 | Class | Type of free day | Key methods |
 |---|---|---|
-| `FreeDate` | One-off date (specific year, e.g. company event) | `getDate()`, `getName()` |
-| `FreeDayOfYear` | Annual recurring holiday (e.g. New Year, Christmas) | `getDay()`, `getMonth()`, `getName()` |
-| `FreeEasterRelativeDay` | Easter-relative holiday (e.g. Good Friday = −2, Easter Monday = +1) | `getDaysSinceEaster()`, `getName()` |
+| `FreeDate` | One-off date (specific year, e.g. company event) | `getDate()`, `getDescription()` |
+| `FreeDayOfYear` | Annual recurring holiday (e.g. New Year, Christmas) | `getDay()`, `getMonth()`, `getDescription()` |
+| `FreeEasterRelativeDay` | Easter-relative holiday (e.g. Good Friday = −2, Easter Monday = +1) | `getDaysSinceEaster()`, `getDescription()` |
+| `FreeDayOfWeek` | Weekly non-working day (e.g. every Saturday) | `getDescription()` |
 
-> ⚠️ The Easter-relative offset method is `getDaysSinceEaster()` — **not** `getOffset()`. The latter does not exist and will fail to compile.
+> ⚠️ The label on a free day is `getDescription()`. `getName()` exists on
+> `IBusinessCalendarConfiguration` only. The Easter-relative offset is `getDaysSinceEaster()`.
 
 ---
 
@@ -78,7 +81,7 @@ Calling `.getTime()` on this type is a common mistake — the IDE may not flag i
 
 ## 4. Calendar inheritance — traverse the parent chain
 
-Calendars can inherit from a parent calendar (e.g. `Bavaria` extends `Germany`). Free days defined on the parent must also be considered. Always walk the parent chain via `getParentCalendar()`:
+Calendars can inherit from a parent calendar (e.g. `Bavaria` extends `Germany`). Free days defined on the parent must also be considered. Always walk the parent chain via `getParent()`:
 
 ```java
 private static String findHolidayName(IBusinessCalendarConfiguration config, LocalDate date) {
@@ -88,22 +91,22 @@ private static String findHolidayName(IBusinessCalendarConfiguration config, Loc
         for (FreeDate fd : current.getFreeDates()) {
             LocalDate d = toLocalDate(fd.getDate());
             if (d != null && d.equals(date)) {
-                return fd.getName();
+                return fd.getDescription();
             }
         }
         // Annual recurring holidays
         for (FreeDayOfYear fd : current.getFreeDaysOfYear()) {
             if (fd.getDay() == date.getDayOfMonth() && fd.getMonth() == date.getMonthValue()) {
-                return fd.getName();
+                return fd.getDescription();
             }
         }
-        current = current.getParentCalendar();
+        current = current.getParent();
     }
     return null;
 }
 ```
 
-`getParentCalendar()` returns `null` once the root is reached — that's the loop's exit condition.
+`getParent()` returns `null` once the root is reached — that's the loop's exit condition.
 
 ---
 
@@ -130,10 +133,10 @@ private static String findEasterRelativeHolidayName(
     while (current != null) {
         for (FreeEasterRelativeDay fd : current.getFreeEasterRelativeDays()) {
             if (easter.plusDays(fd.getDaysSinceEaster()).equals(date)) {
-                return fd.getName();
+                return fd.getDescription();
             }
         }
-        current = current.getParentCalendar();
+        current = current.getParent();
     }
     return null;
 }
@@ -159,9 +162,9 @@ public class WorkingDayResult {
 }
 
 public static WorkingDayResult countWorkingDays(String calendarName, int year, int isoWeek) {
-    IBusinessCalendarConfiguration config = IApplication.current()
-        .getBusinessCalendarSettings()
-        .findBusinessCalendarConfiguration(calendarName);
+    IBusinessCalendarConfiguration config =
+        IBusinessCalendarSettings.of(Application.current())
+            .findBusinessCalendarConfiguration(calendarName);
 
     if (config == null) {
         return new WorkingDayResult(5, List.of()); // sensible default
@@ -211,9 +214,12 @@ Make `WeekConfig.workingDays` **nullable** (`Integer`, not `int`) so a vacation-
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `getApplication()` flagged as deprecated | `Ivy.wf().getApplication()` | Use `IApplication.current()` |
+| `ch.ivyteam.ivy.calendar` package not found | Wrong package | `ch.ivyteam.ivy.application.calendar` |
+| `getBusinessCalendarSettings()` not found on the application | Not a method on `Application` | `IBusinessCalendarSettings.of(Application.current())` |
+| `getName()` not found on `FreeDate` / `FreeDayOfYear` / `FreeEasterRelativeDay` | Free days carry a description | Use `getDescription()` |
 | `getOffset()` not found on `FreeEasterRelativeDay` | Method doesn't exist | Use `getDaysSinceEaster()` |
 | `getTime()` not found on `FreeDate.getDate()` result | Returned type is `ch.ivyteam.ivy.scripting.objects.Date`, not `java.util.Date` | Convert via `getYear()/getMonth()/getDay()` to `LocalDate` |
-| Bavarian holidays missing although parent calendar has them | Did not traverse parent chain | Loop `current = current.getParentCalendar()` |
+| `getAllBusinessCalendarConfigurationsAsList()` won't assign to `java.util.List` | Returns `ch.ivyteam.ivy.scripting.objects.List` | Declare the Ivy `List`, or copy the entries across |
+| Bavarian holidays missing although parent calendar has them | Did not traverse parent chain | Loop `current = current.getParent()` |
 | Easter-relative holidays never matched | Tried to read Easter from the API | Compute Easter locally (Gauss algorithm) |
 | `findBusinessCalendarConfiguration(name)` returns `null` in tests | Calendar name typo or not configured in the app | Provide a default fallback (e.g. 5 working days) |

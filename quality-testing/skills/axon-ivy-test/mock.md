@@ -11,9 +11,9 @@ REST endpoint mocking pattern using JAX-RS mock endpoints.
 ```java
 package package.mock;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Hidden;
 import java.util.function.Function;
