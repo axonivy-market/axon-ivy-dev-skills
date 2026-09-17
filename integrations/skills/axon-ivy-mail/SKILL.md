@@ -51,10 +51,8 @@ public abstract class AbstractMailBuilder {
 
   protected String determineSender() {
     // System default; subclasses override for per-mail sender.
-    return ServerFactory.getServer()
-        .getApplicationConfigurationManager()
-        .getSystemProp("EMail.Server.MailAddress")
-        .getValue();
+    // Held in a global variable so it is overridable per engine via variables.yaml.
+    return Ivy.var().get("mail.sender");
   }
 
   public Mail build() {
@@ -178,11 +176,10 @@ Do not pass `MailType` enums through a switch. Each mail type gets its own build
 
 ### 2. Sender comes from configuration, not code
 
-Three acceptable sources, in order of preference:
+Two acceptable sources, in order of preference:
 
 1. **`BusinessParameter` / DB-stored config** — overridable per environment without redeploy.
 2. **Ivy global variable** (`Ivy.var().get("mail.sender")`) — overridable per engine via `variables.yaml`.
-3. **System property** (`ServerFactory…getSystemProp("EMail.Server.MailAddress")`) — global default, only as fallback.
 
 Hard-coded sender addresses are a FAIL — every project I've seen with hard-coded senders ends up with prod sending from `dev@example.com`.
 
@@ -215,7 +212,7 @@ Reason: templates change per language / per customer; concatenated strings canno
 `Mail.setAttachmentPath(String)` takes a filesystem path. Generate the file (PDF, Excel, …) into a temp location, set the path, send, then delete. Two pitfalls:
 
 - **Don't** use a path inside the IAR — engine can't always read its own packaged resources at that location.
-- **Do** clean up the temp file after `Ivy.mail().send(...)` returns. Ivy does not delete it for you.
+- **Do** clean up the temp file after the process's `EMail` activity has sent the mail. Ivy does not delete it for you.
 
 ### 5. Build inside a system-context block when triggered by a job
 
