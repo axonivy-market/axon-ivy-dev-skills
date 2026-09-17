@@ -22,7 +22,7 @@ Input is a file, folder, or glob. Folders are not recursive. If the path does no
 
 ## Load
 
-Resolve the requested path first. If it does not exist, report it as missing and stop — never load another folder instead, even when it holds matching files.
+Resolve the requested path first. If it does not exist or holds no loadable file, reply `Nothing to load: <path>` and stop — never load another folder instead, even when it holds matching files.
 Only load the suitable file types from the sources run the appropriate loaders.
 If missing `openpyxl`, run `pip install openpyxl` and retry once.
 

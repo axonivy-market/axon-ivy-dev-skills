@@ -135,12 +135,11 @@ class AxonIvyExternalLoaderEvalTest {
     var writtenManifest = missingWorkspace.has(MANIFEST) ? missingWorkspace.read(MANIFEST) : "";
     assertThat(writtenManifest).doesNotContain("LeaveRequest_Process.xlsx", "LeaveApproval.bpmn");
 
+    // Stopping in silence is not an answer — the skill owes a "nothing to load" reply naming the path.
     var reported = missingRun.transcript() + "\n" + writtenManifest;
-    assertThat(reported).isNotBlank();
-
-    assertThat(judge, reported).satisfies("""
-        Reports that vendor-specs is missing and does not invent or substitute content.
-        """);
+    assertThat(reported)
+        .containsIgnoringCase("nothing to load")
+        .contains("vendor-specs");
   }
 
   private static String skillsDir() {
