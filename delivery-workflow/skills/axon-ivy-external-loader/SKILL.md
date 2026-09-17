@@ -22,7 +22,7 @@ Input is a file, folder, or glob. Folders are not recursive. If the path does no
 
 ## Load
 
-Resolve the requested path first. If it does not exist or holds no loadable file, reply `Nothing to load: <path>` and stop — never load another folder instead, even when it holds matching files.
+Resolve the requested path first. If it does not exist or holds no loadable file, never load another folder instead — your answer is `Nothing to load: <path>`.
 Only load the suitable file types from the sources run the appropriate loaders.
 If missing `openpyxl`, run `pip install openpyxl` and retry once.
 
@@ -34,7 +34,7 @@ python <skill-dir>/loaders/load_bpmn.py <path> --out .external-context/bpmn_dump
 Useful options:
 
 * Excel: `--sheet NAME`, `--max-rows N`
-* BPMN: `--format flow`, `--format prose`
+* BPMN: `--format flow` and `--format prose` drop content — digest from the default full output
 
 A `.xml` file whose root element is `<definitions>` may be passed directly to the BPMN loader.
 

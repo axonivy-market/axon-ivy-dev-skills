@@ -131,6 +131,11 @@ class AxonIvyExternalLoaderEvalTest {
         missingWorkspace.root(),
         true);
 
+    assertThat(missingRun.invokedSkills())
+        .as("a silent run means nothing unless we know the skill was in play")
+        .extracting(InvokedSkill::name)
+        .contains(SKILL);
+
     // A manifest recording the missing path is fine; loading the folder next to it is not.
     var writtenManifest = missingWorkspace.has(MANIFEST) ? missingWorkspace.read(MANIFEST) : "";
     assertThat(writtenManifest).doesNotContain("LeaveRequest_Process.xlsx", "LeaveApproval.bpmn");
