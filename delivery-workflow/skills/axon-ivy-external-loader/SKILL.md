@@ -60,12 +60,12 @@ Apply these rules:
 * Report contradictions; do not resolve them.
 * Never infer missing content or summarise from filenames alone.
 
-## Manifest
+## Report
 
-Write `.external-context/manifest.md` and return its content.
+Answer with this structure.
 
 ```markdown
-# External Context Manifest
+# External Context
 
 Requested: <path exactly as given>
 Loaded from: <path the loaders actually read>
@@ -86,10 +86,8 @@ Loaded from: <path the loaders actually read>
 - Spec_v2.docx — unreadable; request a supported export.
 ```
 
-Keep dumps and the manifest under `.external-context/`. They are temporary working files.
+Keep dumps under `.external-context/`. They are temporary working files. Only write the digest to a file when the user explicitly asks.
 
-Only persist the digest elsewhere when the user explicitly asks.
-
-When called by another skill, return the manifest and dump paths; use a subagent only when the sources are large and the caller needs only the digest.
+When called by another skill, return the report and the dump paths; use a subagent only when the sources are large and the caller needs only the digest.
 
 Before returning, ensure every requested file is represented as a source or gap, every generated dump was inspected, and every extracted fact remains traceable.
