@@ -675,7 +675,11 @@ def main() -> int:
     paths = resolve_inputs(args.inputs)
 
     if not paths:
-        sys.stderr.write("No BPMN files matched.\n")
+        missing = [p for p in args.inputs if not os.path.exists(p) and not glob.glob(p)]
+        if missing:
+            sys.stderr.write(f"ERROR: path not found: {', '.join(missing)}\n")
+        else:
+            sys.stderr.write(f"ERROR: no BPMN files under: {', '.join(args.inputs)}\n")
         return 1
 
     out = io.StringIO()

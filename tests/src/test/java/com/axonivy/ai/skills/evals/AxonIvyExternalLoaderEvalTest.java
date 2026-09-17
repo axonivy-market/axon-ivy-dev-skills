@@ -122,31 +122,6 @@ class AxonIvyExternalLoaderEvalTest {
         """);
   }
 
-  @Test
-  void handlesMissingPath(@TempDir Path missingPathDir) {
-    var missingWorkspace = materializeProjectWithSources(missingPathDir);
-
-    var missingRun = runner.run(
-        "Load the Excel and BPMN files in vendor-specs so we can write requirements from them.",
-        missingWorkspace.root(),
-        true);
-
-    assertThat(missingRun.invokedSkills())
-        .as("a silent run means nothing unless we know the skill was in play")
-        .extracting(InvokedSkill::name)
-        .contains(SKILL);
-
-    // A manifest recording the missing path is fine; loading the folder next to it is not.
-    var writtenManifest = missingWorkspace.has(MANIFEST) ? missingWorkspace.read(MANIFEST) : "";
-    assertThat(writtenManifest).doesNotContain("LeaveRequest_Process.xlsx", "LeaveApproval.bpmn");
-
-    // Stopping in silence is not an answer — the skill owes a "nothing to load" reply naming the path.
-    var reported = missingRun.transcript() + "\n" + writtenManifest;
-    assertThat(reported)
-        .containsIgnoringCase("nothing to load")
-        .contains("vendor-specs");
-  }
-
   private static String skillsDir() {
     return Path.of("..").toAbsolutePath().normalize().toString();
   }

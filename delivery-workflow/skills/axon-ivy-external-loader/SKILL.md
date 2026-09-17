@@ -22,8 +22,8 @@ Input is a file, folder, or glob. Folders are not recursive. If the path does no
 
 ## Load
 
-Resolve the requested path first. If it does not exist or holds no loadable file, never load another folder instead — your answer is `Nothing to load: <path>`.
 Only load the suitable file types from the sources run the appropriate loaders.
+Pass the path exactly as given, never one you found yourself. If a loader exits with `path not found`, report that.
 If missing `openpyxl`, run `pip install openpyxl` and retry once.
 
 ```bash
@@ -67,7 +67,8 @@ Write `.external-context/manifest.md` and return its content.
 ```markdown
 # External Context Manifest
 
-Source: <requested path>
+Requested: <path exactly as given>
+Loaded from: <path the loaders actually read>
 
 ## Sources
 | File | Type | Status | Notes |
