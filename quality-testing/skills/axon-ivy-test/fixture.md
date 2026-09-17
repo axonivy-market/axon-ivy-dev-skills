@@ -5,7 +5,7 @@ Test configuration with `AppFixture` for variables and environment setup.
 ## Injection Pattern
 
 ```java
-import ch.ivyteam.ivy.application.app.AppFixture;
+import ch.ivyteam.ivy.environment.AppFixture;
 
 @IvyTest
 public class TestWithFixture {

@@ -63,6 +63,7 @@ class AxonIvyVariableConfigEvalTest {
     if (enableSkills) {
       assertThat(run.usage().outputTokens()).isLessThan(800);
       assertThat(run.elapsed().toMinutes()).isLessThan(1);
+      assertThat(variablesYaml).contains("PageSize: \"10\"");
     }
 
     // llm-as-judge check
@@ -78,6 +79,6 @@ class AxonIvyVariableConfigEvalTest {
     assertDoesNotThrow(() -> {
       new Yaml().load(variablesYaml);
     });
-    assertThat(variablesYaml.stripTrailing()).contains("PageSize: 10");
+    assertThat(variablesYaml.stripTrailing()).containsPattern("PageSize: \"?10\"?");
   }
 }

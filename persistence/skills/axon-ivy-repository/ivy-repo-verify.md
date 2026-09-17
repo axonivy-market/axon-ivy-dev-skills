@@ -6,7 +6,7 @@
 
 ### 1. Process Scripts — Always assign save() result back to variable
 
-When calling repository `save()` from process scripts, always assign the result back to the variable. `Ivy.repo().save()` returns the updated entity (with ID assigned if it's a new record).
+When calling the repository from process scripts, always assign the result back to the variable. The repository method returns the saved entity with its generated ID. `Ivy.repo().save()` itself returns a `BusinessDataInfo<T>` — the repository class unwraps it with `getId()` and `find(id, Entity.class)`.
 
 ```
 WRONG — not capturing updated entity:

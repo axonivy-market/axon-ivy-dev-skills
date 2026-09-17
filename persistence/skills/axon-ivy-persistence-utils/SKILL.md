@@ -38,8 +38,8 @@ description: Rules and patterns for the `com.axonivy.utils.persistence` library 
 
 ```java
 import com.axonivy.utils.persistence.beans.AuditableIdEntity;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Station")
@@ -61,7 +61,7 @@ The first type parameter is the JPA static metamodel class (`Entity_`), the seco
 ```java
 import com.axonivy.utils.persistence.dao.AuditableIdDAO;
 import com.axonivy.utils.persistence.dao.CriteriaQueryContext;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Predicate;
 
 public class StationDAO extends AuditableIdDAO<Station_, Station> {
 

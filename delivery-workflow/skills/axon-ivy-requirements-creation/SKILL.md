@@ -3,26 +3,35 @@ name: axon-ivy-requirements-creation
 description: Generate detailed requirements and implementation stories from simple user input. Use when a user provides vague requirements, needs a structured requirements document, or wants to create implementation stories.
 ---
 
-## When to Use
+## Step 0: Load Source Files
 
-Use this skill when:
+Run this step before Step 1 when the user references external source files or folders.
 
-- User provides a paragraph or brief description of a process they want built
-- User asks to "create requirements" or "write a requirements document"
-- User has vague requirements that need to be expanded into detailed specifications
-- User wants help structuring their business process requirements
-- User asks to "create stories" or "break down requirements into stories"
-- User wants to decompose a requirements document into implementation tasks
+* For `.xlsx` or `.bpmn`, run `axon-ivy-external-loader` with the path and purpose: `requirements for <process>`.
+* Read other supported files such as Markdown, PDF, or CSV directly.
+* Never infer content from filenames or guess a missing path.
+* Use a subagent when the sources are large.
+
+From the loader manifest:
+
+* **Digest** → use as input to Step 1.
+* **Findings** → ask the user about unresolved contradictions; never choose a side.
+* **Gaps** → tell the user what could not be read.
+* **Sources** → preserve source references for traceability.
+
+If the digest lacks needed detail, read the referenced dump.
+
+**Output:** source content for Step 1.
 
 ---
 
-## 4-Step Process
+## Core 4-Step Process
 
 ### Step 1: Detail the Crude Requirements
 
 **Read:** `thinking-dimensions.md` in this skill's directory.
 
-Take the user's vague input and expand it into detailed, structured requirements. Use the thinking dimensions to:
+Take the user's input plus everything loaded in Step 0 and expand them into detailed, structured requirements. Use the thinking dimensions to:
 
 - Extract the workflow skeleton from the description
 - Decompose each step into inputs, outputs, rules, errors, actors
