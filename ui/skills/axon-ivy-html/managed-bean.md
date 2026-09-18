@@ -106,9 +106,7 @@ Rules:
 
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
-  "simpleName" : "MyDialogData",
-  "namespace" : "package.path.MyDialog",
+  ...
   "fields" : [ {
     "name" : "bean",
     "type" : "package.bean.MyDialogBean",

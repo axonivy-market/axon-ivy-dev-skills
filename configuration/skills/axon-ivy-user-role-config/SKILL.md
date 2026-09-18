@@ -32,15 +32,15 @@ description: Provide format for Axon Ivy users/roles configurations. Use when wo
 
 ## Schema
 
-- `roles.yaml` schema: `https://json-schema.axonivy.com/14.0-dev/config/roles.json`
-- `users.yaml` schema: `https://json-schema.axonivy.com/14.0-dev/config/users.json`
+- `roles.yaml` schema: `https://json-schema.axonivy.com/14.0/config/roles.json`
+- `users.yaml` schema: `https://json-schema.axonivy.com/14.0/config/users.json`
 
 Both `Roles` and `Users` are **arrays** (not maps). All field names are **PascalCase**.
 
 ## roles.yaml
 
 ```yaml
-# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0-dev/config/roles.json
+# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0/config/roles.json
 Roles:
   - Id: HR
     Name: HR Department
@@ -65,7 +65,7 @@ Fields:
 ## users.yaml
 
 ```yaml
-# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0-dev/config/users.json
+# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0/config/users.json
 Users:
   - Name: pmUser
     FullName: Project Manager

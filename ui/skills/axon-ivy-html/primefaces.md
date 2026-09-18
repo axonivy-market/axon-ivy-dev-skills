@@ -6,7 +6,8 @@ Rules and best practices for generating JSF and PrimeFaces elements for Axon Ivy
 
 ### Component availability — not every PrimeReact/NG component is a PrimeFaces (JSF) tag
 
-The PrimeFaces build bundled with Ivy 14 has **no `<p:inputGroup>` / `<p:inputGroupAddon>` tags** — using
+Ivy 14 bundles **PrimeFaces 15.0.18** (`jakarta` classifier) — 176 tags in
+`META-INF/primefaces.taglib.xml`. It has **no `<p:inputGroup>` / `<p:inputGroupAddon>` tags** — using
 them fails at render with `TagException: no tag was defined for name: inputGroup`. For a leading-icon
 field, build the group with CSS instead of the component:
 
@@ -64,7 +65,7 @@ Prefer PrimeFaces components (`p:*`) over raw HTML inputs when possible. Use:
 
 ---
 
-## Common Pitfalls (PrimeFaces 14)
+## Common Pitfalls (PrimeFaces 15.0.18)
 
 DataTable `sortBy` vs `sortField`, `<p:tooltip for>` targets, `<p:dialog>` ID prefixes in `update`,
 and `<p:panelGrid columns="N">` child counting are covered by the **`axon-ivy-primefaces-verify`**
