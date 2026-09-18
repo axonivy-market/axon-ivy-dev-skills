@@ -82,60 +82,28 @@ Any field whose value must still be present *after* a UserTask (e.g. a result ob
 
 **Custom enums** trigger the same whitelist advisory and it is unavoidable — expect it, ignore it.
 
-## .d.json Examples
+## .d.json Example
 
-### Basic Master Data
-
-```json
-{
-  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
-  "simpleName" : "OnboardingData",
-  "namespace" : "hr.onboarding",
-  "fields" : [ {
-    "name" : "onboarding",
-    "type" : "hr.onboarding.model.Onboarding",
-    "modifiers" : [ ]
-  }, {
-    "name" : "status",
-    "modifiers" : [ ]
-  } ]
-}
-```
-
-### With Comments
+One example covering a nested object, a plain string field, a comment, and a list field:
 
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
-  "simpleName" : "HiringData",
-  "namespace" : "hr.hiring",
+  ...
   "fields" : [ {
     "name" : "candidate",
     "type" : "hr.hiring.model.Candidate",
     "modifiers" : [ ],
     "comment" : "The candidate being processed"
   }, {
+    "name" : "status",
+    "modifiers" : [ ]
+  }, {
     "name" : "approved",
     "type" : "Boolean",
     "modifiers" : [ ]
-  } ]
-}
-```
-
-### With List Type
-
-```json
-{
-  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
-  "simpleName" : "ProjectData",
-  "namespace" : "project.management",
-  "fields" : [ {
-    "name" : "tasks",
-    "type" : "List<project.model.Task>",
-    "modifiers" : [ ]
   }, {
-    "name" : "notes",
-    "type" : "List<String>",
+    "name" : "tasks",
+    "type" : "List<hr.hiring.model.Task>",
     "modifiers" : [ ]
   } ]
 }
