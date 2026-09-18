@@ -41,7 +41,7 @@ Load these only when the process contains the relevant element type:
 
 ```json
 {
-  "$schema": "https://json-schema.axonivy.com/14.0-dev/project/process.json",
+  "$schema": "https://json-schema.axonivy.com/14.0/project/process.json",
   "id": "UNIQUE_HEX_ID",
   "kind": "NORMAL",
   "config": {

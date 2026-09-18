@@ -18,7 +18,7 @@ One story per module. Covers `roles.yaml`, `users.yaml`, and any module-level `c
 
 File location: `config/roles.yaml`
 
-Schema: `https://json-schema.axonivy.com/14.0-dev/config/roles.json`
+Schema: `https://json-schema.axonivy.com/14.0/config/roles.json`
 
 Rules:
 - `Roles` is an **array** (not a map)
@@ -45,7 +45,7 @@ Role table:
 
 File location: `config/users.yaml`
 
-Schema: `https://json-schema.axonivy.com/14.0-dev/config/users.json`
+Schema: `https://json-schema.axonivy.com/14.0/config/users.json`
 
 Rules:
 - `Users` is an **array** (not a map)

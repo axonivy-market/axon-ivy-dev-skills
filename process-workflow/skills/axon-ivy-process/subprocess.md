@@ -169,7 +169,7 @@ A callable subprocess uses `"kind": "CALLABLE_SUB"`:
 
 ```json
 {
-  "$schema": "https://json-schema.axonivy.com/14.0-dev/project/process.json",
+  "$schema": "https://json-schema.axonivy.com/14.0/project/process.json",
   "id": "UNIQUE_HEX_ID",
   "kind": "CALLABLE_SUB",
   "config": {

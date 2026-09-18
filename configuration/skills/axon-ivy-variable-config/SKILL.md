@@ -35,7 +35,7 @@ Note: the IDE writes `#[password]` without a space after `#`, while `file:`, `en
 ## variables.yaml
 
 ```yaml
-# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0-dev/config/variables.json
+# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0/config/variables.json
 Variables:
   # Name of your application. Will be displayed on the welcome screen.
   # And this note can have many lines.

@@ -1,5 +1,5 @@
 {
-  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process.json",
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/process.json",
   "id" : "19F45B0529E4DFED",
   "config" : {
     "data" : "ivy.project.BusinessProcessData"
