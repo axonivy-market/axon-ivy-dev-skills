@@ -64,8 +64,9 @@ Any field whose value must still be present *after* a UserTask (e.g. a result ob
 | Integer | `"java.lang.Integer"` | Whole numbers, quantities |
 | Double | `"java.lang.Double"` | Prices, amounts, rates |
 | BigDecimal | `"java.math.BigDecimal"` | High-precision financial calculations |
-| LocalDate | `"java.time.LocalDate"` | Date only (yyyy-MM-dd) |
-| LocalDateTime | `"java.time.LocalDateTime"` | Full timestamp |
+| Date | `"ch.ivyteam.ivy.scripting.objects.Date"` | Calendar date |
+| DateTime | `"ch.ivyteam.ivy.scripting.objects.DateTime"` | Full timestamp |
+| Binary | `"ch.ivyteam.ivy.scripting.objects.Binary"` | Uploaded file content held in process data |
 | File | `"java.io.File"` | Uploaded file handle |
 | InputStream | `"java.io.InputStream"` | File content stream (for AI extraction) |
 | List of objects | `"List<com.example.Item>"` | Use fully-qualified type name |
@@ -75,7 +76,11 @@ Any field whose value must still be present *after* a UserTask (e.g. a result ob
 
 **Double vs BigDecimal:** Use `Double` for display and simple calculations. Use `BigDecimal` only for strict financial rounding requirements.
 
-**Dates from AI extraction:** Prefer `String` (AI returns ISO format strings). Parse to `LocalDate` in a Script element only when needed for business logic comparisons.
+**Dates from AI extraction:** Prefer `String` (AI returns ISO format strings). Parse to a date type in a Script element only when needed for business logic comparisons.
+
+**Dates:** use the Ivy types above. `java.time.*` is not on the business-data persistence whitelist — on anything `Ivy.repo()` stores it risks data recovery, and `validateProject` only reports it as Information, so it ships silently.
+
+**Custom enums** trigger the same whitelist advisory and it is unavoidable — expect it, ignore it.
 
 ## .d.json Examples
 
@@ -83,7 +88,7 @@ Any field whose value must still be present *after* a UserTask (e.g. a result ob
 
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
   "simpleName" : "OnboardingData",
   "namespace" : "hr.onboarding",
   "fields" : [ {
@@ -101,7 +106,7 @@ Any field whose value must still be present *after* a UserTask (e.g. a result ob
 
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
   "simpleName" : "HiringData",
   "namespace" : "hr.hiring",
   "fields" : [ {
@@ -121,7 +126,7 @@ Any field whose value must still be present *after* a UserTask (e.g. a result ob
 
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
   "simpleName" : "ProjectData",
   "namespace" : "project.management",
   "fields" : [ {
