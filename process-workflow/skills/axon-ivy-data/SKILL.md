@@ -1,45 +1,11 @@
 ---
 name: axon-ivy-data
-description: Rules and patterns for Axon Ivy data classes (.d.json files).
+description: Use this skill whenever working with Axon Ivy data classes (.d.json files)
 ---
 
-## When to Use
+## Schema
 
-- Creating or editing `.d.json` data class files (master data for processes or dialogs)
-- Adding fields to an existing data class
-- Setting up the data layer for a new workflow process
-
-## Use Together With
-
-- `axon-ivy-workflow-guide` - Step-by-step workflow creation
-- `axon-ivy-process` - For process that uses these data classes
-
-## After Modifying Data Classes
-
-**MANDATORY**: After creating or modifying any `.d.json` file, run Maven build to regenerate the Java source classes:
-
-```bash
-mvn clean install -f <project-directory>/pom.xml
-```
-
-This generates the corresponding Java classes in `src_dataClasses/` (for dialog data) or compiles the data class definitions so they are available at runtime. Without this step, the process engine will not see the updated fields.
-
-## Data Class Types
-
-| Type | Location | Purpose |
-|------|----------|---------|
-| Master Data | `dataclasses/` | Workflow state container |
-| Dialog Data | `src_dataClasses/` | Auto-generated UI bindings |
-
-## .d.json Schema
-
-See `schema.json` in this skill folder for full JSON schema reference.
-
-**Required fields:** `simpleName`, `namespace`
-
-**Field properties:** `name` (required), `type`, `modifiers`, `comment`, `annotations`
-
-**Modifiers:** `PERSISTENT`, `ID`, `GENERATED`, `NOT_NULLABLE`, `UNIQUE`, `NOT_UPDATEABLE`, `NOT_INSERTABLE`, `VERSION`
+**MANDATORY**: See `schema.json` in this skill folder for full JSON schema reference.
 
 ### The PERSISTENT modifier — survives a task save point
 
@@ -108,3 +74,13 @@ One example covering a nested object, a plain string field, a comment, and a lis
   } ]
 }
 ```
+
+## After Modifying Data Classes
+
+**MANDATORY**: After creating or modifying any `.d.json` file, run Maven build to regenerate the Java source classes:
+
+```bash
+mvn clean install -f <project-directory>/pom.xml
+```
+
+This will compiles the data class definitions so they are available at runtime. Without this step, the process engine will not see the updated fields.

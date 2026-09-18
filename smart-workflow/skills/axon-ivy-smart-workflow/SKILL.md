@@ -170,9 +170,7 @@ public class EmployeeInfo {
 
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
-  "simpleName" : "ExtractEmployeeData",
-  "namespace" : "hr.onboarding.agent",
+  ...
   "fields" : [ {
     "name" : "inputText",
     "type" : "String",
@@ -340,9 +338,7 @@ Supported data types for file variables:
 Data class:
 ```json
 {
-  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
-  "simpleName" : "ExtractInvoiceData",
-  "namespace" : "invoice.extraction",
+  ...
   "fields" : [ {
     "name" : "uploadedFile",
     "type" : "java.io.InputStream",

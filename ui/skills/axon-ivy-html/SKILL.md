@@ -3,40 +3,60 @@ name: axon-ivy-html
 description: Rules and best practices for Axon Ivy HTML Dialog implementations including PrimeFaces, PrimeFlex, CSS, JS, and Ivy components.
 ---
 
-## HTML Dialog File Structure — MANDATORY
+## HTML Dialog Structure — MANDATORY
 
-Every HTML dialog consists of **3 files, all inside one named subfolder under `dialog/`**. Never put dialog XHTML in `webContent/` and never put the dialog data class in `dataclass/`.
+Every HTML Dialog must contain these 3 files in the same named folder under `dialog/`:
 
-```
+```text
 dialog/<namespace-path>/<DialogName>/
-├── <DialogName>.xhtml               ← the UI template
-├── <DialogName>Data.d.json          ← dialog data class
-└── <DialogName>Process.p.json       ← HTML_DIALOG logic process
+├── <DialogName>.xhtml
+├── <DialogName>Data.d.json
+└── <DialogName>Process.p.json
 ```
 
-- The data class `namespace` = `<package>.<DialogName>` (e.g. `invoice.parser.upload.UploadInvoice`)
-- The process `config.data` = `<namespace>.<DialogName>Data` (e.g. `invoice.parser.upload.UploadInvoice.UploadInvoiceData`)
+Never:
 
-## Dialog Types
+* place dialog XHTML in `webContent/`
+* place the dialog data class in `dataclass/`
 
-Creating or editing a dialog of either type (full-page Template Dialog, or reusable Component
-Dialog) → Load `dialogs.md`.
+Naming:
 
-## Always Load
+```text
+Data class namespace:
+<package>.<DialogName>
 
-These references are needed for every HTML dialog:
+Process config.data:
+<package>.<DialogName>.<DialogName>Data
+```
 
-- Load `primefaces.md` — JSF & PrimeFaces component rules
-- Load `css-js.md` — Styling, layout, icons, CSS & JS rules
+Example:
 
-## Load When Needed
+```text
+invoice.parser.upload.UploadInvoice
+invoice.parser.upload.UploadInvoice.UploadInvoiceData
+```
 
-- Building input forms → Load `form-design.md`
-- Using date picker or calendar components (`p:datePicker`) → Load `date-picker.md`
-- Using file upload components (`p:fileUpload`) → Load `file-upload.md`
-- Working with dialog logic, events, or methods (`#{logic.*}`, `#{data.*}`) → Load `logic-process.md` and `code.md` from the `axon-ivy-process` skill
-- Creating or updating managed beans for dialogs → Load `managed-bean.md`
-- Using Ivy HTML components (`<ic:*>`) → Load `dialogs.md`
-- Checking finished PrimeFaces markup → Use the `axon-ivy-primefaces-verify` skill
-- Looking up icon names → Refer to `icons.txt`
-- Adding/updating UI labels or translations → Use `axon-ivy-cms` skill to create CMS entries
+## Required References
+
+UI framework: PrimeFaces 15.0.18 (`jakarta` classifier)
+
+For every HTML Dialog, load:
+
+* `dialogs.md` — dialog types, templates, components, and Ivy `<ic:*>` components
+* `primefaces.md` — JSF and PrimeFaces rules
+* `css-js.md` — layout, styling, icons, CSS, and JavaScript
+
+## Load by Feature
+
+* Input forms → `form-design.md`
+* `p:datePicker` → `date-picker.md`
+* `p:fileUpload` → `file-upload.md`
+* Managed beans → `managed-bean.md`
+* `#{logic.*}`, `#{data.*}`, dialog events, or process methods →
+  `logic-process.md` and `code.md` from `axon-ivy-process`
+
+## Related Skills
+
+* Validate finished PrimeFaces markup → `axon-ivy-primefaces-verify`
+* Add or update UI labels/translations → `axon-ivy-cms`
+* Look up icon names → `icons.txt`
