@@ -27,8 +27,8 @@ Pass the path exactly as given, never one you found yourself. If a loader exits 
 If missing `openpyxl`, run `pip install openpyxl` and retry once.
 
 ```bash
-python <skill-dir>/loaders/load_excel.py <path> --out .external-context/excel_dump.txt
-python <skill-dir>/loaders/load_bpmn.py <path> --out .external-context/bpmn_dump.txt
+python <skill-dir>/loaders/load_excel.py <path>
+python <skill-dir>/loaders/load_bpmn.py <path>
 ```
 
 Useful options:
@@ -38,7 +38,7 @@ Useful options:
 
 A `.xml` file whose root element is `<definitions>` may be passed directly to the BPMN loader.
 
-Always read the generated dump. A successful loader message is not extracted content. If a dump is too large, search/read the relevant sections and record that limitation.
+Output is printed to stdout — no dump file is written. Read it directly from the command output; if it's too large, narrow with the options above and record that limitation.
 
 ## Digest
 
@@ -86,8 +86,8 @@ Loaded from: <path the loaders actually read>
 - Spec_v2.docx — unreadable; request a supported export.
 ```
 
-Keep dumps under `.external-context/`. They are temporary working files. Only write the digest to a file when the user explicitly asks.
+Only write the digest to a file when the user explicitly asks.
 
-When called by another skill, return the report and the dump paths; use a subagent only when the sources are large and the caller needs only the digest.
+When called by another skill, return the report; use a subagent only when the sources are large and the caller needs only the digest.
 
-Before returning, ensure every requested file is represented as a source or gap, every generated dump was inspected, and every extracted fact remains traceable.
+Before returning, ensure every requested file is represented as a source or gap, every loader's output was inspected, and every extracted fact remains traceable.
