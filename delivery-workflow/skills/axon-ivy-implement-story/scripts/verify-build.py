@@ -33,17 +33,27 @@ def summarize(output: str, project_dir: Path) -> str:
     build_failure = any("BUILD FAILURE" in l for l in lines)
 
     errors = [l for l in lines if re.search(r"\bERROR\b", l)]
-    validate_summary = []
-    in_summary = False
-    for l in lines:
-        if "Project validation summary" in l:
-            in_summary = True
-        if in_summary:
-            validate_summary.append(l)
-        if in_summary and "Duration" in l:
-            break
 
-    findings = [l for l in lines if "[INFO]" in l and " is not whitelisted" in l]
+    # Locate the validateProject goal's own output block, bounded by Maven's
+    # "--- <goal> ---" markers, so the summary survives wording changes in
+    # the plugin's own messages.
+    validate_summary = []
+    in_block = False
+    for l in lines:
+        is_goal_header = bool(re.match(r"^\[INFO\] --- ", l))
+        if is_goal_header:
+            in_block = "validat" in l.lower()
+            if in_block:
+                validate_summary.append(l)
+            continue
+        if in_block:
+            if "BUILD SUCCESS" in l or "BUILD FAILURE" in l:
+                break
+            validate_summary.append(l)
+
+    # Match findings by keyword rather than one fixed phrase, so a wording
+    # change in the plugin doesn't silently zero out this section.
+    findings = [l for l in lines if "[INFO]" in l and "whitelist" in l.lower()]
 
     generated_dir = project_dir / "target" / "generated-sources" / "ivy-dataclass"
     generated_files = sorted(p.relative_to(generated_dir).as_posix()
@@ -57,12 +67,13 @@ def summarize(output: str, project_dir: Path) -> str:
     report.extend(errors if errors else ["(none)"])
     report.append("")
     report.append("=== VALIDATE PROJECT SUMMARY ===")
-    report.extend(validate_summary if validate_summary else ["(not found)"])
+    report.extend(validate_summary if validate_summary else ["(not found — check ERRORS above for the raw reason)"])
     report.append("")
     report.append(f"=== INFO FINDINGS (whitelist advisories) ({len(findings)}) ===")
     report.extend(findings if findings else ["(none)"])
     report.append("")
     report.append(f"=== GENERATED DATA CLASSES ({len(generated_files)}) ===")
+    report.extend(generated_files if generated_files else ["(none)"])
 
     return "\n".join(report)
 

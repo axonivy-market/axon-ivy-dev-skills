@@ -75,12 +75,10 @@ One example covering a nested object, a plain string field, a comment, and a lis
 }
 ```
 
-## After Modifying Data Classes
+## Regenerate Data Classes
 
-**MANDATORY**: After creating or modifying any `.d.json` file, run Maven build to regenerate the Java source classes:
+After changing `.d.json` files, generated Java classes must be regenerated. Batch all `.d.json` edits first, then build once — never once per file.
 
-```bash
-mvn clean install -f <project-directory>/pom.xml
-```
-
-This will compiles the data class definitions so they are available at runtime. Without this step, the process engine will not see the updated fields.
+- **Standalone use:** run `mvn clean install -f <project-directory>/pom.xml` once, after all `.d.json` edits are done.
+- **Called from an orchestrating skill:** defer regeneration/build to the caller when it provides an equivalent build step.
+- Build early only when a specific generated class is required to continue the current implementation step.

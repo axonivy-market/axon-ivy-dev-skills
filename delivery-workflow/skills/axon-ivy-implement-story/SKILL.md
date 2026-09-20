@@ -53,6 +53,11 @@ Do not introduce a new pattern when an equivalent project pattern already exists
 
 Let specialist skills load their own feature-specific references.
 
+### Specialist Skill Execution
+
+When invoking a specialist skill, follow its implementation rules but defer build, test, regeneration, and verification to `verification.md`.
+Only run a specialist skill's intermediate build command when its generated output is required to continue implementation.
+
 ## 4. Plan Implementation
 
 Plan implementation parts according to their dependencies.
