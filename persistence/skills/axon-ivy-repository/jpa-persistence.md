@@ -33,7 +33,7 @@ It requires: `databases.yaml`, `persistence.xml`, JPA entities, DAOs, and servic
 Location: `<project>/config/databases.yaml`
 
 ```yaml
-# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0-dev/config/databases.json
+# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0/config/databases.json
 Databases:
   MyDatabase:
     Url: jdbc:sqlserver://localhost;databaseName=MY_DB
@@ -57,7 +57,7 @@ Common JDBC drivers:
 Location: `<project>/config/persistence.yaml`
 
 ```yaml
-# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0-dev/config/persistence-2.json
+# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0/config/persistence.json
 Persistence:
   InvoiceDb:
     DataSource: InvoiceDb

@@ -229,7 +229,6 @@ def main() -> int:
     )
 
     parser.add_argument("inputs", nargs="+")
-    parser.add_argument("--out")
     parser.add_argument(
         "--format",
         choices=("grid", "cells"),
@@ -272,22 +271,10 @@ def main() -> int:
 
     text = out.getvalue()
 
-    if args.out:
-        path = os.path.abspath(args.out)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-        with open(path, "w", encoding="utf-8") as file:
-            file.write(text)
-
-        print(
-            f"Wrote {len(text)} chars from "
-            f"{len(paths)} workbook(s) to {args.out}"
-        )
-    else:
-        if hasattr(sys.stdout, "reconfigure"):
-            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-
-        sys.stdout.write(text)
+    sys.stdout.write(text)
 
     return 0
 

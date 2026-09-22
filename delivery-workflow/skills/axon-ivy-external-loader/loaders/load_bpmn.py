@@ -642,10 +642,6 @@ def main() -> int:
         help="BPMN files, directories, or glob patterns",
     )
     parser.add_argument(
-        "--out",
-        help="Write UTF-8 output to this file instead of stdout",
-    )
-    parser.add_argument(
         "--format",
         choices=("full", "flow", "prose"),
         default="full",
@@ -710,26 +706,13 @@ def main() -> int:
 
     text = out.getvalue()
 
-    if args.out:
-        path = os.path.abspath(args.out)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-
-        with open(path, "w", encoding="utf-8") as file:
-            file.write(text)
-
-        print(
-            f"Wrote {len(text)} chars from "
-            f"{len(paths)} BPMN file(s) to {args.out}"
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(
+            encoding="utf-8",
+            errors="replace",
         )
 
-    else:
-        if hasattr(sys.stdout, "reconfigure"):
-            sys.stdout.reconfigure(
-                encoding="utf-8",
-                errors="replace",
-            )
-
-        sys.stdout.write(text)
+    sys.stdout.write(text)
 
     return 0
 

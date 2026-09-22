@@ -18,7 +18,7 @@ One story for the orchestration process (the main `.p.json` file under `processe
 
 - File location (`processes/[namespace]/[ProcessName].p.json`)
 - Process kind: `NORMAL` (standard process, not a callable sub)
-- Schema: `https://json-schema.axonivy.com/14.0-dev/project/process.json`
+- Schema: `https://json-schema.axonivy.com/14.0/project/process.json`
 
 ### Process Variables
 
