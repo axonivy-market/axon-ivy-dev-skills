@@ -10,7 +10,7 @@ If you want to know more about Agent Skills, see [agentskills.io](https://agents
 
 ## Skills Overview
 
-32 skills grouped into 9 purpose-based categories — install the ones that match what you're building:
+29 skills grouped into 8 purpose-based categories — install the ones that match what you're building:
 
 | Category | Skills | Purpose |
 | --- | --- | --- |
@@ -19,7 +19,6 @@ If you want to know more about Agent Skills, see [agentskills.io](https://agents
 | `smart-workflow` | `axon-ivy-smart-workflow` | AI-powered and agentic capabilities within Axon Ivy workflows |
 | `persistence` | `axon-ivy-repository`, `axon-ivy-jpa`, `axon-ivy-persistence-utils`, `axon-ivy-liquibase`, `axon-ivy-liquibase-verify` | Data storage and persistence for Axon Ivy projects |
 | `ui` | `axon-ivy-html`, `axon-ivy-primefaces-verify`, `axon-ivy-cms`, `axon-ivy-cms-verify` | User interface and content for Axon Ivy projects |
-| `configuration` | `axon-ivy-variable-config`, `axon-ivy-user-role-config`, `axon-ivy-custom-fields` | Project-level configuration for Axon Ivy |
 | `integrations` | `axon-ivy-rest`, `axon-ivy-mail`, `axon-ivy-business-calendar` | Connecting Axon Ivy to external systems and services |
 | `delivery-workflow` | `axon-ivy-requirements-creation`, `axon-ivy-implement-story`, `axon-ivy-verify-story`, `axon-ivy-release` | The end-to-end software delivery lifecycle for Axon Ivy features |
 | `quality-testing` | `axon-ivy-test`, `review-java`, `review-javascript` | Quality assurance for Axon Ivy projects |

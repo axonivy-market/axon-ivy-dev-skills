@@ -51,7 +51,7 @@ Do not introduce a new pattern when an equivalent project pattern already exists
 | Tag Library | `axon-ivy-html` |
 | Form | `axon-ivy-html`, `axon-ivy-process`, `axon-ivy-cms` |
 | Main Process | `axon-ivy-process`, `axon-ivy-workflow-guide` |
-| Roles + Config | `axon-ivy-user-role-config` |
+| Roles + Config | `ivy-yaml-files` |
 
 Let specialist skills load their own feature-specific references.
 

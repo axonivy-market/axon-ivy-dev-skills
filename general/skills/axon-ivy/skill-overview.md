@@ -4,6 +4,8 @@ All available skills and their purpose. Skills folder: `.claude/skills/`
 
 Each skill has a `SKILL.md` file in its folder with full instructions.
 
+> **Note:** Project config files (`variables.yaml`, `roles.yaml`, `users.yaml`, `custom-fields.yaml`, etc.) and process/data/form JSON files are handled by the built-in `ivy-yaml-files` and `ivy-json-files` skills — no dedicated skill in this repo is needed for them.
+
 | Intent | Skill | Description |
 |---|---|---|
 | requirement | `axon-ivy-requirements-creation` | Generate structured requirements and ordered story files from vague user input |
@@ -24,9 +26,6 @@ Each skill has a `SKILL.md` file in its folder with full instructions.
 | develop | `axon-ivy-mail` | Sending email — sender/recipient resolution, templating, attachments, builder pattern |
 | develop | `axon-ivy-business-calendar` | Read holidays, free days, and working-day info from the Business Calendar |
 | develop | `axon-ivy-error-handling` | `BpmError` construction, error codes, error start events, exception/Ivy-error boundary |
-| develop | `axon-ivy-variable-config` | Manage `variables.yaml` config files |
-| develop | `axon-ivy-user-role-config` | Manage `roles.yaml` and `users.yaml` config files |
-| develop | `axon-ivy-custom-fields` | Define custom fields in `custom-fields.yaml` for tasks, cases, and process starts |
 | develop | `ivy-market-import` | Import an Axon Ivy Marketplace item and add it as a dependency to `pom.xml` |
 | review | `axon-ivy-process-verify` | Verify `.p.json` files for structural and IvyScript errors |
 | review | `axon-ivy-cms-verify` | Verify `cms_*.yaml` files for common errors — run after `axon-ivy-cms` |
