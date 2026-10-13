@@ -177,7 +177,6 @@ Run only the focused verifiers that apply:
 ```text
 .p.json: axon-ivy-process-verify
 .xhtml: axon-ivy-primefaces-verify
-CMS: axon-ivy-cms-verify
 configuration: corresponding verifier
 ```
 

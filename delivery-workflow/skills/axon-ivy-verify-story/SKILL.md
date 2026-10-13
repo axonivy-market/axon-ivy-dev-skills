@@ -20,7 +20,6 @@ Based on which files were created/modified, load and run the appropriate verify 
 | If modified... | Load and run |
 |----------------|-------------|
 | Any `.p.json` file | `axon-ivy-process-verify` — run its full checklist |
-| Any `cms_*.yaml` file | `axon-ivy-cms-verify` — run its full checklist |
 | Any `.d.json` data class | Phase 3: Data Class Checks (below) |
 | Any `.xhtml` dialog/component | Phase 4: UI Behavior Checks (below) |
 | Any `.java` model/enum | Phase 3: Java Checks (below) |
@@ -151,7 +150,7 @@ Verify form actions match the story specification:
 
 - [ ] **Grid layout** uses PrimeFlex (`grid`, `col-12`, `col-6`, etc.)
 - [ ] **Form sections** match the story's layout description (tabs, accordion, panels)
-- [ ] **Labels** use CMS references, not hardcoded strings (cross-check with `axon-ivy-cms-verify`)
+- [ ] **Labels** use CMS references, not hardcoded strings
 
 ---
 
@@ -187,7 +186,6 @@ Trace the data flow through the full story:
 | Form | Button disabled forever | Trace disabled condition to data source |
 | Form | File upload doesn't enable submit | Check if server field vs client field |
 | Process | SubProcessCall uses `.` instead of `/` | `axon-ivy-process-verify` check #1 |
-| CMS | `Yes`/`No` keys parsed as boolean | `axon-ivy-cms-verify` check #1 |
 | Data Class | Wrong type for date fields | `String` instead of `java.util.Date` |
 | Entity | Missing `Serializable` | Class used in process data without it |
 | Config | Role name mismatch | Process `activator` doesn't match `roles.yaml` |

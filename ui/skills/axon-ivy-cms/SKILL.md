@@ -1,26 +1,14 @@
 ---
 name: axon-ivy-cms
-description: Create and manage CMS (Content Management System) content — multi-language YAML files, binary content (files), and Portal CMS overrides.
+description: Create and manage CMS (Content Management System) content — multi-language YAML files and binary content (files).
 ---
 
 ## When to Use
 
 - Adding UI labels or translations for dialogs/processes
 - Creating email templates stored in CMS
-- Overriding Portal (Axon Ivy Portal) default labels
 - Adding binary CMS content (images, CSS files)
 - Supporting multiple languages (i18n)
-
-## References
-
-This skill includes reference files in the `cms/` subfolder:
-
-| File | Purpose | When to Read |
-|------|---------|--------------|
-| `cms/cms_en.yaml` | English CMS example with all namespace patterns | Always — primary reference for structure |
-| `cms/cms_de.yaml` | German translation showing multi-language pattern | When creating multi-language entries |
-
-Read these to understand the YAML key hierarchy, namespace conventions, and value formatting.
 
 ## CMS Content Object Types
 
@@ -71,7 +59,6 @@ cms/
 ## Use Together With
 
 - `axon-ivy-html` — XHTML files reference CMS via `#{ivy.cms.co('...')}`
-- `axon-ivy-cms-verify` — **MUST** run after creating/modifying CMS files to catch common errors
 
 ## Proactive CMS Creation
 
@@ -171,16 +158,38 @@ Replace all hardcoded strings with CMS references:
 
 ## CMS YAML Namespaces
 
-See `cms/cms_en.yaml` reference for full examples. Key namespaces:
+Key namespaces:
 
 | Namespace | Purpose | CMS Access Path |
 |-----------|---------|-----------------|
-| `ch.ivy.addon.portalkit.ui.jsf:` | Override Portal default labels | `/ch.ivy.addon.portalkit.ui.jsf/...` |
-| `ch.ivy.addon.portal.generic:` | Override Portal generic labels | `/ch.ivy.addon.portal.generic/...` |
 | `Dialogs:` | Dialog-specific labels (match package path) | `/Dialogs/package/path/DialogName/Key` |
 | `Processes:` | Process start names/descriptions | `/Processes/package/path/ProcessName/name` |
 | `Labels:` | Shared reusable labels | `/Labels/Key` |
 | `Email:` | Email template content | `/Email/TemplateName/subject` |
+
+Example combining all namespaces (use the generic YAML skill for schema/indentation rules):
+
+```yaml
+Dialogs:
+  hr:
+    onboarding:
+      StartOnboarding:
+        Title: Start Employee Onboarding
+        SubmitButton: Submit
+Processes:
+  hr:
+    onboarding:
+      StartOnboarding:
+        name: Employee Onboarding
+Labels:
+  Cancel: Cancel
+  Submit: Submit
+  'Yes': 'Yes'
+Email:
+  OnboardingNotification:
+    subject: 'New Onboarding: {0}'
+    greeting: 'Hello {0},'
+```
 
 ## Accessing CMS in Code
 
@@ -237,18 +246,3 @@ Labels:
   'Yes': 'Yes'
   'No': 'No'
 ```
-
-## Portal CMS Overrides
-
-To override Axon Ivy Portal default labels, use the `ch.ivy.addon.portalkit.ui.jsf:` namespace:
-
-```yaml
-ch.ivy.addon.portalkit.ui.jsf:
-  common:
-    save: Speichern        # Override Portal's "Save" label
-    cancel: Abbrechen      # Override Portal's "Cancel" label
-  caseDetails:
-    addNoteHelpText: Write your text here.
-```
-
-**IMPORTANT**: Only override keys that exist in the Portal's default CMS. Check Portal documentation for available keys.

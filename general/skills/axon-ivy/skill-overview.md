@@ -20,7 +20,7 @@ Each skill has a `SKILL.md` file in its folder with full instructions.
 | develop | `axon-ivy-persistence-utils` | `com.axonivy.utils.persistence` helpers — `AuditableIdEntity`/`AuditableIdDAO`, query contexts |
 | develop | `axon-ivy-liquibase` | Liquibase changelog conventions and patterns under `<project>/liquibase/` |
 | develop | `axon-ivy-html` | HTML dialog rules: PrimeFaces, PrimeFlex, CSS, JS, and Ivy components |
-| develop | `axon-ivy-cms` | Create and manage CMS multi-language YAML files, binary content, and Portal CMS overrides |
+| develop | `axon-ivy-cms` | Create and manage CMS multi-language YAML files and binary content |
 | develop | `axon-ivy-smart-workflow` | Build AI-powered data extraction using AgenticProcessCall |
 | develop | `axon-ivy-rest` | JAX-RS REST endpoints — `@Path`, param binding, `Response`, `@RolesAllowed` auth |
 | develop | `axon-ivy-mail` | Sending email — sender/recipient resolution, templating, attachments, builder pattern |
@@ -28,7 +28,6 @@ Each skill has a `SKILL.md` file in its folder with full instructions.
 | develop | `axon-ivy-error-handling` | `BpmError` construction, error codes, error start events, exception/Ivy-error boundary |
 | develop | `ivy-market-import` | Import an Axon Ivy Marketplace item and add it as a dependency to `pom.xml` |
 | review | `axon-ivy-process-verify` | Verify `.p.json` files for structural and IvyScript errors |
-| review | `axon-ivy-cms-verify` | Verify `cms_*.yaml` files for common errors — run after `axon-ivy-cms` |
 | review | `axon-ivy-primefaces-verify` | Verify PrimeFaces column widths, table layout, AJAX updates, and rendering pitfalls |
 | review | `axon-ivy-liquibase-verify` | Verify `.sql`/`.xml` Liquibase changelogs — run after `axon-ivy-liquibase` |
 | review | `axon-ivy-verify-story` | Verify story acceptance criteria and UI behavior (field interactions, validations) |
