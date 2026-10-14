@@ -1,7 +1,5 @@
 package com.axonivy.ai.skills.evals;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -15,6 +13,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -35,8 +34,6 @@ class AxonIvyExternalLoaderEvalTest {
 
   private static final String SKILL = "axon-ivy-external-loader";
   private static final String MODEL = "gpt-5.4-mini";
-  private static final String EXCEL_DUMP = ".external-context/excel_dump.txt";
-  private static final String BPMN_DUMP = ".external-context/bpmn_dump.txt";
 
   private static final String PROMPT = """
       The folder external-requirements next to the project holds an Excel workbook and a BPMN export
@@ -76,21 +73,23 @@ class AxonIvyExternalLoaderEvalTest {
 
   @Test
   void runsBothLoadersOverTheExternalFolder() {
+    assertThat(run.usage().modelCalls())
+        .as("the agent made 0 model calls and replied %s — this is a transient Copilot "
+            + "API/quota/auth failure, not a skill or test defect. Re-run the job.", run.transcript())
+        .isGreaterThan(0);
+
     assertThat(run.invokedSkills())
         .extracting(InvokedSkill::name)
         .contains(SKILL);
 
-    assertThat(created)
-        .as("the run left nothing behind. It replied: %s", run.transcript())
-        .contains(EXCEL_DUMP, BPMN_DUMP);
-
-    assertThat(workspace.read(EXCEL_DUMP))
-        .as("load_excel.py must have opened the binary workbook")
+    assertThat(run.transcript())
+        .as("load_excel.py must have opened the binary workbook. The run replied: %s", run.transcript())
         .contains("ApplicantCostCenter")
         .containsPattern("60\\s*[-–—]\\s*70");
 
-    assertThat(workspace.read(BPMN_DUMP))
-        .as("the default full format keeps annotations and lanes, --format flow drops them")
+    assertThat(run.transcript())
+        .as("the default full format keeps annotations and lanes, --format flow drops them. "
+            + "The run replied: %s", run.transcript())
         .contains("10 working days")
         .contains("HR Operations")
         .containsIgnoringCase("June");
@@ -100,8 +99,8 @@ class AxonIvyExternalLoaderEvalTest {
         .containsAllEntriesOf(baseline);
 
     assertThat(created)
-        .as("dumps are working files, and nothing else may be left behind")
-        .allSatisfy(path -> assertThat(path).startsWith(".external-context/"));
+        .as("the skill must not write any files unless the user explicitly asks for a saved digest")
+        .isEmpty();
   }
 
   private static String skillsDir() {
