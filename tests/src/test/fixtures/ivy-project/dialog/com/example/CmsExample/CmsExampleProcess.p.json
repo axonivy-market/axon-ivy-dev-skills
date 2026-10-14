@@ -1,0 +1,48 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/process.json",
+  "id" : "1A13978094ED2CB2",
+  "kind" : "HTML_DIALOG",
+  "config" : {
+    "data" : "com.example.CmsExample.CmsExampleData"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "HtmlDialogStart",
+      "name" : "start()",
+      "config" : {
+        "signature" : "start",
+        "guid" : "1A1397809549D721"
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f2", "to" : "f1" }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "HtmlDialogEnd",
+      "visual" : {
+        "at" : { "x" : 224, "y" : 64 }
+      }
+    }, {
+      "id" : "f3",
+      "type" : "HtmlDialogEventStart",
+      "name" : "close",
+      "config" : {
+        "guid" : "1A139780976A08E6"
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 160 }
+      },
+      "connect" : [
+        { "id" : "f5", "to" : "f4" }
+      ]
+    }, {
+      "id" : "f4",
+      "type" : "HtmlDialogExit",
+      "visual" : {
+        "at" : { "x" : 224, "y" : 160 }
+      }
+    } ]
+}
