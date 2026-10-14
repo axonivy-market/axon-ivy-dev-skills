@@ -1,6 +1,6 @@
 ---
 name: axon-ivy-implement-story
-description: Implement any formal story: data models, entities, processes, UI, forms, roles, etc.
+description: Implement user stories involving data models, entities, processes, UI components, forms, roles, and configuration.
 ---
 
 # Conditional Sections
