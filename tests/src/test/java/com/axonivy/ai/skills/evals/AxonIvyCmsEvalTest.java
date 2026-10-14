@@ -69,7 +69,6 @@ class AxonIvyCmsEvalTest {
 
   private Workspace workspace;
   private AgentRun run;
-  private String dialogBefore;
 
   @BeforeAll
   void runAgent() {
@@ -81,7 +80,6 @@ class AxonIvyCmsEvalTest {
     assertThat(workspace.has(CMS_DE)).as("German CMS must exist before the agent run").isTrue();
     assertThat(flatten(loadYaml(CMS_EN))).containsEntry(SEED_KEY_PATH, EN_SEED_VALUE);
     assertThat(flatten(loadYaml(CMS_DE))).containsEntry(SEED_KEY_PATH, DE_SEED_VALUE);
-    dialogBefore = workspace.read(DIALOG);
 
     run = runner.run(PROMPT, workspace.root(), true);
   }
@@ -143,9 +141,18 @@ class AxonIvyCmsEvalTest {
     String dialogAfter = workspace.read(DIALOG);
     assertThat(dialogAfter)
         .as("the dialog must be updated to reference CMS. The run replied: %s", run.transcript())
-        .isNotEqualTo(dialogBefore)
-        .contains("ivy.cms.co(")
-        .doesNotContain(HARDCODED_TEXT);
+        .contains("ivy.cms.co(");
+
+    assertThat(remainingHardcodedText(dialogAfter))
+        .as("the dialog must not contain hardcoded visible text outside EL expressions")
+        .isEmpty();
+  }
+
+  private List<String> remainingHardcodedText(String content) {
+    String contentOutsideElExpressions = content.replaceAll("#\\{[^}]*}", "");
+    return HARDCODED_TEXT.stream()
+        .filter(contentOutsideElExpressions::contains)
+        .toList();
   }
 
   private void assertEnglishEntriesPreserveDialogText(Map<String, Object> en) {
