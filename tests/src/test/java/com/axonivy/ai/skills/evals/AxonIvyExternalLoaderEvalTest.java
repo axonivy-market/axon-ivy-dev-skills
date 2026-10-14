@@ -37,8 +37,9 @@ class AxonIvyExternalLoaderEvalTest {
 
   private static final String PROMPT = """
       The folder external-requirements next to the project holds an Excel workbook and a BPMN export
-      alongside a few other files. Load them and get the context out so we can write the leave
-      approval requirements from it.
+      alongside a few other files. Load them and return the complete `# External Context` report
+      required by the axon-ivy-external-loader skill, including source-traceable digests, findings,
+      and gaps. Do not write the report to a file.
       """;
 
   private CopilotAgentRunner runner;
