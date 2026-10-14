@@ -23,12 +23,15 @@ import com.axonivy.ai.skills.agent.Workspace;
 @TestInstance(Lifecycle.PER_CLASS)
 class AxonIvyCmsEvalTest {
 
-  private static final Path IVY_PROJECT = Path.of("src/test/fixtures/ivy-project");
+  private static final Path SKELETON_PROJECT = Path.of("src/test/fixtures/ivy-project");
 
   private static final String SKILL = "axon-ivy-cms";
   private static final String MODEL = "gpt-5.4-mini";
   private static final String CMS_EN = "cms/cms_en.yaml";
   private static final String CMS_DE = "cms/cms_de.yaml";
+  private static final String SEED_KEY_PATH = "Labels.ExistingFixtureLabel";
+  private static final String EN_SEED_VALUE = "Keep this English label";
+  private static final String DE_SEED_VALUE = "Diese deutsche Bezeichnung behalten";
   private static final String DIALOG = "dialog/com/example/CmsExample/CmsExample.xhtml";
   private static final String DIALOG_PATH_PREFIX = "Dialogs.com.example.CmsExample";
   private static final List<String> HARDCODED_TEXT = List.of(
@@ -54,8 +57,9 @@ class AxonIvyCmsEvalTest {
   private static final String PROMPT = """
       Update the existing XHTML dialog `dialog/com/example/CmsExample/CmsExample.xhtml`.
       Move every hardcoded user-visible text, including the title, field labels, validation messages,
-      and action labels, to CMS references. Create English and German CMS entries, preserving the
-      current English wording and all dialog behavior, component IDs, and technical attributes.
+      and action labels, to CMS references. Update the existing English and German CMS files in place;
+      both files already exist, so do not create or delete CMS files. Preserve existing CMS entries,
+      the current English wording, and all dialog behavior, component IDs, and technical attributes.
       """;
 
   private CopilotAgentRunner runner;
@@ -71,10 +75,12 @@ class AxonIvyCmsEvalTest {
   void runAgent() {
     var projectPath = Path.of("..").toAbsolutePath().normalize().toString();
     runner = new CopilotAgentRunner(MODEL, projectPath);
-    workspace = Workspace.materialize(IVY_PROJECT, tempDir);
+    workspace = Workspace.materialize(SKELETON_PROJECT, tempDir);
 
-    assertThat(workspace.has(CMS_EN)).as("English CMS must not exist before the agent run").isFalse();
-    assertThat(workspace.has(CMS_DE)).as("German CMS must not exist before the agent run").isFalse();
+    assertThat(workspace.has(CMS_EN)).as("English CMS must exist before the agent run").isTrue();
+    assertThat(workspace.has(CMS_DE)).as("German CMS must exist before the agent run").isTrue();
+    assertThat(flatten(loadYaml(CMS_EN))).containsEntry(SEED_KEY_PATH, EN_SEED_VALUE);
+    assertThat(flatten(loadYaml(CMS_DE))).containsEntry(SEED_KEY_PATH, DE_SEED_VALUE);
     dialogBefore = workspace.read(DIALOG);
 
     run = runner.run(PROMPT, workspace.root(), true);
@@ -88,9 +94,25 @@ class AxonIvyCmsEvalTest {
   }
 
   @Test
-  void booleanLookingKeysAreQuoted() {
-    Set<Object> enKeys = collectKeys(loadYaml(CMS_EN));
-    Set<Object> deKeys = collectKeys(loadYaml(CMS_DE));
+  void cmsFilesAreCreatedWithMatchingKeysAndGermanTranslations() {
+    assertCmsFilesExist();
+    assertDialogUsesCms();
+
+    Map<String, Object> rawEn = loadYaml(CMS_EN);
+    Map<String, Object> rawDe = loadYaml(CMS_DE);
+    assertBooleanLookingKeysAreStrings(rawEn, rawDe);
+
+    Map<String, Object> en = flatten(rawEn);
+    Map<String, Object> de = flatten(rawDe);
+    assertCmsSeedEntriesPreserved(en, de);
+    assertEnglishEntriesPreserveDialogText(en);
+    assertCmsKeyPathsMatch(en, de);
+    assertGermanTitleIsTranslated(en, de);
+  }
+
+  private void assertBooleanLookingKeysAreStrings(Map<String, Object> en, Map<String, Object> de) {
+    Set<Object> enKeys = collectKeys(en);
+    Set<Object> deKeys = collectKeys(de);
 
     assertThat(enKeys).as("Yes/No/True/False keys must be quoted so SnakeYAML keeps them as strings")
         .noneMatch(Boolean.class::isInstance);
@@ -98,28 +120,23 @@ class AxonIvyCmsEvalTest {
         .noneMatch(Boolean.class::isInstance);
   }
 
-  @Test
-  void cmsFilesAreCreatedWithMatchingKeysAndGermanTranslations() {
-    assertCmsFilesCreated();
-    assertDialogUsesCms();
-
-    Map<String, Object> en = flatten(loadYaml(CMS_EN));
-    Map<String, Object> de = flatten(loadYaml(CMS_DE));
-    assertEnglishEntriesPreserveDialogText(en);
-    assertCmsKeyPathsMatch(en, de);
-    assertGermanTitleIsTranslated(en, de);
-  }
-
-  private void assertCmsFilesCreated() {
+  private void assertCmsFilesExist() {
     assertThat(run.invoked(SKILL))
         .as("the CMS skill must be invoked. The run replied: %s", run.transcript())
         .isTrue();
     assertThat(workspace.has(CMS_EN))
-        .as("%s must be created. The run replied: %s", CMS_EN, run.transcript())
+        .as("%s must remain available. The run replied: %s", CMS_EN, run.transcript())
         .isTrue();
     assertThat(workspace.has(CMS_DE))
-        .as("%s must be created. The run replied: %s", CMS_DE, run.transcript())
+        .as("%s must remain available. The run replied: %s", CMS_DE, run.transcript())
         .isTrue();
+  }
+
+  private void assertCmsSeedEntriesPreserved(Map<String, Object> en, Map<String, Object> de) {
+    assertThat(en).as("the English CMS must preserve its existing entry")
+        .containsEntry(SEED_KEY_PATH, EN_SEED_VALUE);
+    assertThat(de).as("the German CMS must preserve its existing entry")
+        .containsEntry(SEED_KEY_PATH, DE_SEED_VALUE);
   }
 
   private void assertDialogUsesCms() {
