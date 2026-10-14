@@ -15,21 +15,22 @@ Use this skill when:
 
 ### Step 1: Define Domain Model
 
-**Skill:** `axon-ivy-data`
+**Skills:** `axon-ivy-java-data`, `axon-ivy-repository`
 
 Create Java model classes in `src/package/model/`:
 
 - [ ] Entity class with fields, getters, setters, builder pattern
 - [ ] Status enum if workflow has states
-- [ ] Repository class for persistence
+- [ ] Repository class for persistence using `axon-ivy-repository`
 
 ### Step 2: Create Master Data Class
 
 **Skill:** `axon-ivy-data`
 
-Create master data in `dataclasses/package/`:
+Create the master process data class in `dataclasses/package/`:
 
-- [ ] Create `.d.json` file with workflow state fields
+- [ ] Call `new_axon_ivy_data_class` to create the `.d.json` data class
+- [ ] Define its workflow state fields using `axon-ivy-data`
 - [ ] Include main entity and temp entity (for AI operations)
 
 ### Step 3: Design Process Flow

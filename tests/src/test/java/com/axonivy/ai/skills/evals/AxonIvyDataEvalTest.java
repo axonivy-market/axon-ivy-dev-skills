@@ -31,7 +31,7 @@ class AxonIvyDataEvalTest {
     private static final Map<String, String> EXPECTED_FIELD_TYPES = Map.ofEntries(
       Map.entry("eligibleForAdvance", "Boolean"),
       Map.entry("dependentCount", "java.lang.Integer"),
-      Map.entry("conversionRate", "Double"),
+      Map.entry("conversionRate", "java.lang.Double"),
       Map.entry("reimbursementAmount", "java.math.BigDecimal"),
       Map.entry("serviceDate", "ch.ivyteam.ivy.scripting.objects.Date"),
       Map.entry("submittedAt", "ch.ivyteam.ivy.scripting.objects.DateTime"),

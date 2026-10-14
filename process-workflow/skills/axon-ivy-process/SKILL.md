@@ -17,7 +17,8 @@ See `axon-ivy-process-schema-14.0-dev/` folder for JSON schemas:
 
 - `axon-ivy-process-verify` - **MUST use after** generating/editing `.p.json` files
 - `axon-ivy-workflow-guide` - Step-by-step workflow creation
-- `axon-ivy-data` - For master data class and models
+- `axon-ivy-data` - For process data classes (`.d.json`), field types, and persistence modifiers
+- `axon-ivy-java-data` - For Java models and enums
 - `axon-ivy-html` - For dialog UIs
 - `ivy-yaml-files` - For task/case/start custom fields configuration in `custom-fields.yaml`
 
