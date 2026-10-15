@@ -44,9 +44,15 @@ class AxonIvyProcessEvalTest {
       """;
 
   private static final String TASK_BRANCHES_PROMPT = """
-      Add the two update paths: use EmployeeInput for personal details and
-      EmployeeJobInfoUpdate for job details. Pass the employee to both dialogs and return the
-      updated employee to the process. End the process when the update type is empty or unsupported.
+      Create two UserTasks on the existing update branches:
+      - Personal information: name the task Update Employee <%= in.employee.firstName %>
+        <%= in.employee.lastName %> Information and use the EmployeeInput dialog.
+      - Job information: name the task Update Employee <%= in.employee.firstName %>
+        <%= in.employee.lastName %> Job Information and use the EmployeeJobInfoUpdate dialog.
+
+      Pass the employee into each dialog and map the updated employee back to process data. Connect
+      both tasks to the existing end, and keep the empty or unsupported update-type branch connected
+      to that end as well.
       """;
 
   @TempDir
