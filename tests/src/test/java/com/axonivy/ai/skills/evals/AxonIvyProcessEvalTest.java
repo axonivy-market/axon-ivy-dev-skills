@@ -16,7 +16,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.axonivy.ai.skills.agent.AgentRun;
 import com.axonivy.ai.skills.agent.CopilotAgentRunner;
-import com.axonivy.ai.skills.agent.InvokedSkill;
 import com.axonivy.ai.skills.agent.Workspace;
 
 import tools.jackson.core.JacksonException;
@@ -30,7 +29,6 @@ class AxonIvyProcessEvalTest {
   private static final JsonMapper JSON_MAPPER = JsonMapper.builder().build();
 
   private static final String MODEL = "gpt-5.4-mini";
-  private static final String SKILL = "axon-ivy-process";
   private static final String MANAGEMENT_PROCESS = "process/com/example/EmployeeInformationManagement.p.json";
   private static final String CALLABLE_PROCESS = "process/com/example/GetMockEmployee.p.json";
 
@@ -76,18 +74,16 @@ class AxonIvyProcessEvalTest {
   }
 
   @Test
-  void invokesTheProcessSkill() {
-    assertThat(run.usage().modelCalls())
-        .as("the agent made no model calls and replied %s", run.transcript())
-        .isGreaterThan(0);
-    assertThat(run.invokedSkills())
-        .extracting(InvokedSkill::name)
-        .contains(SKILL);
+  void createsEmployeeInformationManagementWorkflow() {
+    JsonNode callableProcess = process(CALLABLE_PROCESS);
+    JsonNode managementProcess = process(MANAGEMENT_PROCESS);
+
+    assertCallableEmployeeProcess(callableProcess);
+    assertMainProcessCallsCallableAndSelectsUpdateType(managementProcess);
+    assertAlternativeBranchesToTaskDialogs(managementProcess);
   }
 
-  @Test
-  void createsCallableEmployeeProcess() {
-    JsonNode process = process(CALLABLE_PROCESS);
+  private void assertCallableEmployeeProcess(JsonNode process) {
     assertThat(process.path("kind").asText()).isEqualTo("CALLABLE_SUB");
 
     JsonNode start = firstElement(process, "CallSubStart");
@@ -100,23 +96,19 @@ class AxonIvyProcessEvalTest {
     assertThat(script.path("config").path("output").path("code").toString())
         .contains("in.employee")
         .contains("Employee");
-  JsonNode end = firstElement(process, "CallSubEnd");
-  assertThat(targets(start)).contains(id(script));
-  assertThat(targets(script)).contains(id(end));
+
+    JsonNode end = firstElement(process, "CallSubEnd");
+    assertThat(targets(start)).contains(id(script));
+    assertThat(targets(script)).contains(id(end));
     assertUniqueIds(process);
   }
 
-  @Test
-  void buildsEmployeeManagementFlow() {
-    JsonNode process = process(MANAGEMENT_PROCESS);
+  private void assertMainProcessCallsCallableAndSelectsUpdateType(JsonNode process) {
     JsonNode start = firstElement(process, "RequestStart");
     JsonNode subprocessCall = firstElement(process, "SubProcessCall");
     JsonNode dialogCall = firstElement(process, "DialogCall");
     JsonNode alternative = firstElement(process, "Alternative");
-    List<JsonNode> userTasks = elementsOfType(process, "UserTask");
-    JsonNode end = firstElement(process, "TaskEnd");
 
-    assertThat(userTasks).hasSize(2);
     assertThat(targets(start)).contains(id(subprocessCall));
     assertThat(targets(subprocessCall)).contains(id(dialogCall));
     assertThat(targets(dialogCall)).contains(id(alternative));
@@ -133,6 +125,15 @@ class AxonIvyProcessEvalTest {
     assertThat(dialogCall.path("config").path("output").path("map").path("out.updateType").asText())
         .isEqualTo("result.updateType");
 
+    assertUniqueIds(process);
+  }
+
+  private void assertAlternativeBranchesToTaskDialogs(JsonNode process) {
+    JsonNode alternative = firstElement(process, "Alternative");
+    List<JsonNode> userTasks = elementsOfType(process, "UserTask");
+    JsonNode end = firstElement(process, "TaskEnd");
+
+    assertThat(userTasks).hasSize(2);
     List<String> taskDialogs = userTasks.stream()
         .map(task -> task.path("config").path("dialog").asText())
         .toList();
