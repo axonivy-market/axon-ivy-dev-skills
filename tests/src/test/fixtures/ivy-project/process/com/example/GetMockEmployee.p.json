@@ -1,0 +1,9 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/process.json",
+  "id" : "8C3F2A91D6B74E05",
+  "kind" : "CALLABLE_SUB",
+  "config" : {
+    "data" : "com.example.BusinessProcessData"
+  },
+  "elements" : []
+}

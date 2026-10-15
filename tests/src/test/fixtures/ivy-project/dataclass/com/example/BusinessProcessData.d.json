@@ -1,5 +1,8 @@
 {
   "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
   "simpleName" : "BusinessProcessData",
-  "namespace" : "ivy.project"
+  "namespace" : "com.example",
+  "fields" : [
+    { "name" : "employee", "type" : "com.example.Employee" }
+  ]
 }

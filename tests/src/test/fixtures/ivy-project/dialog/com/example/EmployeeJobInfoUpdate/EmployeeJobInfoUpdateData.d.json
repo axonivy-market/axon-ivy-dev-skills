@@ -1,0 +1,16 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
+  "simpleName" : "EmployeeJobInfoUpdateData",
+  "namespace" : "com.example.EmployeeJobInfoUpdate",
+  "fields" : [
+    { "name" : "employee", "type" : "com.example.Employee", "modifiers" : [ "PERSISTENT" ] },
+    { "name" : "jobTitles", "type" : "List<com.example.JobTitle>" },
+    { "name" : "departments", "type" : "List<com.example.Department>" },
+    { "name" : "selectedJobTitleCode" },
+    { "name" : "selectedDepartmentCode" },
+    { "name" : "jobTitleName" },
+    { "name" : "jobTitleDescription" },
+    { "name" : "departmentName" },
+    { "name" : "departmentDescription" }
+  ]
+}
