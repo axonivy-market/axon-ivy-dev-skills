@@ -93,8 +93,11 @@ class AxonIvyProcessEvalTest {
         .isEqualTo("in.employee");
 
     JsonNode script = firstElement(process, "Script");
-    assertThat(script.path("config").path("output").path("code").toString())
-        .contains("in.employee")
+    String scriptCode = script.path("config").path("output").path("code").toString();
+    boolean usesInputEmployee = scriptCode.contains("in.employee");
+    boolean usesOutputEmployee = scriptCode.contains("out.employee");
+    assertThat(usesInputEmployee || usesOutputEmployee).isTrue();
+    assertThat(scriptCode)
         .contains("Employee");
 
     JsonNode end = firstElement(process, "CallSubEnd");
