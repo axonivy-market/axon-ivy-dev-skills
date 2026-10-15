@@ -138,7 +138,9 @@ class AxonIvyProcessEvalTest {
     List<JsonNode> userTasks = elementsOfType(process, "UserTask");
     JsonNode end = firstElement(process, "TaskEnd");
 
-    assertThat(userTasks).hasSize(2);
+    assertThat(userTasks)
+      .as("Generated EmployeeInformationManagement process JSON:\n%s", process.toPrettyString())
+      .hasSize(2);
     List<String> taskDialogs = userTasks.stream()
         .map(task -> task.path("config").path("dialog").asText())
         .toList();
