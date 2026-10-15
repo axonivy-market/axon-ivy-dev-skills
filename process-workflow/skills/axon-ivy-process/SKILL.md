@@ -82,3 +82,7 @@ Load these additional references only when applicable:
 - EmbeddedProcess -> `embedded.md` — Group process elements into an embedded subprocess.
 - ErrorBoundaryEvent or ErrorStartEvent -> `error-handling.md` — Catch an error at an element boundary or start handling a process error.
 
+## Final Checklist
+
+- [ ] Every element ID is unique within its process.
+
