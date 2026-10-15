@@ -32,24 +32,21 @@ class AxonIvyProcessEvalTest {
   private static final String MANAGEMENT_PROCESS = "process/com/example/EmployeeInformationManagement.p.json";
   private static final String CALLABLE_PROCESS = "process/com/example/GetMockEmployee.p.json";
 
-  private static final String PROMPT = """
-      Complete the `EmployeeInformationManagement.p.json` and `GetMockEmployee.p.json` processes.
-      Use the Axon Ivy process skill and the existing dialogs and data classes; do not modify any
-      dialog, data-class, CMS, or other project files.
+  private static final String CALLABLE_PROMPT = """
+      Create a callable GetMockEmployee process that builds a sample com.example.Employee and
+      returns it from call().
+      """;
 
-      Build this workflow:
-      - `GetMockEmployee` is a callable subprocess with a `call()` signature that creates a mock
-        `com.example.Employee` and returns it as `result.employee`.
-      - `EmployeeInformationManagement` starts the workflow and calls that subprocess to populate
-        its employee data.
-      - Show `EmployeeUpdateTypeSelection` with the employee, then branch on the selected update
-        type.
-      - Add two human tasks, one using `EmployeeInput` for personal information and one using
-        `EmployeeJobInfoUpdate` for job information. Both dialogs return the updated employee.
-      - Route an empty or unsupported selection to a normal process end.
+  private static final String MAIN_PROCESS_PROMPT = """
+      Wire EmployeeInformationManagement to call GetMockEmployee, then show
+      EmployeeUpdateTypeSelection and branch on its returned update type. Add the start, call,
+      dialog, Alternative, and a default process end; we can add the update tasks next.
+      """;
 
-      Preserve the existing file names, data classes, and dialog signatures. Ensure all process
-      element and connection IDs are unique within each process.
+  private static final String TASK_BRANCHES_PROMPT = """
+      Add the two update paths: use EmployeeInput for personal details and
+      EmployeeJobInfoUpdate for job details. Pass the employee to both dialogs and return the
+      updated employee to the process. End the process when the update type is empty or unsupported.
       """;
 
   @TempDir
@@ -60,10 +57,9 @@ class AxonIvyProcessEvalTest {
   private AgentRun run;
 
   @BeforeAll
-  void runAgent() {
+  void prepareWorkspace() {
     runner = new CopilotAgentRunner(MODEL, Path.of("..").toAbsolutePath().normalize().toString());
     workspace = Workspace.materialize(IVY_PROJECT, tempDir);
-    run = runner.run(PROMPT, workspace.root(), true);
   }
 
   @AfterAll
@@ -75,12 +71,18 @@ class AxonIvyProcessEvalTest {
 
   @Test
   void createsEmployeeInformationManagementWorkflow() {
-    JsonNode callableProcess = process(CALLABLE_PROCESS);
-    JsonNode managementProcess = process(MANAGEMENT_PROCESS);
+    runPrompt(CALLABLE_PROMPT);
+    assertCallableEmployeeProcess(process(CALLABLE_PROCESS));
 
-    assertCallableEmployeeProcess(callableProcess);
-    assertMainProcessCallsCallableAndSelectsUpdateType(managementProcess);
-    assertAlternativeBranchesToTaskDialogs(managementProcess);
+    runPrompt(MAIN_PROCESS_PROMPT);
+    assertMainProcessCallsCallableAndSelectsUpdateType(process(MANAGEMENT_PROCESS));
+
+    runPrompt(TASK_BRANCHES_PROMPT);
+    assertAlternativeBranchesToTaskDialogs(process(MANAGEMENT_PROCESS));
+  }
+
+  private void runPrompt(String prompt) {
+    run = runner.run(prompt, workspace.root(), true);
   }
 
   private void assertCallableEmployeeProcess(JsonNode process) {
