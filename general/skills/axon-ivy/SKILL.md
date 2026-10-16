@@ -53,10 +53,10 @@ If intent is **ambiguous**, use your best judgment — freely decide which path 
 
 1. Run skill `axon-ivy-init` — scaffold project from template, run Maven build
 2. After scaffold completes, **spawn 2 parallel subagents:**
-   - **`config-setup`** — follow `axon-ivy-variable-config` + `axon-ivy-user-role-config`: create `config/variables.yaml`, `config/roles.yaml`, `config/users.yaml`
+   - **`config-setup`** — use `ivy-yaml-files` skill: create `config/variables.yaml`, `config/roles.yaml`, `config/users.yaml`
    - **`data-scaffold`** — follow `axon-ivy-data`: create base data classes in `dataclasses/`
 3. Wait for both subagents to finish
-4. Run skill `axon-ivy-custom-fields` if the project needs task/case metadata fields
+4. Use `ivy-yaml-files` skill if the project needs task/case metadata fields in `config/custom-fields.yaml`
 
 **Done when:** project builds cleanly and base config files exist. If Path A was triggered as a prerequisite (i.e., no `.ivyproject` existed when the user asked for a feature or story), immediately continue to the originally intended path — do not stop here.
 
@@ -70,12 +70,11 @@ If intent is **ambiguous**, use your best judgment — freely decide which path 
 
 1. Read the story file `[project]/documents/stories/story_NN.md`
 2. Run skill `axon-ivy-implement-story` — implement all parts sequentially
-3. After all parts are done, **spawn 3 parallel verification subagents:**
+3. After all parts are done, **spawn 2 parallel verification subagents:**
 
    | Subagent | Follows | Scope |
    |---|---|---|
    | **`process-verify`** | `axon-ivy-process-verify` | All `.p.json` files modified in this story |
-   | **`cms-verify`** | `axon-ivy-cms-verify` | All `cms_*.yaml` files modified in this story |
    | **`ui-verify`** | `axon-ivy-primefaces-verify` | All `.xhtml` files modified in this story |
 
 4. Collect results from all 3 subagents
@@ -103,12 +102,11 @@ If intent is **ambiguous**, use your best judgment — freely decide which path 
 
 **Goal:** Run the full verification and review suite on recent changes and produce a consolidated report.
 
-**Spawn 6 parallel subagents simultaneously:**
+**Spawn 5 parallel subagents simultaneously:**
 
 | Subagent | Follows | Scope |
 |---|---|---|
 | **`process-verify`** | `axon-ivy-process-verify` | All modified `.p.json` files |
-| **`cms-verify`** | `axon-ivy-cms-verify` | All modified `cms_*.yaml` files |
 | **`ui-verify`** | `axon-ivy-primefaces-verify` | All modified `.xhtml` files |
 | **`story-verify`** | `axon-ivy-verify-story` | Current story acceptance criteria |
 | **`java-review`** | `review-java` | All modified `.java` files |
@@ -120,7 +118,6 @@ Wait for all, then output a **consolidated report**:
 
 ```
 ✓ Process verify:     PASS  (N files checked)
-✗ CMS verify:         FAIL  — cms_en.yaml line 42: key mismatch
 ✓ PrimeFaces verify:  PASS  (N files checked)
 ✓ Story verify:       PASS  (all acceptance criteria met)
 ✓ Java review:        PASS  (N files checked)

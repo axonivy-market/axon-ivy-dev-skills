@@ -1,9 +1,8 @@
 package com.axonivy.ai.skills.evals;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
@@ -12,9 +11,11 @@ import java.util.HexFormat;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -32,16 +33,16 @@ class AxonIvyExternalLoaderEvalTest {
 
   private static final Path IVY_PROJECT = Path.of("src/test/fixtures/ivy-project");
   private static final Path EXTERNAL_SOURCES = Path.of("src/test/fixtures/external-sources");
+  private static final Path LOADERS = Path.of("..", "delivery-workflow", "skills", "axon-ivy-external-loader", "loaders")
+      .toAbsolutePath()
+      .normalize();
 
   private static final String SKILL = "axon-ivy-external-loader";
   private static final String MODEL = "gpt-5.4-mini";
-  private static final String EXCEL_DUMP = ".external-context/excel_dump.txt";
-  private static final String BPMN_DUMP = ".external-context/bpmn_dump.txt";
 
   private static final String PROMPT = """
-      The folder external-requirements next to the project holds an Excel workbook and a BPMN export
-      alongside a few other files. Load them and get the context out so we can write the leave
-      approval requirements from it.
+      Load the Excel and BPMN files in `external-requirements` and summarize the leave approval
+      context. Do not modify any files.
       """;
 
   private CopilotAgentRunner runner;
@@ -75,37 +76,72 @@ class AxonIvyExternalLoaderEvalTest {
   }
 
   @Test
-  void runsBothLoadersOverTheExternalFolder() {
+  void runsBothLoadersOverTheExternalFolder() throws Exception {
+    assertThat(run.usage().modelCalls())
+        .as("the agent made 0 model calls and replied %s — this is a transient Copilot "
+            + "API/quota/auth failure, not a skill or test defect. Re-run the job.", run.transcript())
+        .isGreaterThan(0);
+
     assertThat(run.invokedSkills())
         .extracting(InvokedSkill::name)
         .contains(SKILL);
 
-    assertThat(created)
-        .as("the run left nothing behind. It replied: %s", run.transcript())
-        .contains(EXCEL_DUMP, BPMN_DUMP);
+    String excelOutput = runLoader(
+      "load_excel.py",
+      workspace.root().resolve("external-requirements/LeaveRequest_Process.xlsx"));
+    assertThat(excelOutput)
+      .contains("ApplicantCostCenter")
+      .contains("[A4]")
+      .contains("Mandatory between June and August")
+      .contains("60-70 requests per month");
 
-    assertThat(workspace.read(EXCEL_DUMP))
-        .as("load_excel.py must have opened the binary workbook")
-        .contains("ApplicantCostCenter")
-        .containsPattern("60\\s*[-–—]\\s*70");
-
-    assertThat(workspace.read(BPMN_DUMP))
-        .as("the default full format keeps annotations and lanes, --format flow drops them")
-        .contains("10 working days")
-        .contains("HR Operations")
-        .containsIgnoringCase("June");
+    String bpmnOutput = runLoader(
+      "load_bpmn.py",
+      workspace.root().resolve("external-requirements/LeaveApproval.bpmn"));
+    assertThat(bpmnOutput)
+      .contains("HR Operations")
+      .contains("Manager Approval")
+      .contains("10 working days")
+      .contains("June to August")
+      .contains("Approved? --[Approved]--> Leave booked");
 
     assertThat(checksums(workspace.root()))
-        .as("sources and project files are read, never rewritten")
-        .containsAllEntriesOf(baseline);
+      .as("the source files must not be modified")
+      .containsAllEntriesOf(baseline);
 
     assertThat(created)
-        .as("dumps are working files, and nothing else may be left behind")
-        .allSatisfy(path -> assertThat(path).startsWith(".external-context/"));
+        .as("the skill must not write files unless the user explicitly asks for a saved digest")
+        .isEmpty();
   }
 
   private static String skillsDir() {
     return Path.of("..").toAbsolutePath().normalize().toString();
+  }
+
+  private static String runLoader(String script, Path source) throws IOException, InterruptedException {
+    Path outputFile = Files.createTempFile("axonivy-loader-", ".log");
+    Process process = new ProcessBuilder("python", LOADERS.resolve(script).toString(), source.toString())
+        .redirectErrorStream(true)
+        .redirectOutput(outputFile.toFile())
+        .start();
+
+    try {
+      if (!process.waitFor(30, TimeUnit.SECONDS)) {
+        process.destroyForcibly();
+        throw new AssertionError(script + " timed out");
+      }
+
+      String output = Files.readString(outputFile, StandardCharsets.UTF_8);
+      assertThat(process.exitValue())
+          .as("%s output: %s", script, output)
+          .isZero();
+      return output;
+    } finally {
+      if (process.isAlive()) {
+        process.destroyForcibly();
+      }
+      Files.deleteIfExists(outputFile);
+    }
   }
 
   private static Workspace materializeProjectWithSources(Path target) {

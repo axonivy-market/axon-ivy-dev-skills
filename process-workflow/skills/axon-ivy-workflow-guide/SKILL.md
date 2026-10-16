@@ -67,7 +67,7 @@ Create dialogs in `src_hd/package/`:
 
 ### Step 6: Configure Roles & Users
 
-**Skills:** `axon-ivy-variable-config`, `axon-ivy-user-role-config`
+**Skill:** `ivy-yaml-files`
 
 Update config files:
 

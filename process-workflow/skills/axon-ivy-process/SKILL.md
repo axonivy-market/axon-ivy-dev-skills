@@ -19,7 +19,7 @@ See `axon-ivy-process-schema-14.0-dev/` folder for JSON schemas:
 - `axon-ivy-workflow-guide` - Step-by-step workflow creation
 - `axon-ivy-data` - For master data class and models
 - `axon-ivy-html` - For dialog UIs
-- `axon-ivy-custom-fields` - For task/case/start custom fields configuration
+- `ivy-yaml-files` - For task/case/start custom fields configuration in `custom-fields.yaml`
 
 ## Always Load on Invocation
 
@@ -97,7 +97,7 @@ Load these only when the process contains the relevant element type:
 }
 ```
 
-**IMPORTANT**: Before adding `customFields` to RequestStart, use `axon-ivy-custom-fields` skill to define fields in `config/custom-fields.yaml` (load `case.md` for Cases, `start.md` for Starts).
+**IMPORTANT**: Before adding `customFields` to RequestStart, use the `ivy-yaml-files` skill to define fields in `config/custom-fields.yaml` under `Cases:` (for Cases) or `Starts:` (for Starts).
 
 ### UserTask (Human Task + Dialog) — DEFAULT for "task + UI" steps
 
@@ -170,7 +170,7 @@ Load these only when the process contains the relevant element type:
 
 **CRITICAL — Duration format**: Use `new Duration("XD")` for days or `new Duration("XH")` for hours (capital letter). Do NOT use shorthand like `"3d"` or `"5d"`.
 
-**IMPORTANT**: Before adding `customFields` to UserTask, use `axon-ivy-custom-fields` skill (load `task.md`) to define fields in `config/custom-fields.yaml` under `Tasks:`.
+**IMPORTANT**: Before adding `customFields` to UserTask, use the built-in `ivy-yaml-files` skill to define fields in `config/custom-fields.yaml` under `Tasks:`.
 
 **Note on `dialog`**: Uses `.` (dot) package separators. This is different from `SubProcessCall.processCall` which uses `/` (slash) path separators.
 
