@@ -10,11 +10,11 @@ If you want to know more about Agent Skills, see [agentskills.io](https://agents
 
 ## Skills Overview
 
-27 skills grouped into 8 purpose-based categories — install the ones that match what you're building:
+26 skills grouped into 8 purpose-based categories — install the ones that match what you're building:
 
 | Category | Skills | Purpose |
 | --- | --- | --- |
-| `general` | `axon-ivy-init`, `ivy-market-import` | Project setup and Marketplace imports for Axon Ivy development |
+| `general` | `ivy-market-import` | Marketplace imports for Axon Ivy development |
 | `process-workflow` | `axon-ivy-workflow-guide`, `axon-ivy-process`, `axon-ivy-process-verify`, `axon-ivy-error-handling`, `axon-ivy-data`, `axon-ivy-java-data` | Designing, building, and verifying Axon Ivy workflow processes and their data |
 | `smart-workflow` | `axon-ivy-smart-workflow` | AI-powered and agentic capabilities within Axon Ivy workflows |
 | `persistence` | `axon-ivy-repository`, `axon-ivy-jpa`, `axon-ivy-persistence-utils`, `axon-ivy-liquibase`, `axon-ivy-liquibase-verify` | Data storage and persistence for Axon Ivy projects |
