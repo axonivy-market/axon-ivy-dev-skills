@@ -3,9 +3,7 @@ name: axon-ivy-data
 description: Use this skill whenever working with Axon Ivy data classes (.d.json files)
 ---
 
-## Schema
-
-**MANDATORY**: See `schema.json` in this skill folder for full JSON schema reference.
+Use `ivy-json-files` for JSON structure and schema-validation rules. This skill covers Axon Ivy data-class semantics.
 
 ### The PERSISTENT modifier — survives a task save point
 
@@ -44,41 +42,6 @@ Any field whose value must still be present *after* a UserTask (e.g. a result ob
 
 **Dates from AI extraction:** Prefer `String` (AI returns ISO format strings). Parse to a date type in a Script element only when needed for business logic comparisons.
 
-**Dates:** use the Ivy types above. `java.time.*` is not on the business-data persistence whitelist — on anything `Ivy.repo()` stores it risks data recovery, and `validateProject` only reports it as Information, so it ships silently.
-
-**Custom enums** trigger the same whitelist advisory and it is unavoidable — expect it, ignore it.
-
-## .d.json Example
-
-One example covering a nested object, a plain string field, a comment, and a list field:
-
-```json
-{
-  ...
-  "fields" : [ {
-    "name" : "candidate",
-    "type" : "hr.hiring.model.Candidate",
-    "modifiers" : [ ],
-    "comment" : "The candidate being processed"
-  }, {
-    "name" : "status",
-    "modifiers" : [ ]
-  }, {
-    "name" : "approved",
-    "type" : "Boolean",
-    "modifiers" : [ ]
-  }, {
-    "name" : "tasks",
-    "type" : "List<hr.hiring.model.Task>",
-    "modifiers" : [ ]
-  } ]
-}
-```
-
 ## Regenerate Data Classes
 
-After changing `.d.json` files, generated Java classes must be regenerated. Batch all `.d.json` edits first, then build once — never once per file.
-
-- **Standalone use:** run `mvn clean install -f <project-directory>/pom.xml` once, after all `.d.json` edits are done.
-- **Called from an orchestrating skill:** defer regeneration/build to the caller when it provides an equivalent build step.
-- Build early only when a specific generated class is required to continue the current implementation step.
+Call `new_axon_ivy_data_class` to regenerate Axon Ivy data classes.

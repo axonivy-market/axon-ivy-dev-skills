@@ -7,7 +7,7 @@ Element types used in HTML Dialog process files (`dialog/**/*Process.p.json`). T
 A dialog has its **own data class** (`*Data.d.json`, referenced by the dialog process's `config.data`). It is a **different object** from the calling process's master data class. **Nothing crosses automatically** — a value is visible inside the dialog only if you mapped it in, and returns to the process only if you mapped it out. You must bridge the boundary in **both directions**:
 
 | Direction | Caller side | Dialog side |
-|---|---|---|
+| --- | --- | --- |
 | **In** (process → dialog) | `UserTask`/`DialogCall` `call.map`: `param.x = in.x` | `HtmlDialogStart.input.map`: `out.x = param.x` (read downstream as `in.x`) |
 | **Out** (dialog → process) | `output.map`: `out.x = result.x` | `HtmlDialogStart.result.map`: `result.x = in.x` |
 
@@ -24,7 +24,7 @@ Because the data classes are separate, business logic that needs process data sh
 **Choose the correct end element based on whether the flow should exit the dialog:**
 
 | End Element | Behavior | Use For |
-|---|---|---|
+| --- | --- | --- |
 | `HtmlDialogEnd` | Flow ends, **dialog stays open** | Method flows (upload, removeFile, validate, refresh), start initialization |
 | `HtmlDialogExit` | Flow ends, **dialog closes** and returns to calling process | Navigation events (submit, close, cancel) that leave the dialog |
 
@@ -32,17 +32,17 @@ Because the data classes are separate, business logic that needs process data sh
 
 ### Correct Examples
 
-```
+```text
 start()        → Script → HtmlDialogEnd      (dialog opens and stays open)
 upload()       → Script → HtmlDialogEnd      (file uploaded, dialog stays open)
 removeFile()   → Script → HtmlDialogEnd      (file removed, dialog stays open)
 submit         → Script → HtmlDialogExit     (dialog closes, result returned)
-close          →          HtmlDialogExit     (dialog closes without result)
+close          →          HtmlDialogExit     (dialog closes; start result contract applies, if defined)
 ```
 
 ### Common Mistake
 
-```
+```text
 WRONG:  HtmlDialogMethodStart (upload) → Script → HtmlDialogExit
         (dialog would close after upload — user loses their work!)
 
@@ -91,6 +91,8 @@ RIGHT:  HtmlDialogMethodStart (upload) → Script → HtmlDialogEnd
 - `guid` — unique identifier linking to the dialog component
 
 **CRITICAL — Result section**: Every `HtmlDialogStart` that returns data to a calling process MUST have a `result` section. Without it, the calling process cannot resolve `result.fieldName` in its output mapping, causing `Output 'out.field': Field not found` errors.
+
+The result contract is declared on `HtmlDialogStart`, not on `HtmlDialogExit`. Any exit path uses that start's declared result mapping; an exit does not automatically suppress the result for a close or cancel action. If close/cancel should return no meaningful value, define the start contract and caller mapping accordingly.
 
 ## HtmlDialogEnd (Flow End — Dialog Stays Open)
 
@@ -206,7 +208,7 @@ A dialog process file lives next to its `.xhtml` in the dialog folder and typica
     { "type": "HtmlDialogEventStart", "name": "submit", ... },
     { "type": "HtmlDialogExit", ... },
 
-    // Cancel/close (dialog closes without result)
+    // Cancel/close (dialog closes; the start's result contract still applies, if defined)
     { "type": "HtmlDialogEventStart", "name": "close", ... },
     { "type": "HtmlDialogExit", ... },
 

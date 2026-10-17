@@ -1,2 +1,43 @@
+Dialogs:
+  com:
+    example:
+      EmployeeInput:
+        Title: Employee information
+        EmployeeId: Employee ID
+        EmployeeIdRequired: Employee ID is required
+        FirstName: First name
+        FirstNameRequired: First name is required
+        LastName: Last name
+        LastNameRequired: Last name is required
+        Birthday: Birthday
+        BirthdayRequired: Birthday is required
+        BirthdayInvalid: Enter a valid birthday
+        Email: Email
+        EmailRequired: Email is required
+        YearsOfExperience: Years of experience
+        PerformanceRating: Performance rating
+        JobTitle: Job title
+        Department: Department
+        SaveEmployee: Save employee
+      EmployeeUpdateTypeSelection:
+        Title: Choose employee information to update
+        Prompt: Select the type of information you want to update.
+        EmployeePersonalInfo: Employee personal info
+        EmployeeJobInfo: Employee job info
+        SelectionRequired: Choose an update type.
+        Continue: Continue
+      EmployeeJobInfoUpdate:
+        Title: Update employee job information
+        Instruction: Choose a job title and department. Their details are read only.
+        JobTitle: Job title
+        JobTitleRequired: Select a job title.
+        JobTitleName: Title name
+        JobTitleDescription: Title description
+        Department: Department
+        DepartmentRequired: Select a department.
+        DepartmentName: Department name
+        DepartmentDescription: Department description
+        SaveJobInformation: Save job information
 Labels:
   ExistingFixtureLabel: Keep this English label
+  Cancel: Cancel

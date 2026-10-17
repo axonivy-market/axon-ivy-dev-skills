@@ -1,2 +1,43 @@
+Dialogs:
+  com:
+    example:
+      EmployeeInput:
+        Title: Mitarbeiterinformationen
+        EmployeeId: Mitarbeiter-ID
+        EmployeeIdRequired: Mitarbeiter-ID ist erforderlich
+        FirstName: Vorname
+        FirstNameRequired: Vorname ist erforderlich
+        LastName: Nachname
+        LastNameRequired: Nachname ist erforderlich
+        Birthday: Geburtsdatum
+        BirthdayRequired: Geburtsdatum ist erforderlich
+        BirthdayInvalid: Geben Sie ein gültiges Geburtsdatum ein
+        Email: E-Mail
+        EmailRequired: E-Mail ist erforderlich
+        YearsOfExperience: Berufserfahrung in Jahren
+        PerformanceRating: Leistungsbewertung
+        JobTitle: Berufsbezeichnung
+        Department: Abteilung
+        SaveEmployee: Mitarbeiter speichern
+      EmployeeUpdateTypeSelection:
+        Title: Mitarbeiterinformationen zur Aktualisierung auswählen
+        Prompt: Wählen Sie die Art der Informationen aus, die Sie aktualisieren möchten.
+        EmployeePersonalInfo: Persönliche Daten des Mitarbeiters
+        EmployeeJobInfo: Berufliche Informationen des Mitarbeiters
+        SelectionRequired: Wählen Sie eine Aktualisierungsart aus.
+        Continue: Weiter
+      EmployeeJobInfoUpdate:
+        Title: Berufliche Informationen des Mitarbeiters aktualisieren
+        Instruction: Wählen Sie eine Berufsbezeichnung und Abteilung aus. Deren Details sind schreibgeschützt.
+        JobTitle: Berufsbezeichnung
+        JobTitleRequired: Wählen Sie eine Berufsbezeichnung aus.
+        JobTitleName: Bezeichnung
+        JobTitleDescription: Beschreibung der Berufsbezeichnung
+        Department: Abteilung
+        DepartmentRequired: Wählen Sie eine Abteilung aus.
+        DepartmentName: Abteilungsname
+        DepartmentDescription: Beschreibung der Abteilung
+        SaveJobInformation: Berufliche Informationen speichern
 Labels:
   ExistingFixtureLabel: Diese deutsche Bezeichnung behalten
+  Cancel: Abbrechen

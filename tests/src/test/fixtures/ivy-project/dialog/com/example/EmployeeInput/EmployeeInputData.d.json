@@ -1,0 +1,8 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
+  "simpleName" : "EmployeeInputData",
+  "namespace" : "com.example.EmployeeInput",
+  "fields" : [
+    { "name" : "employee", "type" : "com.example.Employee", "modifiers" : [ "PERSISTENT" ] }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/process.json",
+  "id" : "01A13D9841C21437",
+  "config" : {
+    "data" : "com.example.EmployeeInformationManagementData"
+  },
+  "elements" : []
+}
