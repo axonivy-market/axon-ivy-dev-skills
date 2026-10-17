@@ -27,7 +27,7 @@ class AxonIvyDataEvalTest {
   private static final JsonMapper JSON_MAPPER = JsonMapper.builder().build();
 
   private static final String MODEL = "gpt-5.4-mini";
-  private static final String DATA_CLASS = "dataclasses/ivy/project/BusinessProcessData.d.json";
+  private static final String DATA_CLASS = "dataclass/com/example/BusinessProcessData.d.json";
     private static final Map<String, String> EXPECTED_FIELD_TYPES = Map.ofEntries(
       Map.entry("eligibleForAdvance", "Boolean"),
       Map.entry("dependentCount", "java.lang.Integer"),
@@ -44,7 +44,7 @@ class AxonIvyDataEvalTest {
       Map.entry("reimbursementStatus", "com.example.Status"));
 
   private static final String PROMPT = """
-      Update `ivy.project.BusinessProcessData` for an employee reimbursement review with:
+      Update `com.example.BusinessProcessData` for an employee reimbursement review with:
       - `applicantName`, a regular text value
       - `eligibleForAdvance`, a true/false flag
       - `dependentCount`, a whole-number quantity

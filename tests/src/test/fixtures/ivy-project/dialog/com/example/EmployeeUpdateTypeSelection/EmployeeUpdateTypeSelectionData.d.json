@@ -1,0 +1,9 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
+  "simpleName" : "EmployeeUpdateTypeSelectionData",
+  "namespace" : "com.example.EmployeeUpdateTypeSelection",
+  "fields" : [
+    { "name" : "employee", "type" : "com.example.Employee" },
+    { "name" : "updateType", "type" : "enums.UpdateType" }
+  ]
+}

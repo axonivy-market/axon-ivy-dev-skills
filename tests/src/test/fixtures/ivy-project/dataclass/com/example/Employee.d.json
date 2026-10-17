@@ -1,0 +1,16 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
+  "simpleName" : "Employee",
+  "namespace" : "com.example",
+  "fields" : [
+    { "name" : "employeeId" },
+    { "name" : "firstName" },
+    { "name" : "lastName" },
+    { "name" : "birthday", "type" : "ch.ivyteam.ivy.scripting.objects.Date" },
+    { "name" : "yearsOfExperience", "type" : "java.lang.Integer" },
+    { "name" : "performanceRating", "type" : "java.lang.Double" },
+    { "name" : "email" },
+    { "name" : "jobTitle", "type" : "com.example.JobTitle" },
+    { "name" : "department", "type" : "com.example.Department" }
+  ]
+}

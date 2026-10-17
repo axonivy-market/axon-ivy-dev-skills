@@ -1,6 +1,6 @@
-## Error Handling in Processes
+# Error Handling in Processes
 
-### ErrorBoundaryEvent
+## ErrorBoundaryEvent
 
 Attached to elements that may fail (EMail, WebServiceCall). Catches errors and routes to a graceful continuation.
 
@@ -39,7 +39,7 @@ Attached to elements that may fail (EMail, WebServiceCall). Catches errors and r
 ### Common Error Codes
 
 | Error Code | Used On | Description |
-|-----------|---------|-------------|
+| ----------- | --------- | ------------- |
 | `ivy:error:email` | `EMail` elements | Email sending failure |
 | `ivy:error:webservice:exception` | `WebServiceCall` elements | SOAP web service call failure |
 
@@ -72,7 +72,7 @@ For WebServiceCall errors, you can capture the error message:
 ### ErrorBoundaryEvent Output Types
 
 | Type | Syntax | Use Case |
-|------|--------|----------|
+| ------ | -------- | ---------- |
 | Code (script) | `"output": { "code": "ivy.log.error(...);" }` | Log error and continue |
 | Mapping | `"output": { "map": { "out.field": "error.getMessage()" } }` | Capture error details |
 

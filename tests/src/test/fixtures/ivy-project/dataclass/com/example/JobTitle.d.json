@@ -1,0 +1,10 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
+  "simpleName" : "JobTitle",
+  "namespace" : "com.example",
+  "fields" : [
+    { "name" : "titleName" },
+    { "name" : "titleCode" },
+    { "name" : "description" }
+  ]
+}

@@ -1,0 +1,69 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="jakarta.faces.core"
+  xmlns:h="jakarta.faces.html" xmlns:ui="jakarta.faces.facelets"
+  xmlns:ic="http://ivyteam.ch/jsf/component" xmlns:p="primefaces"
+  xmlns:pe="primefaces.extensions">
+<h:body>
+  <ui:composition template="/layouts/frame-10-full-width.xhtml">
+    <ui:define name="title">Employee information</ui:define>
+    <ui:define name="content">
+
+      <h:form id="form" styleClass="grid">
+        <div class="col-12">
+          <p:messages id="form-messages" showDetail="true" />
+        </div>
+
+        <div class="col-12 md:col-6 p-fluid grid">
+          <div class="grid p-fluid field col-12 align-content-center align-items-center">
+            <div class="col-5"><p:outputLabel for="employee-id" value="Employee ID" styleClass="font-semibold pr-2" /></div>
+            <div class="col-7"><p:inputText id="employee-id" value="#{data.employee.employeeId}" required="true" requiredMessage="Employee ID is required" styleClass="w-full" /></div>
+          </div>
+          <div class="grid p-fluid field col-12 align-content-center align-items-center">
+            <div class="col-5"><p:outputLabel for="first-name" value="First name" styleClass="font-semibold pr-2" /></div>
+            <div class="col-7"><p:inputText id="first-name" value="#{data.employee.firstName}" required="true" requiredMessage="First name is required" styleClass="w-full" /></div>
+          </div>
+          <div class="grid p-fluid field col-12 align-content-center align-items-center">
+            <div class="col-5"><p:outputLabel for="last-name" value="Last name" styleClass="font-semibold pr-2" /></div>
+            <div class="col-7"><p:inputText id="last-name" value="#{data.employee.lastName}" required="true" requiredMessage="Last name is required" styleClass="w-full" /></div>
+          </div>
+          <div class="grid p-fluid field col-12 align-content-center align-items-center">
+            <div class="col-5"><p:outputLabel for="birthday" value="Birthday" styleClass="font-semibold pr-2" /></div>
+            <div class="col-7">
+              <p:datePicker id="birthday" value="#{data.employee.birthday}" showIcon="true" required="true" requiredMessage="Birthday is required" converterMessage="Enter a valid birthday" pattern="yyyy-MM-dd" styleClass="w-full flex" inputStyleClass="flex-1" />
+            </div>
+          </div>
+          <div class="grid p-fluid field col-12 align-content-center align-items-center">
+            <div class="col-5"><p:outputLabel for="email" value="Email" styleClass="font-semibold pr-2" /></div>
+            <div class="col-7"><p:inputText id="email" value="#{data.employee.email}" type="email" required="true" requiredMessage="Email is required" styleClass="w-full" /></div>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6 p-fluid grid">
+          <div class="grid p-fluid field col-12 align-content-center align-items-center">
+            <div class="col-5"><p:outputLabel for="years-of-experience" value="Years of experience" styleClass="font-semibold pr-2" /></div>
+            <div class="col-7"><p:inputText id="years-of-experience" value="#{data.employee.yearsOfExperience}" type="number" styleClass="w-full" /></div>
+          </div>
+          <div class="grid p-fluid field col-12 align-content-center align-items-center">
+            <div class="col-5"><p:outputLabel for="performance-rating" value="Performance rating" styleClass="font-semibold pr-2" /></div>
+            <div class="col-7"><p:inputText id="performance-rating" value="#{data.employee.performanceRating}" type="number" styleClass="w-full" /></div>
+          </div>
+          <div class="grid p-fluid field col-12 align-content-center align-items-center">
+            <div class="col-5"><p:outputLabel for="job-title" value="Job title" styleClass="font-semibold pr-2" /></div>
+            <div class="col-7"><p:inputText id="job-title" value="#{data.employee.jobTitle.titleName}" styleClass="w-full" /></div>
+          </div>
+          <div class="grid p-fluid field col-12 align-content-center align-items-center">
+            <div class="col-5"><p:outputLabel for="department" value="Department" styleClass="font-semibold pr-2" /></div>
+            <div class="col-7"><p:inputText id="department" value="#{data.employee.department.departmentName}" styleClass="w-full" /></div>
+          </div>
+        </div>
+
+        <div class="col-12 mt-3 text-right">
+          <p:commandLink id="cancel" actionListener="#{logic.close}" process="@this" immediate="true" value="Cancel" styleClass="ui-button-secondary mr-2" />
+          <p:commandButton id="submit" actionListener="#{logic.submit}" process="@form" value="Save employee" update="@form" icon="ti ti-check" styleClass="ui-button-primary" />
+        </div>
+      </h:form>
+
+    </ui:define>
+  </ui:composition>
+</h:body>
+
+</html>

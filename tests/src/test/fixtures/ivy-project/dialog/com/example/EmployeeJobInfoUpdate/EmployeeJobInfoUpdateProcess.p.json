@@ -1,0 +1,283 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/process.json",
+  "id" : "1A13DB5C9E3B9155",
+  "kind" : "HTML_DIALOG",
+  "config" : {
+    "data" : "com.example.EmployeeJobInfoUpdate.EmployeeJobInfoUpdateData"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "HtmlDialogStart",
+      "name" : "start(com.example.Employee)",
+      "config" : {
+        "signature" : "start",
+        "input" : {
+          "params" : [
+            { "name" : "employee", "type" : "com.example.Employee", "desc" : "Employee to update" }
+          ],
+          "map" : {
+            "out.employee" : "param.employee"
+          }
+        },
+        "result" : {
+          "params" : [
+            { "name" : "employee", "type" : "com.example.Employee", "desc" : "Updated employee" }
+          ],
+          "map" : {
+            "result.employee" : "in.employee"
+          }
+        },
+        "guid" : "1A13DB5C9E42018E"
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f16", "to" : "f6" }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "HtmlDialogEnd",
+      "visual" : {
+        "at" : { "x" : 224, "y" : 64 }
+      }
+    }, {
+      "id" : "f3",
+      "type" : "HtmlDialogEventStart",
+      "name" : "close",
+      "config" : {
+        "guid" : "1A13DB5C9E5C17D5"
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 160 }
+      },
+      "connect" : [
+        { "id" : "f5", "to" : "f4" }
+      ]
+    }, {
+      "id" : "f4",
+      "type" : "HtmlDialogExit",
+      "visual" : {
+        "at" : { "x" : 224, "y" : 160 }
+      }
+    }, {
+      "id" : "f6",
+      "type" : "Script",
+      "name" : "Prepare job choices",
+      "config" : {
+        "output" : {
+          "code" : [
+            "import java.util.ArrayList;",
+            "import com.example.JobTitle;",
+            "import com.example.Department;",
+            "",
+            "List<JobTitle> jobTitles = new ArrayList<JobTitle>();",
+            "JobTitle currentJobTitle = in.employee.getJobTitle();",
+            "if (currentJobTitle == null || currentJobTitle.getTitleCode() == null) {",
+            "  currentJobTitle = new JobTitle();",
+            "  currentJobTitle.setTitleName(\"Software Engineer\");",
+            "  currentJobTitle.setTitleCode(\"ENG\");",
+            "  currentJobTitle.setDescription(\"Builds and maintains software applications.\");",
+            "}",
+            "jobTitles.add(currentJobTitle);",
+            "if (!\"SSE\".equals(currentJobTitle.getTitleCode())) {",
+            "  JobTitle seniorEngineer = new JobTitle();",
+            "  seniorEngineer.setTitleName(\"Senior Software Engineer\");",
+            "  seniorEngineer.setTitleCode(\"SSE\");",
+            "  seniorEngineer.setDescription(\"Leads implementation work and mentors engineers.\");",
+            "  jobTitles.add(seniorEngineer);",
+            "}",
+            "if (!\"PM\".equals(currentJobTitle.getTitleCode())) {",
+            "  JobTitle productManager = new JobTitle();",
+            "  productManager.setTitleName(\"Product Manager\");",
+            "  productManager.setTitleCode(\"PM\");",
+            "  productManager.setDescription(\"Defines product priorities and coordinates delivery.\");",
+            "  jobTitles.add(productManager);",
+            "}",
+            "in.jobTitles = jobTitles;",
+            "in.selectedJobTitleCode = currentJobTitle.getTitleCode();",
+            "in.jobTitleName = currentJobTitle.getTitleName();",
+            "in.jobTitleDescription = currentJobTitle.getDescription();",
+            "",
+            "List<Department> departments = new ArrayList<Department>();",
+            "Department currentDepartment = in.employee.getDepartment();",
+            "if (currentDepartment == null || currentDepartment.getDepartmentCode() == null) {",
+            "  currentDepartment = new Department();",
+            "  currentDepartment.setDepartmentName(\"Engineering\");",
+            "  currentDepartment.setDepartmentCode(\"ENG\");",
+            "  currentDepartment.setDescription(\"Develops and maintains the company's products.\");",
+            "}",
+            "departments.add(currentDepartment);",
+            "if (!\"PRD\".equals(currentDepartment.getDepartmentCode())) {",
+            "  Department product = new Department();",
+            "  product.setDepartmentName(\"Product\");",
+            "  product.setDepartmentCode(\"PRD\");",
+            "  product.setDescription(\"Owns product direction and customer experience.\");",
+            "  departments.add(product);",
+            "}",
+            "if (!\"OPS\".equals(currentDepartment.getDepartmentCode())) {",
+            "  Department operations = new Department();",
+            "  operations.setDepartmentName(\"Operations\");",
+            "  operations.setDepartmentCode(\"OPS\");",
+            "  operations.setDescription(\"Supports reliable day-to-day business operations.\");",
+            "  departments.add(operations);",
+            "}",
+            "in.departments = departments;",
+            "in.selectedDepartmentCode = currentDepartment.getDepartmentCode();",
+            "in.departmentName = currentDepartment.getDepartmentName();",
+            "in.departmentDescription = currentDepartment.getDescription();"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 320, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f17", "to" : "f1" }
+      ]
+    }, {
+      "id" : "f7",
+      "type" : "HtmlDialogEventStart",
+      "name" : "submit",
+      "config" : {
+        "guid" : "A1F04D88C71843B2"
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 256 }
+      },
+      "connect" : [
+        { "id" : "f18", "to" : "f8" }
+      ]
+    }, {
+      "id" : "f8",
+      "type" : "Script",
+      "name" : "Apply selected job information",
+      "config" : {
+        "output" : {
+          "code" : [
+            "import com.example.JobTitle;",
+            "import com.example.Department;",
+            "",
+            "for (int i = 0; i < in.jobTitles.size(); i++) {",
+            "  JobTitle title = in.jobTitles.get(i);",
+            "  if (in.selectedJobTitleCode.equals(title.getTitleCode())) {",
+            "    in.employee.setJobTitle(title);",
+            "    break;",
+            "  }",
+            "}",
+            "for (int i = 0; i < in.departments.size(); i++) {",
+            "  Department department = in.departments.get(i);",
+            "  if (in.selectedDepartmentCode.equals(department.getDepartmentCode())) {",
+            "    in.employee.setDepartment(department);",
+            "    break;",
+            "  }",
+            "}"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 320, "y" : 256 }
+      },
+      "connect" : [
+        { "id" : "f19", "to" : "f9" }
+      ]
+    }, {
+      "id" : "f9",
+      "type" : "HtmlDialogExit",
+      "visual" : {
+        "at" : { "x" : 544, "y" : 256 }
+      }
+    }, {
+      "id" : "f10",
+      "type" : "HtmlDialogMethodStart",
+      "name" : "updateJobTitleDetails()",
+      "config" : {
+        "signature" : "updateJobTitleDetails",
+        "guid" : "B2E15E99D82954C3"
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 352 }
+      },
+      "connect" : [
+        { "id" : "f20", "to" : "f11" }
+      ]
+    }, {
+      "id" : "f11",
+      "type" : "Script",
+      "name" : "Refresh job title details",
+      "config" : {
+        "output" : {
+          "code" : [
+            "import com.example.JobTitle;",
+            "",
+            "for (int i = 0; i < in.jobTitles.size(); i++) {",
+            "  JobTitle title = in.jobTitles.get(i);",
+            "  if (in.selectedJobTitleCode.equals(title.getTitleCode())) {",
+            "    in.jobTitleName = title.getTitleName();",
+            "    in.jobTitleDescription = title.getDescription();",
+            "    break;",
+            "  }",
+            "}"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 320, "y" : 352 }
+      },
+      "connect" : [
+        { "id" : "f21", "to" : "f12" }
+      ]
+    }, {
+      "id" : "f12",
+      "type" : "HtmlDialogEnd",
+      "visual" : {
+        "at" : { "x" : 544, "y" : 352 }
+      }
+    }, {
+      "id" : "f13",
+      "type" : "HtmlDialogMethodStart",
+      "name" : "updateDepartmentDetails()",
+      "config" : {
+        "signature" : "updateDepartmentDetails",
+        "guid" : "C3F26FAAE93A65D4"
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 448 }
+      },
+      "connect" : [
+        { "id" : "f22", "to" : "f14" }
+      ]
+    }, {
+      "id" : "f14",
+      "type" : "Script",
+      "name" : "Refresh department details",
+      "config" : {
+        "output" : {
+          "code" : [
+            "import com.example.Department;",
+            "",
+            "for (int i = 0; i < in.departments.size(); i++) {",
+            "  Department department = in.departments.get(i);",
+            "  if (in.selectedDepartmentCode.equals(department.getDepartmentCode())) {",
+            "    in.departmentName = department.getDepartmentName();",
+            "    in.departmentDescription = department.getDescription();",
+            "    break;",
+            "  }",
+            "}"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 320, "y" : 448 }
+      },
+      "connect" : [
+        { "id" : "f23", "to" : "f15" }
+      ]
+    }, {
+      "id" : "f15",
+      "type" : "HtmlDialogEnd",
+      "visual" : {
+        "at" : { "x" : 544, "y" : 448 }
+      }
+    } ]
+}

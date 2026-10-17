@@ -6,11 +6,9 @@ Rules and patterns for writing scripts in Axon Ivy process elements.
 
 ### Data Access
 
-**IMPORTANT**: In Script elements, you CANNOT use `param`. Use `in` instead.
-
-- `param.*` — Only available in RequestStart element signatures (input parameters)
 - `in.*` — Available in all Script elements (process data fields)
 - `out.*` — For setting output values in script code
+- In Script elements, you CANNOT use `param.*`.
 
 ```java
 // WRONG - param is not available in Script elements
@@ -25,7 +23,7 @@ String name = in.employeeName;
 Use the `as` keyword to cast objects:
 
 ```java
-// WRONG - Java-style cast is not supported
+// WRONG
 Invoice invoice = (Invoice) in.resultObject;
 
 // CORRECT - use 'as' keyword for casting

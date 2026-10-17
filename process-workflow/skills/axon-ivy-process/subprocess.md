@@ -1,61 +1,64 @@
-# Subprocess Elements
+# Subprocess Calls and Triggers
 
-## SubProcessCall (Call a Subprocess)
+Use `ivy-json-files` for JSON structure and schema validation.
+
+- `SubProcessCall` calls a subprocess and receives its results.
+- `TriggerCall` starts another process asynchronously without waiting for completion or receiving results.
+
+Examples below omit IDs, layout, and connections.
+
+## Shared Call Rules
+
+For both `SubProcessCall` and `TriggerCall`:
+
+- Use `config.processCall` to identify the target entry.
+- Use `config.call.map` when the target declares input parameters, mapping current process data (`in.*`) to target parameters (`param.*`). Omit the entire `call` block when the target has no input parameters.
+
+### Target Path and Signature
+
+Use `Folder/ProcessName:methodName(ParamTypes)`:
+
+- Separate process folders with `/`, not `.`.
+- Include the exact parameter types in their declared order.
+- Use `()` only when the target has no parameters.
+
+Example:
+
+`hr/onboarding/ExtractEmployeeData:extractEmployeeData(String)`
+
+**Do not confuse path conventions:** `processCall` uses slash-separated process paths; `DialogCall.dialog` uses dot-separated package names.
+
+**For `TriggerCall`, an incomplete signature can fail silently.** Do not omit parameter types or use `()` when the target expects parameters.
+
+## Synchronous Subprocess
+
+A callable subprocess declares `"kind": "CALLABLE_SUB"`, starts with `CallSubStart`, and finishes with `CallSubEnd`.
+
+### Entry and Return Values
+
+Define the subprocess contract on `CallSubStart`:
+
+- `signature` — entry method name.
+- `input.params` — input parameter definitions.
+- `input.map` — maps incoming `param.*` to subprocess data `out.*`.
+- `result.params` — return value definitions.
+- `result.map` — maps subprocess data `in.*` to returned `result.*`.
+
+Parameter definitions include `name`, `type`, and `desc`.
+
+Example entry in `documents/CheckDocument`:
 
 ```json
 {
-  "id": "f3",
-  "type": "SubProcessCall",
-  "name": "Upload Document Checker",
-  "config": {
-    "processCall": "Functional Processes/UploadDocumentItemChecker:call(IvyDocument)",
-    "call": {
-      "map": {
-        "param.uploadFile": "in.uploadedFile"
-      }
-    },
-    "output": {
-      "map": {
-        "out.message": "result.message"
-      }
-    }
-  },
-  "visual": { "at": { "x": 400, "y": 64 } },
-  "connect": [{ "id": "f10", "to": "f4" }]
-}
-```
-
-- `processCall` — path to subprocess signature: `"Folder/ProcessName:methodName(ParamTypes)"`
-- `call.map` — maps current data to subprocess `param.*`
-- `output.map` — maps subprocess `result.*` back to current data
-
-**CRITICAL — Path separator rule**: `processCall` uses `/` (slash) separators for process paths, NOT `.` (dot).
-
-```text
-WRONG: "hr.onboarding.agent.ExtractEmployeeData:extractEmployeeData(String)"
-RIGHT: "hr/onboarding/agent/ExtractEmployeeData:extractEmployeeData(String)"
-```
-
-Note: `DialogCall.dialog` uses `.` (dot) package separators — do NOT confuse the two conventions.
-
-## CallSubStart (Callable Subprocess Entry)
-
-Used in processes with `"kind": "CALLABLE_SUB"`. Defines the entry point that other processes call.
-
-```json
-{
-  "id": "f0",
   "type": "CallSubStart",
-  "name": "call(ICase,String)",
+  "name": "check(String)",
   "config": {
-    "signature": "call",
+    "signature": "check",
     "input": {
       "params": [
-        { "name": "businessCase", "type": "ch.ivyteam.ivy.workflow.ICase", "desc": "" },
         { "name": "documentName", "type": "String", "desc": "" }
       ],
       "map": {
-        "out.businessCase": "param.businessCase",
         "out.documentName": "param.documentName"
       }
     },
@@ -67,62 +70,45 @@ Used in processes with `"kind": "CALLABLE_SUB"`. Defines the entry point that ot
         "result.message": "in.message"
       }
     }
-  },
-  "visual": { "at": { "x": 96, "y": 64 } },
-  "connect": [{ "id": "f10", "to": "f1" }]
+  }
 }
 ```
 
-- `input.params` — parameter definitions (name, type, desc)
-- `input.map` — maps `param.*` to process data `out.*`
-- `result.params` — return value definitions
-- `result.map` — maps process data `in.*` back to `result.*`
+The subprocess performs its logic, populates `message`, and reaches `CallSubEnd`. Return mappings belong to `CallSubStart`, not `CallSubEnd`.
 
-## CallSubEnd (Callable Subprocess Exit)
+### Calling the Subprocess
 
-```json
-{
-  "id": "f5",
-  "type": "CallSubEnd",
-  "name": "",
-  "visual": { "at": { "x": 700, "y": 64 } }
-}
-```
-
-## TriggerCall (Start Another Process Asynchronously)
-
-Used to trigger a `RequestStart` process programmatically. The target `RequestStart` MUST have `"triggerable": true`.
+Use `call.map` to pass inputs and `output.map` to copy returned `result.*` into caller data `out.*`.
 
 ```json
 {
-  "id": "f8",
-  "type": "TriggerCall",
-  "name": "Trigger Leave Request",
+  "type": "SubProcessCall",
+  "name": "Check Document",
   "config": {
-    "processCall": "hr/workflow/BusinessProcess:createLeaveRequest(String,java.time.LocalDate,java.time.LocalDate,String)",
+    "processCall": "documents/CheckDocument:check(String)",
     "call": {
       "map": {
-        "param.leaveType": "in.leaveType",
-        "param.startDate": "in.startDate",
-        "param.endDate": "in.endDate",
-        "param.reason": "in.reason"
+        "param.documentName": "in.documentName"
+      }
+    },
+    "output": {
+      "map": {
+        "out.message": "result.message"
       }
     }
-  },
-  "visual": { "at": { "x": 288, "y": 408 } },
-  "connect": [{ "id": "f19", "to": "f9" }]
+  }
 }
 ```
 
-**CRITICAL — Full parameter type signature required**: `processCall` MUST include the exact parameter types in the signature, matching the `RequestStart` params. Omitting them or using `()` causes the trigger to fail silently.
+## Asynchronous Trigger
 
-```text
-WRONG: "processCall": "hr/workflow/BusinessProcess:createLeaveRequest"
-WRONG: "processCall": "hr/workflow/BusinessProcess:createLeaveRequest()"
-RIGHT: "processCall": "hr/workflow/BusinessProcess:createLeaveRequest(String,java.time.LocalDate,java.time.LocalDate,String)"
-```
+`TriggerCall` starts a process through a triggerable `RequestStart`. It is fire-and-forget: it does not wait for completion and has no output mapping.
 
-**Target `RequestStart` must declare `"triggerable": true`**:
+### Target Entry
+
+The target `RequestStart` must declare `"triggerable": true`. Its input parameters must match the caller's full signature.
+
+Example entry in `hr/workflow/BusinessProcess`:
 
 ```json
 {
@@ -132,8 +118,8 @@ RIGHT: "processCall": "hr/workflow/BusinessProcess:createLeaveRequest(String,jav
     "triggerable": true,
     "input": {
       "params": [
-        { "name": "leaveType", "type": "String", "desc": "..." },
-        { "name": "startDate", "type": "java.time.LocalDate", "desc": "..." }
+        { "name": "leaveType", "type": "String", "desc": "" },
+        { "name": "startDate", "type": "java.time.LocalDate", "desc": "" }
       ],
       "map": {
         "out.leaveType": "param.leaveType",
@@ -144,41 +130,32 @@ RIGHT: "processCall": "hr/workflow/BusinessProcess:createLeaveRequest(String,jav
 }
 ```
 
-- `processCall` — path uses `/` (slash) separators, same as `SubProcessCall`
-- `call.map` — maps current process data to the target process `param.*` inputs
-- TriggerCall is **fire-and-forget** (async): it does not wait for the triggered process to complete and returns no output
-
-**CRITICAL — Target `RequestStart` task responsible must be `SYSTEM`**: When a `RequestStart` is triggered programmatically via `TriggerCall` (not started by a user from the portal), its first task's `responsible` must use the `SYSTEM` role. If no responsible is specified by the user, default to `SYSTEM`.
+### Triggering the Process
 
 ```json
-// WRONG — no user context when triggered programmatically
-"responsible": {
-  "type": "ROLE_FROM_ATTRIBUTE",
-  "script": ""
+{
+  "type": "TriggerCall",
+  "name": "Trigger Leave Request",
+  "config": {
+    "processCall": "hr/workflow/BusinessProcess:createLeaveRequest(String,java.time.LocalDate)",
+    "call": {
+      "map": {
+        "param.leaveType": "in.leaveType",
+        "param.startDate": "in.startDate"
+      }
+    }
+  }
 }
+```
 
-// RIGHT — system-initiated trigger
+### Task Responsibility
+
+For programmatically triggered starts, use the `SYSTEM` role for the first task. Default to `SYSTEM` when the user has not specified a responsible party:
+
+```json
 "responsible": {
   "roles": ["SYSTEM"]
 }
 ```
 
-## SUB Process Structure
-
-A callable subprocess uses `"kind": "CALLABLE_SUB"`:
-
-```json
-{
-  "$schema": "https://json-schema.axonivy.com/14.0/project/process.json",
-  "id": "UNIQUE_HEX_ID",
-  "kind": "CALLABLE_SUB",
-  "config": {
-    "data": "package.name.DataClass"
-  },
-  "elements": [
-    { "type": "CallSubStart", ... },
-    { "type": "Script", ... },
-    { "type": "CallSubEnd", ... }
-  ]
-}
-```
+Do not use `ROLE_FROM_ATTRIBUTE` with an empty script: a programmatic trigger has no initiating user context.
