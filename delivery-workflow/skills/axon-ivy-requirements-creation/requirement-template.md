@@ -3,7 +3,7 @@
 ## 1. General Information
 
 **Requirement ID:**
-REQ-PRC-XXX
+`REQ-<TICKET>` (e.g. `REQ-APS-285`)
 
 **Requirement Name:**
 Short, clear name of the process
@@ -320,7 +320,7 @@ Process is accepted when:
 
 | Requirement | Process | Task | Test Case |
 |-------------|---------|------|-----------|
-| REQ-PRC-001 | | | TC-01 |
+| `REQ-<TICKET>` | | | TC-01 |
 
 ---
 

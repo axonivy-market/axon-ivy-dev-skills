@@ -69,7 +69,11 @@ Use the verified requirements from Steps 1-2 to fill in the template:
 - For repeatable sections (Task Definition, UI Requirements), duplicate as needed
 - Replace all placeholder examples with real content
 
-**Output location:** `[project]/documents/requirements/` — create folder if it doesn't exist.
+**Output location:** `[project]/documents/requirements/REQ-<TICKET>_short-name.md` — create folder if it doesn't exist.
+
+- `<TICKET>` is the same Jira ticket id used for the stories in Step 4 (`TICKET_0` when the requirements don't originate from a Jira ticket). The Requirement ID in the document is `REQ-<TICKET>`.
+- `short-name` is the requirement name in kebab-case, e.g. `REQ-APS-285_team-availability-matrix.md`.
+- If one ticket needs more than one requirements document, append `-2`, `-3` to the ID and file name (`REQ-APS-285-2_...`).
 
 ---
 
