@@ -1,66 +1,66 @@
 ---
 name: axon-ivy-smart-workflow
-description: Create AI-powered data extraction and processing in Axon Ivy workflows using the Smart Workflow AgenticProcessCall element.
+description: Add AI / LLM steps to Axon Ivy processes with Smart Workflow (AgenticProcessCall, a ProgramInterface element in .p.json). Use when a process should let AI (OpenAI, ChatGPT, Gemini, Claude, Azure OpenAI, Ollama...) extract structured data from text, images or PDFs (invoices, forms, CVs), classify or decide, call sub-process or Java tools, ask a human, answer from documents (RAG) or search the web. Also covers guardrails, PII masking and provider/model configuration.
 ---
 
-# Axon Ivy Smart Workflow - AI Extraction Skill
+# Axon Ivy Smart Workflow
 
-Use this skill when creating AI-powered data extraction or processing in Axon Ivy workflows.
+Use this skill when a process needs an AI step: extract structured data, classify or decide, answer with tools, or run a multi-step agent.
 
-## Prerequisites Check
+The AI step is a `ProgramInterface` element with `javaClass` = `com.axonivy.utils.smart.workflow.AgenticProcessCall`.
 
-### Step 1: Check pom.xml for Smart Workflow Dependency
+## Reference files
 
-Before creating Smart Workflow elements, verify the project's `pom.xml` contains the required dependencies:
+Read the matching file before building one of these features:
 
-```xml
-<dependency>
-  <groupId>com.axonivy.utils.ai</groupId>
-  <artifactId>smart-workflow</artifactId>
-  <version>13.2.0-SNAPSHOT</version>
-  <type>iar</type>
-</dependency>
-<dependency>
-  <groupId>com.axonivy.utils.ai</groupId>
-  <artifactId>smart-workflow-openai</artifactId>
-  <version>13.2.0-SNAPSHOT</version>
-  <type>iar</type>
-</dependency>
-```
+| Feature | File |
+|---------|------|
+| Full example: extraction callable sub-process (data class + process) | [references/extraction-example.md](references/extraction-example.md) |
+| Tools: callable sub-processes, Java tools, web search, agents as tools, agent pipeline | [references/tools.md](references/tools.md) |
+| Guardrails, PII masking, custom guardrails, circuit breaker | [references/guardrails.md](references/guardrails.md) |
+| Human-in-the-loop: the agent asks a user and continues afterwards | [references/human-in-the-loop.md](references/human-in-the-loop.md) |
+| RAG with OpenSearch | [references/rag.md](references/rag.md) |
+| Dependencies, providers, `variables.yaml`, observability | [references/configuration.md](references/configuration.md) |
 
-### Step 2: If Dependencies Missing
+## Setup
 
-1. **Search for smart-workflow project in workspace:**
-   - Look for `smart-workflow/pom.xml` or `smart-workflow-openai/pom.xml` in the workspace
-   - Use glob pattern: `**/smart-workflow/pom.xml`
+1. Check the project's `pom.xml` for `com.axonivy.utils.ai:smart-workflow` **and at least one provider** artifact (e.g. `smart-workflow-openai`). The artifact list and pom snippet are in [references/configuration.md](references/configuration.md).
+2. If they are missing and the library is not in the workspace (glob `**/smart-workflow/pom.xml` or `smart-workflow-*.iar`), use the `ivy-market-import` skill first. If it is in the workspace, add the dependencies. Never hardcode a version; how to find it is in [references/configuration.md](references/configuration.md).
+3. Make sure the provider's API key is configured in `variables.yaml`. See [references/configuration.md](references/configuration.md).
 
-2. **If smart-workflow project EXISTS in workspace:**
-   - Add the dependencies to the target project's `pom.xml`
-   - Use the version from the smart-workflow project's pom.xml
+## Gotchas
 
-3. **If smart-workflow project DOES NOT EXIST in workspace** (no `pom.xml` found AND no `smart-workflow-*.iar` file found):
-   - **Use the `ivy-market-import` skill** to import the smart-workflow library into the codebase before doing anything else.
-   - After import completes, continue with the rest of this skill.
+These are the mistakes that break Smart Workflow elements. Check every element against them.
 
-## Creating Smart Workflow Elements
+1. **`resultType` is a class literal ending in `.class`**: `"invoice.model.Invoice.class"`, not `"invoice.model.Invoice"`. Empty or `"String.class"` means a text answer.
+2. **`resultType` must be a single object.** `java.util.List.class` and `List<x.Item>.class` do not work. Wrap lists in a class with a `List<Item>` field.
+3. **`model` is a script expression**, so a literal needs quotes: `"\"gpt-4.1\""`. For Azure it is the deployment name.
+4. **`tools`, `inputGuardrails` and `outputGuardrails` are plain comma strings**: `"a,b"`. Not JSON arrays like `"[\"a\",\"b\"]"` (legacy format). `""` means none.
+5. **Only PNG, JPEG and PDF files reach the model.** Any other file in `query` (docx, xlsx, txt from a stream...) is dropped without warning. Convert it to text first.
+6. **`PromptInjectionInputGuardrail` blocks any line break**, including line breaks in your own `query` template. See [references/guardrails.md](references/guardrails.md) for the workaround.
+7. **`PiiMaskingGuardrail` belongs in both `inputGuardrails` and `outputGuardrails`**, or the placeholders stay in the result.
+8. **Unknown guardrail names are ignored silently.** Check the spelling.
+9. **A sub-process tool needs the `tool` tag** on its `CallSubStart`. Without it the agent cannot see it, even if it is listed in `tools`.
+10. **Every field the system prompt asks for must exist on the `resultType` class**, and the other way round.
+11. **Name every AgenticProcessCall meaningfully.** The element `name` is the agent name in chat history and traces.
+12. **Each call costs one or more LLM round trips.** In multi-step flows, put a `TaskSwitchEvent` before each agent so a failure resumes there. See "Agent pipeline" in [references/tools.md](references/tools.md).
+13. **Set large stream or binary fields to `null` after the agent has run**, so they are not persisted with the process data.
 
-### ProgramInterface Element for AI Extraction
-
-Use `ProgramInterface` with `AgenticProcessCall` to call AI for structured data extraction.
+## The AgenticProcessCall element
 
 ```json
 {
   "id" : "f1",
   "type" : "ProgramInterface",
-  "name" : "Extract Data with AI",
+  "name" : "Extract Invoice",
   "config" : {
     "javaClass" : "com.axonivy.utils.smart.workflow.AgenticProcessCall",
     "userConfig" : {
-      "system" : "You are an AI assistant. Extract the requested information from the provided text.",
-      "tools" : "[]",
-      "resultType" : "package.model.OutputClass.class",
-      "resultMapping" : "in.outputVariable",
-      "query" : "Extract information from this text:\n\n<TEXT>\n<%= in.inputText %>\n</TEXT>"
+      "system" : "You are an invoice data extraction assistant. ...",
+      "query" : "Extract all data from this invoice:\n<%=in.uploadedFile%>",
+      "tools" : "",
+      "resultType" : "invoice.model.Invoice.class",
+      "resultMapping" : "in.invoice"
     }
   },
   "visual" : {
@@ -72,306 +72,110 @@ Use `ProgramInterface` with `AgenticProcessCall` to call AI for structured data 
       "type" : "ErrorBoundaryEvent",
       "config" : {
         "errorCode" : "ivy:error:program:exception",
-        "output" : {
-          "map" : {
-            "out" : "in",
-            "out.error" : "error"
-          }
-        }
+        "output" : { "map" : { "out" : "in", "out.error" : "error" } }
       },
-      "visual" : {
-        "at" : { "x" : 288, "y" : 104 }
-      },
-      "connect" : [
-        { "id" : "f10", "to" : "errorHandler" }
-      ]
+      "visual" : { "at" : { "x" : 288, "y" : 104 } },
+      "connect" : [ { "id" : "f10", "to" : "errorHandler" } ]
     } ],
-  "connect" : [
-    { "id" : "f11", "to" : "nextElement" }
-  ]
+  "connect" : [ { "id" : "f11", "to" : "nextElement" } ]
 }
 ```
 
-## userConfig Parameters
+### userConfig keys
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `system` | Yes | System prompt instructing the AI what to extract |
-| `query` | Yes | User query with input data (use `<%= in.variable %>` for template expansion) |
-| `resultType` | Yes | **MUST end with `.class`** - The Java class for structured output |
-| `resultMapping` | Yes | Variable to store the result (e.g., `in.result`) |
-| `tools` | No | List of callable sub-processes as tools (default: `"[]"`) |
-| `model` | No | AI model to use (e.g., `"gpt-4.1"`) |
+All values are JSON strings. The "Kind" column says how each one is evaluated.
 
-## IMPORTANT NOTES
+| Key | Kind | Required | Description |
+|-----|------|----------|-------------|
+| `query` | macro text | Yes | User message. See [Query input](#query-input). If it is empty, the element is skipped. |
+| `system` | macro text | Recommended | System message. `<%=expr%>` is expanded as text. |
+| `resultType` | script → `Class` | No | Structured output type ending in `.class`. Empty means a `String` result. |
+| `resultMapping` | script target | Usually | Where the result is assigned, e.g. `"in.invoice"`. |
+| `tools` | comma list | No | Tool names, e.g. `"findProduct,createProduct"`. See [references/tools.md](references/tools.md). |
+| `provider` | name | No | `OpenAI`, `AzureOpenAI`, `Gemini`, `Anthropic`, `xAI` or `Ollama`. Empty means `AI.DefaultProvider`. |
+| `model` | script → `String` | No | Quoted literal or expression. Empty means the provider's `DefaultModel`. |
+| `temperature` | script → `Double` | No | e.g. `"0.2"`. Empty means `0.0`. |
+| `inputGuardrails` | comma list | No | Empty means `AI.Guardrails.DefaultInput`. See [references/guardrails.md](references/guardrails.md). |
+| `outputGuardrails` | comma list | No | Empty means `AI.Guardrails.DefaultOutput`. |
 
-### 1. resultType MUST End with `.class`
+### Error codes to catch
 
-**CORRECT:**
+Add one `ErrorBoundaryEvent` per code you need to handle. The process data class needs a field `error` of type `ch.ivyteam.ivy.bpm.error.BpmError`; `error.getMessage()` holds the reason.
+
+| Error code | Raised when |
+|-----------|-------------|
+| `ivy:error:program:exception` | Technical failure: provider down, invalid API key, mapping failure. **Always catch this.** |
+| `smartworkflow:guardrail:input:violation` | An input guardrail blocked the user message |
+| `smartworkflow:guardrail:output:violation` | An output guardrail blocked the AI response |
+| `smartworkflow:stop` | The circuit breaker is active (all agents stopped) |
+| any BpmError thrown by a tool sub-process | Re-thrown with attributes `tool.name`, `tool.arguments`, `tool.id`, `ai.invocationId` |
+
+Non-BpmError exceptions inside a tool are **not** thrown. They go back to the model as the tool result, and the model decides how to continue.
+
+## Query input
+
+Each `<%=expr%>` in `query` is evaluated on its own. Files are attached; everything else is converted with `String.valueOf(...)`. Several values and files in one query are fine.
+
+| Value in `<%=...%>` | Result |
+|------|-------|
+| `String`, numbers, Ivy data classes | Text (`toString()`) |
+| Plain Java object | Use `dev.langchain4j.internal.Json.toJson(in.obj)` to send it as JSON |
+| `java.io.InputStream`, `ch.ivyteam.ivy.scripting.objects.Binary` | File attached, format detected from content |
+| `java.io.File`, `java.nio.file.Path`, `ch.ivyteam.ivy.scripting.objects.File` | File attached, format from the file extension |
+| `ch.ivyteam.ivy.workflow.document.IDocument` | Case or task document attached, format from the document name |
+| `ivy.cms.co("/path")` written **literally** | CMS `png`/`jpg`/`jpeg`/`pdf` attached; `txt`, `md` and string entries become text; other extensions throw |
+
+Examples:
+
 ```json
-"resultType" : "hr.onboarding.model.EmployeeInfo.class"
+"query" : "Context: <%=in.context%>\n\nData:\n<%=in.inputData%>",
+"query" : "Compare these two invoices:\n<%=in.firstStream%>\n<%=in.secondBinary%>",
+"system" : "<%=ivy.cms.co(\"/Prompts/ExtractInvoice\")%>"
 ```
 
-**WRONG:**
-```json
-"resultType" : "hr.onboarding.model.EmployeeInfo"
-```
+## Result classes
 
-### 2. Output Type MUST Be a Single Object (NOT a List)
+Annotate the `resultType` class and its fields with `@Description`. The model sees these descriptions in the output schema.
 
-The AI extraction **cannot return a List directly**. Always use a wrapper object.
-
-**WRONG - Will not work:**
-```json
-"resultType" : "java.util.List.class"
-"resultType" : "List<hr.model.Item>.class"
-```
-
-**CORRECT - Use a wrapper class:**
 ```java
-// Create a wrapper class
-public class ExtractionResult {
-  private List<Item> items;
-  // getters and setters
-}
-```
-```json
-"resultType" : "hr.model.ExtractionResult.class"
-```
+package invoice.model;
 
-### 3. Use @Description Annotations for Better Extraction
-
-When creating model classes for AI extraction, use LangChain4j `@Description` annotations:
-
-```java
-package hr.onboarding.model;
+import java.util.List;
 
 import dev.langchain4j.model.output.structured.Description;
 
-@Description("Employee identification information")
-public class EmployeeInfo {
+@Description("Invoice header and line items")
+public class Invoice {
 
-  @Description("System username for the employee")
-  private String employeeUsername;
+  @Description("Invoice identifier as printed on the document")
+  private String invoiceNumber;
 
-  @Description("Employee's first/given name")
-  private String employeeFirstName;
+  @Description("Issue date in format yyyy-MM-dd")
+  private String invoiceDate;
 
-  @Description("Employee's last/family name")
-  private String employeeLastName;
+  @Description("Final amount due, number without currency symbol")
+  private Double totalDue;
+
+  @Description("All line items of the invoice")
+  private List<LineItem> items;
 
   // getters and setters
 }
 ```
 
-## Complete Example: Employee Data Extraction Subprocess
+| Field type | Use for |
+|-----------|---------|
+| `java.lang.Double` | Prices, amounts, totals |
+| `java.lang.Integer` | Quantities |
+| `String` | Dates, identifiers, IBAN. Parse in a Script afterwards if needed. |
+| `List<T>` inside the result class | Line items and other repeated values |
 
-### Data Class: ExtractEmployeeData.d.json
+## System prompt
 
-```json
-{
-  ...
-  "fields" : [ {
-    "name" : "inputText",
-    "type" : "String",
-    "comment" : "Raw input text"
-  }, {
-    "name" : "employeeInfo",
-    "type" : "hr.onboarding.model.EmployeeInfo",
-    "comment" : "Extracted employee information"
-  }, {
-    "name" : "error",
-    "type" : "ch.ivyteam.ivy.bpm.error.BpmError"
-  }, {
-    "name" : "errorStr",
-    "type" : "String"
-  } ]
-}
-```
-
-### Process: ExtractEmployeeData.p.json
+- List every field to fill, with its format (dates, numbers). Use the same names as the result class.
+- Say what to do when a value is missing (return null, never guess IDs).
+- When tools are configured, name them and say when and in which order to call them.
 
 ```json
-{
-  "$schema" : "https://json-schema.axonivy.com/14.0/project/process.json",
-  "id" : "19CF01A0E1B2C3D4",
-  "kind" : "CALLABLE_SUB",
-  "config" : {
-    "data" : "hr.onboarding.agent.ExtractEmployeeData"
-  },
-  "elements" : [ {
-      "id" : "f0",
-      "type" : "CallSubStart",
-      "name" : "extractEmployeeData(String)",
-      "config" : {
-        "signature" : "extractEmployeeData",
-        "input" : {
-          "params" : [
-            { "name" : "inputText", "type" : "String", "desc" : "Raw text containing employee information" }
-          ],
-          "map" : {
-            "out.inputText" : "param.inputText",
-            "out.employeeInfo" : "new hr.onboarding.model.EmployeeInfo()"
-          }
-        },
-        "result" : {
-          "params" : [
-            { "name" : "employeeInfo", "type" : "hr.onboarding.model.EmployeeInfo", "desc" : "Extracted employee information" },
-            { "name" : "error", "type" : "String", "desc" : "Error message if extraction fails" }
-          ],
-          "map" : {
-            "result.employeeInfo" : "in.employeeInfo",
-            "result.error" : "in.errorStr"
-          }
-        }
-      },
-      "visual" : { "at" : { "x" : 96, "y" : 64 } },
-      "connect" : [ { "id" : "f6", "to" : "f1" } ]
-    }, {
-      "id" : "f1",
-      "type" : "ProgramInterface",
-      "name" : "Extract Employee Data",
-      "config" : {
-        "javaClass" : "com.axonivy.utils.smart.workflow.AgenticProcessCall",
-        "userConfig" : {
-          "system" : "You are an HR data extraction assistant. Extract employee identification information from the provided text.\n\nEXTRACT THE FOLLOWING FIELDS:\n1. employeeUsername: System username\n2. employeeFirstName: First name\n3. employeeLastName: Last name\n4. employeeId: Employee ID number\n\nRULES:\n- Names should be properly capitalized\n- If username not provided, generate as firstname.lastname (lowercase)\n- Return an EmployeeInfo object with the extracted data.",
-          "tools" : "[]",
-          "resultType" : "hr.onboarding.model.EmployeeInfo.class",
-          "resultMapping" : "in.employeeInfo",
-          "query" : "Extract employee information from this text:\n\n<TEXT>\n<%= in.inputText %>\n</TEXT>"
-        }
-      },
-      "visual" : { "at" : { "x" : 256, "y" : 64 }, "size" : { "width" : 128 } },
-      "boundaries" : [ {
-          "id" : "f2",
-          "type" : "ErrorBoundaryEvent",
-          "config" : {
-            "errorCode" : "ivy:error:program:exception",
-            "output" : { "map" : { "out" : "in", "out.error" : "error" } }
-          },
-          "visual" : { "at" : { "x" : 288, "y" : 104 } },
-          "connect" : [ { "id" : "f7", "to" : "f4", "via" : [ { "x" : 288, "y" : 160 } ] } ]
-        } ],
-      "connect" : [ { "id" : "f8", "to" : "f3" } ]
-    }, {
-      "id" : "f3",
-      "type" : "CallSubEnd",
-      "visual" : { "at" : { "x" : 448, "y" : 64 } }
-    }, {
-      "id" : "f4",
-      "type" : "Script",
-      "name" : "Parse Error",
-      "config" : {
-        "output" : {
-          "code" : "in.errorStr = in.error != null ? in.error.getMessage() : \"Unknown error\";"
-        }
-      },
-      "visual" : { "at" : { "x" : 384, "y" : 160 } },
-      "connect" : [ { "id" : "f9", "to" : "f3", "via" : [ { "x" : 448, "y" : 160 } ] } ]
-    } ]
-}
-```
-
-## Using Tools (Callable Sub-Processes)
-
-To give the AI access to tools (sub-processes it can call):
-
-```json
-"userConfig" : {
-  "system" : "You are an assistant with access to tools...",
-  "tools" : "[\"searchDatabase\", \"createRecord\", \"sendNotification\"]",
-  "resultType" : "hr.model.AgentResponse.class",
-  "resultMapping" : "in.response",
-  "query" : "<%= in.userRequest %>"
-}
-```
-
-Each tool name must correspond to a callable sub-process signature in the project.
-
-## System Prompt Best Practices
-
-1. **Be specific** about what to extract
-2. **List all fields** the AI should populate
-3. **Provide rules** for handling edge cases
-4. **Specify formats** for dates, numbers, etc.
-5. **Use examples** if the extraction is complex
-
-```json
-"system" : "You are a data extraction assistant.\n\nEXTRACT:\n1. fieldName: Description of what to extract\n2. anotherField: Another description\n\nRULES:\n- Rule 1\n- Rule 2\n\nFORMATS:\n- Dates: yyyy-MM-dd\n- Phone: +1-XXX-XXX-XXXX"
-```
-
-## Query Template Patterns
-
-### Simple Text Input
-```json
-"query" : "Process this text:\n\n<%= in.inputText %>"
-```
-
-### JSON Object Input
-```json
-"query" : "Process this data:\n\n<%= dev.langchain4j.internal.Json.toJson(in.dataObject) %>"
-```
-
-### Multiple Inputs
-```json
-"query" : "Context: <%= in.context %>\n\nData to process:\n<%= in.inputData %>\n\nInstructions: <%= in.instructions %>"
-```
-
-### Binary File Input (Image or PDF)
-Pass binary files directly in the query — AgenticProcessCall understands `InputStream` and `Binary` objects natively. No base64 encoding needed.
-
-```json
-"query" : "Extract all data from this invoice:\n<%= in.uploadedFile %>"
-```
-
-Supported data types for file variables:
-
-| Type | How to obtain | Notes |
-|------|--------------|-------|
-| `java.io.InputStream` | From uploaded file or CMS | Preferred for images |
-| `ch.ivyteam.ivy.scripting.objects.Binary` | From CMS binary resource | Preferred for PDFs |
-| `java.io.File` | From file system path | Works for both |
-| CMS binary directly | `ivy.cms.co("/path/to/resource")` | Embedded in template |
-
-**Example: Extract invoice from user-uploaded file**
-
-Data class:
-```json
-{
-  ...
-  "fields" : [ {
-    "name" : "uploadedFile",
-    "type" : "java.io.InputStream",
-    "comment" : "Uploaded invoice file (PDF or image)"
-  }, {
-    "name" : "invoice",
-    "type" : "invoice.model.Invoice",
-    "comment" : "Extracted invoice data"
-  }, {
-    "name" : "error",
-    "type" : "ch.ivyteam.ivy.bpm.error.BpmError"
-  }, {
-    "name" : "errorStr",
-    "type" : "String"
-  } ]
-}
-```
-
-AgenticProcessCall query:
-```json
-"query" : "Extract all invoice data from this document:\n<%= in.uploadedFile %>"
-```
-
-**Type guidance for financial/document extraction:**
-
-| Field type | Use | Reason |
-|-----------|-----|--------|
-| `java.lang.Double` | Prices, amounts, totals | Sufficient for display and calculation |
-| `java.lang.Integer` | Quantities | Whole numbers only |
-| `String` | Dates, invoice number, IBAN | Return as string, parse in Script if needed |
-| `List<T>` (via wrapper) | Line items | Must be wrapped — see Note 2 above |
-
-**System prompt example for invoice extraction:**
-```json
-"system" : "You are an invoice data extraction assistant.\n\nEXTRACT THE FOLLOWING:\n1. invoiceNumber: The invoice identifier\n2. invoiceDate: Issue date (format: yyyy-MM-dd)\n3. dueDate: Payment due date (format: yyyy-MM-dd)\n4. vendorName: Name of the issuing company\n5. customerName: Name of the billed customer\n6. items: List of line items (description, quantity, unitPrice, total)\n7. subtotal: Amount before tax\n8. vatRate: VAT percentage (e.g. 8.1)\n9. vatAmount: Tax amount\n10. totalDue: Final amount due\n\nRULES:\n- All amounts are numbers (no currency symbols)\n- Return null for fields not found in the document"
+"system" : "You are an invoice data extraction assistant.\n\nEXTRACT:\n1. invoiceNumber: The invoice identifier\n2. invoiceDate: Issue date (yyyy-MM-dd)\n3. totalDue: Final amount due\n4. items: Line items (description, quantity, unitPrice, total)\n\nRULES:\n- Amounts are numbers without currency symbols\n- Return null for fields not found in the document"
 ```
